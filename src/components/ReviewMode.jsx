@@ -32,6 +32,13 @@ export default function ReviewMode({
 
   const handleNext = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
     if (currentIndex < targetQuestions.length - 1) {
       setCurrentIndex(i => i + 1);
     } else {

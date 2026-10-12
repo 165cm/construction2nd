@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#0c4a6e" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="bolt" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#facc15" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#38bdf8" flood-opacity="0.45" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="#38bdf8" stroke-width="6" stroke-opacity="0.35" />
+  <path
+    d="M296 64L136 280h112l-32 168 160-216H264L296 64z"
+    fill="url(#bolt)"
+    filter="url(#glow)"
+  />
+  <rect x="310" y="360" width="146" height="68" rx="20" fill="#0f172a" fill-opacity="0.85" stroke="#38bdf8" stroke-width="4" />
+  <text x="383" y="407" font-family="sans-serif" font-weight="900" font-size="38" fill="#38bdf8" text-anchor="middle">2種</text>
+</svg>

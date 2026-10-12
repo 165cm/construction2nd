@@ -34,6 +34,9 @@
 | `src/components/Round1CompleteModal.jsx` | 第1巡（全50問）走破達成＆SRS復習移行アナウンスモーダル |
 | `public/crops/` | 回路図・材料写真・工具写真・器具記号の個別クロップ画像 |
 | `public/pages/` | 全頁高精細PNG（配線図含む） |
+| `public/manifest.json` | PWA Webアプリマニフェスト（スマホのホーム画面追加設定） |
+| `public/icon.svg` | アプリアイコン（SVGベクター形式） |
+| `public/sw.js` | Service Worker（オフライン動作・問題画像キャッシュ制御） |
 
 ## データ
 - LocalStorage キー: `denkou2_mastery_state_v1`

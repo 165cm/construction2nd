@@ -32,6 +32,8 @@
 | `src/utils/spacedRepetition.js` | 科学的忘却曲線（ライトナーBox）間隔反復エンジン・中断再開ロジック |
 | `src/utils/storage.js` | 理解度・平均解答速度・残りプレイ時間算出・実績判定ロジック |
 | `src/components/Round1CompleteModal.jsx` | 第1巡（全50問）走破達成＆SRS復習移行アナウンスモーダル |
+| `src/data/cropOverrides.json` | 共有トリミング座標（リポジトリ管理・全端末共通反映） |
+| `src/components/CropImage.jsx` | 共有トリミング＆ローカルカスタム描画対応の画像表示コンポーネント |
 | `public/crops/` | 回路図・材料写真・工具写真・器具記号の個別クロップ画像 |
 | `public/pages/` | 全頁高精細PNG（配線図含む） |
 | `public/manifest.json` | PWA Webアプリマニフェスト（スマホのホーム画面追加設定） |

@@ -14,16 +14,47 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
-import { getCustomCrops, saveCustomCrop, resetCustomCrop, clearAllCustomCrops } from '../utils/customCrops';
+import {
+  getCustomCrops,
+  getSharedOverrides,
+  saveCustomCrop,
+  resetCustomCrop,
+  clearAllCustomCrops,
+  SHARED_OVERRIDES_ENDPOINT
+} from '../utils/customCrops';
 import { getAssetUrl } from '../utils/asset';
 import { playClick, triggerHaptic } from '../utils/sound';
 
+// 手元の開発サーバー（npm run dev）で開いているときだけ、共有ファイルへ直接書き込める
+const CAN_WRITE_SHARED = import.meta.env.DEV;
+const SELECTED_KEY_STORAGE = 'denkou_admin_selected_key';
+
+const writeSharedOverrides = async (updates = {}, removals = []) => {
+  const res = await fetch(SHARED_OVERRIDES_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ updates, removals })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || `書き込みに失敗しました (HTTP ${res.status})`);
+  }
+  return data;
+};
+
 export default function AdminCropEditor({ onBack }) {
   const cropKeys = Object.keys(DEFAULT_CROPS);
-  const [selectedKey, setSelectedKey] = useState('1');
+  const [selectedKey, setSelectedKey] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(SELECTED_KEY_STORAGE);
+      if (saved && DEFAULT_CROPS[saved]) return saved;
+    } catch (e) { /* ignore */ }
+    return '1';
+  });
   const [coords, setCoords] = useState(DEFAULT_CROPS['1']);
   const [pageNumber, setPageNumber] = useState(DEFAULT_CROPS['1'].page);
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [savedMessage, setSavedMessage] = useState('');
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [savedCount, setSavedCount] = useState(0);
@@ -46,6 +77,11 @@ export default function AdminCropEditor({ onBack }) {
   const prevLabel = prevKey ? (DEFAULT_CROPS[prevKey]?.label || `問${prevKey}`) : '';
   const nextLabel = nextKey ? (DEFAULT_CROPS[nextKey]?.label || `問${nextKey}`) : '';
 
+  const showMessage = (msg, ms = 4000) => {
+    setSavedMessage(msg);
+    setTimeout(() => setSavedMessage(''), ms);
+  };
+
   // Update saved count
   const refreshSavedCount = () => {
     const custom = getCustomCrops();
@@ -53,10 +89,13 @@ export default function AdminCropEditor({ onBack }) {
   };
 
   // Load custom or default coords when selected key changes
+  // 優先順位: この端末の保存 > 共有ファイル > 初期値
   useEffect(() => {
+    try { sessionStorage.setItem(SELECTED_KEY_STORAGE, selectedKey); } catch (e) { /* ignore */ }
     const custom = getCustomCrops();
+    const shared = getSharedOverrides();
     refreshSavedCount();
-    const active = custom[selectedKey]?.coords || DEFAULT_CROPS[selectedKey] || {
+    const active = custom[selectedKey]?.coords || shared[selectedKey] || DEFAULT_CROPS[selectedKey] || {
       page: 5, filename: 'custom.png', x: 200, y: 200, w: 400, h: 300, label: `問${selectedKey}`
     };
     setCoords(active);
@@ -145,19 +184,31 @@ export default function AdminCropEditor({ onBack }) {
         throw new Error('画像データの生成に失敗しました');
       }
 
+      const savedCoords = { ...coords, page: pageNumber };
       const success = saveCustomCrop(selectedKey, {
         dataUrl,
-        coords: { ...coords, page: pageNumber }
+        coords: savedCoords
       });
 
-      if (success) {
-        triggerHaptic('success');
-        refreshSavedCount();
-        setSavedMessage(`✅ ${coords.label || `問${selectedKey}`} のトリミングを保存・反映しました！`);
-        setTimeout(() => setSavedMessage(''), 3500);
-      } else {
+      if (!success) {
         triggerHaptic('error');
         alert('⚠️ ブラウザの保存容量制限（LocalStorage Quota）により保存できませんでした。「全初期化」を行ってから再度お試しください。');
+        return;
+      }
+
+      triggerHaptic('success');
+      refreshSavedCount();
+      const label = coords.label || `問${selectedKey}`;
+
+      if (CAN_WRITE_SHARED) {
+        writeSharedOverrides({ [selectedKey]: savedCoords })
+          .then(() => showMessage(`✅ ${label} を共有ファイルに保存しました（公開すると全端末に反映）`))
+          .catch((err) => {
+            console.error(err);
+            showMessage(`⚠️ ${label} はこの端末にだけ保存されました（共有ファイルへの書き込み失敗: ${err.message}）`, 6000);
+          });
+      } else {
+        showMessage(`✅ ${label} をこの端末に保存しました。スマホ等へ反映するには下の「全端末へ反映するデータをコピー」を使ってください`, 6000);
       }
     } catch (err) {
       console.error('Failed to save crop:', err);
@@ -166,19 +217,71 @@ export default function AdminCropEditor({ onBack }) {
     }
   };
 
+  // この端末で保存した座標（共有ファイルの内容と合わせたもの）
+  const collectShareData = () => {
+    const merged = { ...getSharedOverrides() };
+    const custom = getCustomCrops();
+    Object.keys(custom).forEach((k) => {
+      if (custom[k]?.coords) merged[k] = custom[k].coords;
+    });
+    return merged;
+  };
+
+  // 全端末へ反映するデータ（座標のJSON）をコピー
+  const handleCopyShareData = async () => {
+    playClick();
+    const text = JSON.stringify(collectShareData(), null, 2);
+    try {
+      await navigator.clipboard.writeText(text);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 3000);
+      showMessage('📋 コピーしました。AIとのチャットに貼り付けて「トリミングを反映して」と伝えてください', 6000);
+    } catch (e) {
+      window.prompt('自動コピーできませんでした。下の文字をすべて選択してコピーしてください', text);
+    }
+  };
+
+  // 開発サーバー限定: この端末の保存分をまとめて共有ファイルへ書き込む
+  const handleBulkWriteShared = async () => {
+    playClick();
+    const custom = getCustomCrops();
+    const updates = {};
+    Object.keys(custom).forEach((k) => {
+      if (custom[k]?.coords) updates[k] = custom[k].coords;
+    });
+    const count = Object.keys(updates).length;
+    if (count === 0) {
+      showMessage('この端末に保存されたトリミングはありません');
+      return;
+    }
+    try {
+      await writeSharedOverrides(updates);
+      triggerHaptic('success');
+      showMessage(`✅ この端末の ${count} 件を共有ファイルへ書き込みました`);
+    } catch (err) {
+      triggerHaptic('error');
+      alert(`⚠️ 書き込みエラー: ${err.message}`);
+    }
+  };
+
   // Handle Reset for current question
   const handleReset = () => {
     playClick();
     triggerHaptic('light');
     resetCustomCrop(selectedKey);
-    const def = DEFAULT_CROPS[selectedKey];
+    const def = (!CAN_WRITE_SHARED && getSharedOverrides()[selectedKey]) || DEFAULT_CROPS[selectedKey];
     if (def) {
       setCoords(def);
       setPageNumber(def.page);
     }
     refreshSavedCount();
-    setSavedMessage('🔄 初期値にリセットしました');
-    setTimeout(() => setSavedMessage(''), 3000);
+    if (CAN_WRITE_SHARED) {
+      writeSharedOverrides({}, [selectedKey])
+        .then(() => showMessage('🔄 初期値に戻しました（共有ファイルからも削除）', 3000))
+        .catch((err) => showMessage(`🔄 この端末だけ初期値に戻しました（共有ファイル更新失敗: ${err.message}）`, 5000));
+    } else {
+      showMessage('🔄 この端末の保存を消して初期値に戻しました', 3000);
+    }
   };
 
   // Handle Clear ALL custom crops (Recovery for corrupted/blank data on mobile)
@@ -354,6 +457,17 @@ export default function AdminCropEditor({ onBack }) {
           <span>保存・反映</span>
         </button>
       </div>
+
+      {/* Save-destination notice */}
+      {CAN_WRITE_SHARED ? (
+        <div className="bg-emerald-950/60 border-b border-emerald-700/40 text-emerald-200 px-4 py-2 text-[11px] leading-relaxed">
+          🟢 <strong>手元の開発サーバーで開いています。</strong>保存すると共有ファイル（cropOverrides.json）に書き込まれ、公開後は<strong>スマホを含むすべての端末</strong>に反映されます。
+        </div>
+      ) : (
+        <div className="bg-amber-950/60 border-b border-amber-700/40 text-amber-200 px-4 py-2 text-[11px] leading-relaxed">
+          ⚠️ <strong>公開サイトでの保存は、この端末のこのブラウザだけに反映されます。</strong>スマホなど他の端末にも反映するには、ページ下部の「全端末へ反映するデータをコピー」を押して、AIとのチャットに貼り付けてください。
+        </div>
+      )}
 
       {/* Toast Notice */}
       {savedMessage && (
@@ -675,7 +789,34 @@ export default function AdminCropEditor({ onBack }) {
             </button>
           </div>
 
-          {/* 5. 全初期化救済ボタン（破損データ・容量オーバー時用） */}
+          {/* 5. 全端末への反映 */}
+          <div className="p-3 bg-slate-900/80 rounded-2xl border border-sky-800/50 space-y-2">
+            <div className="text-xs font-bold text-sky-300">📱 スマホ・他の端末にも反映する</div>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              {CAN_WRITE_SHARED
+                ? '以前に保存した分も含めて共有ファイルに書き込めます。書き込んだ後、AIに「トリミングを公開して」と伝えてください。'
+                : 'この端末で保存したトリミングの座標をコピーします。AIとのチャットに貼り付けると、全端末に反映されるよう公開します。'}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {CAN_WRITE_SHARED && (
+                <button
+                  onClick={handleBulkWriteShared}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold active:scale-95 transition"
+                >
+                  💾 この端末の保存分（{savedCount}件）を共有ファイルへ書き込む
+                </button>
+              )}
+              <button
+                onClick={handleCopyShareData}
+                className="flex-1 py-2.5 px-3 rounded-xl bg-sky-700 hover:bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition"
+              >
+                {shareCopied ? <Check size={14} /> : <Copy size={14} />}
+                <span>{shareCopied ? 'コピーしました' : '全端末へ反映するデータをコピー'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 6. 全初期化救済ボタン（破損データ・容量オーバー時用） */}
           <div className="pt-2 text-center">
             <button
               onClick={handleClearAll}

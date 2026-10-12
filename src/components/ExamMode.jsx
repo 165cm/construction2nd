@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sound';
-import { getDisplayImageUrl } from '../utils/customCrops';
+import { cropKeyForDiagram } from '../utils/customCrops';
+import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
 
 export default function ExamMode({
@@ -361,7 +362,12 @@ export default function ExamMode({
 
         {activeQ.diagram && (
           <div className="bg-white rounded-xl p-2 my-2 flex items-center justify-center max-h-52 overflow-hidden border border-slate-600">
-            <img src={getDisplayImageUrl(activeQ.id, activeQ.diagram)} alt="問題図" className="max-h-48 object-contain" />
+            <CropImage
+              cropKey={cropKeyForDiagram(activeQ.id, activeQ.diagram)}
+              defaultPath={activeQ.diagram}
+              alt="問題図"
+              className="max-h-48 object-contain"
+            />
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2, Brain } from 'lucide-react';
 import { BADGES_DEF, getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime } from '../utils/storage';
+import { getLeitnerBoxCounts } from '../utils/spacedRepetition';
 import { playClick } from '../utils/sound';
 
 export default function StatsModal({
@@ -16,6 +17,7 @@ export default function StatsModal({
   const levelTitle = getTitleForLevel(state.level);
   const expRequired = calculateExpForLevel(state.level);
   const timeEstimate = computeRemainingPlayTime(state, 50);
+  const boxCounts = getLeitnerBoxCounts(allQuestions, state);
 
   const accuracy = state.totalAnswered > 0
     ? Math.round((state.totalCorrect / state.totalAnswered) * 100)
@@ -154,6 +156,53 @@ export default function StatsModal({
               <span className="text-[10px] text-slate-400">総学習時間</span>
               <div className="text-sm font-black text-sky-400 mt-0.5">
                 {Math.floor(state.totalTimeSpentSec / 60)} 分
+              </div>
+            </div>
+          </div>
+
+          {/* Spaced Repetition (Leitner Box) Progress Card */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-800/80 to-purple-950/40 border border-purple-500/30">
+            <h4 className="text-xs font-bold text-slate-200 mb-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-purple-300">
+                <Brain size={15} />
+                <span>忘却曲線（ライトナーBox）定着状況</span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {state.round > 1 ? '第2巡（復習ループ）' : '第1巡（全問走破中）'}
+              </span>
+            </h4>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-rose-500/30 flex items-center justify-between">
+                <div>
+                  <span className="text-rose-400 font-bold text-xs">Box 1 要復習 🔥</span>
+                  <div className="text-[10px] text-slate-400">最優先（3問以内）</div>
+                </div>
+                <span className="font-mono font-black text-rose-300 text-base">{boxCounts[1]}<span className="text-[10px] font-normal text-slate-400 ml-0.5">問</span></span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-amber-500/30 flex items-center justify-between">
+                <div>
+                  <span className="text-amber-300 font-bold text-xs">Box 2 初期定着 🌱</span>
+                  <div className="text-[10px] text-slate-400">8問間隔で再確認</div>
+                </div>
+                <span className="font-mono font-black text-amber-200 text-base">{boxCounts[2]}<span className="text-[10px] font-normal text-slate-400 ml-0.5">問</span></span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-teal-500/30 flex items-center justify-between">
+                <div>
+                  <span className="text-teal-300 font-bold text-xs">Box 3 中期定着 🌿</span>
+                  <div className="text-[10px] text-slate-400">20問間隔で確認</div>
+                </div>
+                <span className="font-mono font-black text-teal-200 text-base">{boxCounts[3]}<span className="text-[10px] font-normal text-slate-400 ml-0.5">問</span></span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-emerald-500/30 flex items-center justify-between">
+                <div>
+                  <span className="text-emerald-300 font-bold text-xs">Box 4 マスター 👑</span>
+                  <div className="text-[10px] text-slate-400">長期記憶へ定着</div>
+                </div>
+                <span className="font-mono font-black text-emerald-200 text-base">{boxCounts[4]}<span className="text-[10px] font-normal text-slate-400 ml-0.5">問</span></span>
               </div>
             </div>
           </div>

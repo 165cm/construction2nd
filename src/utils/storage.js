@@ -1,4 +1,5 @@
 // Storage and gamification state manager
+import { updateSpacedRepetitionRecord } from './spacedRepetition';
 
 const STORAGE_KEY = 'denkou2_mastery_state_v1';
 
@@ -31,7 +32,7 @@ export const getTitleForLevel = (level) => {
 
 export const getInitialState = () => {
   return {
-    records: {}, // questionId -> { attempts, correct, wrong, consecutiveCorrect, status: 'unattempted'|'review'|'correct'|'mastered' }
+    records: {}, // questionId -> { attempts, correct, wrong, consecutiveCorrect, status, box, interval, ... }
     bookmarks: [],
     exp: 0,
     level: 1,
@@ -42,7 +43,10 @@ export const getInitialState = () => {
     totalTimeSpentSec: 0,
     responseTimes: [], // array of last 30 question response times in seconds
     badges: [],
-    recentHistory: [] // last 20 answers
+    recentHistory: [], // last 20 answers
+    currentQuestionId: 1,
+    currentQuizIndex: 0,
+    round: 1
   };
 };
 
@@ -51,7 +55,16 @@ export const loadState = () => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getInitialState();
     const parsed = JSON.parse(raw);
-    return { ...getInitialState(), ...parsed };
+    const initial = getInitialState();
+    const state = { ...initial, ...parsed };
+    state.records = state.records || {};
+
+    const attemptedCount = Object.values(state.records).filter(r => r && r.attempts > 0).length;
+    if (!state.round) {
+      state.round = attemptedCount >= 50 ? 2 : 1;
+    }
+
+    return state;
   } catch (e) {
     console.error('Failed to load state:', e);
     return getInitialState();
@@ -66,28 +79,39 @@ export const saveState = (state) => {
   }
 };
 
+export const saveCurrentQuizPosition = (state, { questionId, index, round }) => {
+  const next = {
+    ...state,
+    currentQuestionId: questionId,
+    currentQuizIndex: index !== undefined ? index : state.currentQuizIndex,
+    round: round !== undefined ? round : state.round
+  };
+  saveState(next);
+  return next;
+};
+
 export const calculateExpForLevel = (level) => {
   // Base EXP curve: Lv 1 -> 2 needs 150 exp, Lv 2 -> 3 needs 200 exp, etc.
   return Math.floor(100 + (level - 1) * 60);
 };
 
-// Record an answer and compute gamification updates
+// Record an answer and compute gamification updates with Leitner / SRS integration
 export const recordAnswer = (prevState, { questionId, isCorrect, timeSpentSec, category }) => {
   const state = JSON.parse(JSON.stringify(prevState));
-  const currentRecord = state.records[questionId] || {
-    attempts: 0,
-    correct: 0,
-    wrong: 0,
-    consecutiveCorrect: 0,
-    status: 'unattempted',
-    bestTimeSec: 999
-  };
+  const prevRecord = state.records[questionId] || {};
+  const wasReview = prevRecord.status === 'review';
 
-  const wasReview = currentRecord.status === 'review';
-
-  currentRecord.attempts += 1;
   state.totalAnswered += 1;
   state.totalTimeSpentSec += Math.round(timeSpentSec);
+
+  // Update spaced repetition / Leitner record
+  const currentRecord = updateSpacedRepetitionRecord(
+    prevRecord,
+    isCorrect,
+    state.totalAnswered,
+    timeSpentSec,
+    category
+  );
 
   // Keep last 30 response times for rolling average
   state.responseTimes = [...(state.responseTimes || []).slice(-29), Math.max(2, Math.round(timeSpentSec))];
@@ -96,23 +120,10 @@ export const recordAnswer = (prevState, { questionId, isCorrect, timeSpentSec, c
   let newBadges = [];
 
   if (isCorrect) {
-    currentRecord.correct += 1;
-    currentRecord.consecutiveCorrect += 1;
     state.totalCorrect += 1;
     state.streak += 1;
     if (state.streak > state.maxStreak) {
       state.maxStreak = state.streak;
-    }
-
-    if (timeSpentSec < currentRecord.bestTimeSec) {
-      currentRecord.bestTimeSec = Math.round(timeSpentSec * 10) / 10;
-    }
-
-    // Mastery criteria: 2 consecutive correct answers or 2 total correct answers with no recent failure
-    if (currentRecord.consecutiveCorrect >= 2 || currentRecord.correct >= 2) {
-      currentRecord.status = 'mastered';
-    } else {
-      currentRecord.status = 'correct';
     }
 
     // EXP Calculation: Base + Combo Bonus + Speed Bonus
@@ -145,9 +156,6 @@ export const recordAnswer = (prevState, { questionId, isCorrect, timeSpentSec, c
     }
 
   } else {
-    currentRecord.wrong += 1;
-    currentRecord.consecutiveCorrect = 0;
-    currentRecord.status = 'review';
     state.streak = 0; // reset streak
     earnedExp += 20; // consolation EXP for learning!
   }
@@ -188,6 +196,16 @@ export const recordAnswer = (prevState, { questionId, isCorrect, timeSpentSec, c
   state.badges = [...state.badges, ...newBadges];
   state.records[questionId] = currentRecord;
 
+  // Check Round 1 completion:
+  const prevAttemptedCount = Object.values(prevState.records || {}).filter(r => r && r.attempts > 0).length;
+  const newAttemptedCount = Object.values(state.records).filter(r => r && r.attempts > 0).length;
+  const didCompleteRound1 = prevAttemptedCount < 50 && newAttemptedCount >= 50;
+  if (newAttemptedCount >= 50 && (state.round || 1) <= 1) {
+    state.round = 2;
+  }
+
+  state.currentQuestionId = questionId;
+
   // Recent History
   state.recentHistory = [
     { questionId, isCorrect, timestamp: Date.now() },
@@ -203,7 +221,8 @@ export const recordAnswer = (prevState, { questionId, isCorrect, timeSpentSec, c
     oldLevel: prevLevel,
     newLevel: state.level,
     newBadges,
-    currentRecord
+    currentRecord,
+    didCompleteRound1
   };
 };
 

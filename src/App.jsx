@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import questionsData from './data/questions.json';
-import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState } from './utils/storage';
+import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition } from './utils/storage';
+import { getInitialResumeQuestion, determineNextQuizQuestion } from './utils/spacedRepetition';
 import { isSoundEnabled, setSoundEnabled, playClick } from './utils/sound';
+import confetti from 'canvas-confetti';
 
 import Header from './components/Header';
 import QuizCard from './components/QuizCard';
@@ -11,9 +13,9 @@ import QuestionList from './components/QuestionList';
 import StatsModal from './components/StatsModal';
 import WiringDiagramModal from './components/WiringDiagramModal';
 import LevelUpModal from './components/LevelUpModal';
+import Round1CompleteModal from './components/Round1CompleteModal';
 import BottomNav from './components/BottomNav';
 import AdminCropEditor from './components/AdminCropEditor';
-
 
 export default function App() {
   const [state, setState] = useState(() => loadState());
@@ -24,7 +26,21 @@ export default function App() {
     }
     return 'quiz';
   }); // 'quiz' | 'review' | 'exam' | 'list' | 'admin'
-  const [quizIndex, setQuizIndex] = useState(0);
+
+  // Quiz position state: auto-resumes where user left off
+  const [quizStep, setQuizStep] = useState(() => {
+    const initialState = loadState();
+    return getInitialResumeQuestion(questionsData, initialState) || {
+      question: questionsData[0],
+      index: 0,
+      isFirstRound: true,
+      round: 1,
+      modeDescription: '第1巡：全問走破中',
+      progressText: '1 / 50 問'
+    };
+  });
+
+  const [showRound1CompleteModal, setShowRound1CompleteModal] = useState(false);
 
   const handleOpenAdmin = () => {
     playClick();
@@ -55,6 +71,16 @@ export default function App() {
 
     setState(result.nextState);
 
+    // Milestone celebration: User completed all 50 questions for the first time!
+    if (result.didCompleteRound1) {
+      setShowRound1CompleteModal(true);
+      confetti({
+        particleCount: 75,
+        spread: 90,
+        origin: { y: 0.6 }
+      });
+    }
+
     if (result.didLevelUp) {
       setLevelUpData({
         oldLevel: result.oldLevel,
@@ -63,13 +89,18 @@ export default function App() {
     }
   };
 
-  // Next Question in Quick Quiz
+  // Next Question in Quick Quiz (determines next based on Round 1 vs Round 2 SRS)
   const handleNextQuizQuestion = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    if (quizIndex < questionsData.length - 1) {
-      setQuizIndex(i => i + 1);
-    } else {
-      setQuizIndex(0); // loop to beginning
+    const currentQId = quizStep?.question?.id || null;
+    const nextStep = determineNextQuizQuestion(questionsData, state, currentQId);
+    if (nextStep) {
+      setQuizStep(nextStep);
+      saveCurrentQuizPosition(state, {
+        questionId: nextStep.question.id,
+        index: nextStep.index,
+        round: nextStep.round
+      });
     }
   };
 
@@ -89,7 +120,25 @@ export default function App() {
     const idx = questionsData.findIndex(q => q.id === questionId);
     if (idx !== -1) {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      setQuizIndex(idx);
+      const targetQ = questionsData[idx];
+      const rec = state.records[targetQ.id];
+      const attemptedCount = questionsData.filter(q => state.records[q.id]?.attempts > 0).length;
+      const isFirst = attemptedCount < questionsData.length && (state.round || 1) <= 1;
+      const newStep = {
+        question: targetQ,
+        index: idx,
+        isFirstRound: isFirst,
+        round: state.round || 1,
+        modeDescription: isFirst ? '第1巡：全問走破中' : '忘却曲線：間隔反復ループ',
+        badge: rec?.status === 'mastered' ? 'マスター 👑' : rec?.status === 'review' ? '要復習 🔥' : '定着中 🌱',
+        progressText: `${attemptedCount + 1} / ${questionsData.length} 問`
+      };
+      setQuizStep(newStep);
+      saveCurrentQuizPosition(state, {
+        questionId: targetQ.id,
+        index: idx,
+        round: state.round
+      });
       setCurrentMode('quiz');
     }
   };
@@ -99,7 +148,8 @@ export default function App() {
     const fresh = getInitialState();
     saveState(fresh);
     setState(fresh);
-    setQuizIndex(0);
+    const initialStep = getInitialResumeQuestion(questionsData, fresh);
+    setQuizStep(initialStep);
     setIsStatsOpen(false);
   };
 
@@ -118,8 +168,8 @@ export default function App() {
     setState(curState);
   };
 
-  const currentQuestion = questionsData[quizIndex] || questionsData[0];
-  const reviewQuestionsCount = questionsData.filter(q => state.records[q.id]?.status === 'review').length;
+  const currentQuestion = quizStep.question || questionsData[0];
+  const reviewQuestionsCount = questionsData.filter(q => state.records[q.id]?.status === 'review' || (state.records[q.id]?.wrong > 0 && state.records[q.id]?.status !== 'mastered')).length;
 
   if (currentMode === 'admin') {
     return <AdminCropEditor onBack={() => setCurrentMode('quiz')} />;
@@ -149,7 +199,8 @@ export default function App() {
             onToggleBookmark={handleToggleBookmark}
             onOpenWiringDiagram={handleOpenWiringDiagram}
             totalQuestions={questionsData.length}
-            currentIndex={quizIndex}
+            currentIndex={quizStep.index}
+            quizStep={quizStep}
           />
         )}
 
@@ -214,6 +265,13 @@ export default function App() {
         onClose={() => setLevelUpData(null)}
         oldLevel={levelUpData?.oldLevel}
         newLevel={levelUpData?.newLevel}
+      />
+
+      {/* Round 1 (50 Questions) Completion Modal */}
+      <Round1CompleteModal
+        isOpen={showRound1CompleteModal}
+        onClose={() => setShowRound1CompleteModal(false)}
+        reviewCount={reviewQuestionsCount}
       />
     </div>
   );

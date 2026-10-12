@@ -5,6 +5,8 @@ import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound
 import { cropKeyForDiagram } from '../utils/customCrops';
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
+import CheatsheetAccordion from './CheatsheetAccordion';
+import { getCheatsheetsForQuestion } from '../data/cheatsheets';
 
 const AUTO_ADVANCE_TIME_MS = 3000;
 
@@ -429,6 +431,11 @@ export default function QuizCard({
                 </p>
               </div>
             )}
+
+            {/* Deep-dive memorization cheatsheets */}
+            <CheatsheetAccordion
+              cheatsheets={getCheatsheetsForQuestion(question.number || question.id)}
+            />
           </div>
 
           {/* Action Buttons inside explanation card */}

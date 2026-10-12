@@ -1,0 +1,20 @@
+{
+  "name": "電工2種サクサク道場 | 過去問効率マスター",
+  "short_name": "電工2種道場",
+  "description": "第二種電気工事士の過去問を忘却曲線（SRS）と要点一覧表でサクサク攻略する学習アプリ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

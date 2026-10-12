@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Save, RotateCcw, Download, Copy, Check, Sliders, Eye, Move } from 'lucide-react';
+import {
+  ArrowLeft,
+  Save,
+  RotateCcw,
+  Download,
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Move
+} from 'lucide-react';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
 import { getCustomCrops, saveCustomCrop, resetCustomCrop } from '../utils/customCrops';
 import { getAssetUrl } from '../utils/asset';
@@ -22,6 +33,14 @@ export default function AdminCropEditor({ onBack }) {
   const [dragMode, setDragMode] = useState('move'); // 'move' | 'se' | 'nw' | 'ne' | 'sw'
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialCoords, setInitialCoords] = useState({ x: 0, y: 0, w: 0, h: 0 });
+
+  // Navigation indices
+  const currentIndex = cropKeys.indexOf(selectedKey);
+  const prevKey = currentIndex > 0 ? cropKeys[currentIndex - 1] : null;
+  const nextKey = currentIndex < cropKeys.length - 1 ? cropKeys[currentIndex + 1] : null;
+
+  const prevLabel = prevKey ? (DEFAULT_CROPS[prevKey]?.label || `問${prevKey}`) : '';
+  const nextLabel = nextKey ? (DEFAULT_CROPS[nextKey]?.label || `問${nextKey}`) : '';
 
   // Load custom or default coords when selected key changes
   useEffect(() => {
@@ -59,6 +78,21 @@ export default function AdminCropEditor({ onBack }) {
   useEffect(() => {
     updatePreview();
   }, [coords, pageNumber]);
+
+  // Navigation handlers
+  const handlePrev = () => {
+    if (prevKey) {
+      playClick();
+      setSelectedKey(prevKey);
+    }
+  };
+
+  const handleNext = () => {
+    if (nextKey) {
+      playClick();
+      setSelectedKey(nextKey);
+    }
+  };
 
   // Handle Save
   const handleSave = () => {
@@ -145,16 +179,17 @@ export default function AdminCropEditor({ onBack }) {
     e.preventDefault();
     setIsDragging(true);
     setDragMode(mode);
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
     setDragStart({ x: clientX, y: clientY });
     setInitialCoords({ ...coords });
   };
 
   const handlePointerMove = (e) => {
     if (!isDragging || !imgRef.current) return;
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
+    if (clientX === undefined || clientY === undefined) return;
 
     const rect = imgRef.current.getBoundingClientRect();
     const scaleX = imgRef.current.naturalWidth / rect.width;
@@ -181,6 +216,16 @@ export default function AdminCropEditor({ onBack }) {
         next.h = initialCoords.h + (initialCoords.y - newY);
         next.x = newX;
         next.y = newY;
+      } else if (dragMode === 'ne') { // top-right corner
+        const newY = Math.max(0, Math.min(Math.round(initialCoords.y + dy), initialCoords.y + initialCoords.h - 20));
+        next.w = Math.max(20, Math.min(Math.round(initialCoords.w + dx), naturalW - prev.x));
+        next.h = initialCoords.h + (initialCoords.y - newY);
+        next.y = newY;
+      } else if (dragMode === 'sw') { // bottom-left corner
+        const newX = Math.max(0, Math.min(Math.round(initialCoords.x + dx), initialCoords.x + initialCoords.w - 20));
+        next.w = initialCoords.w + (initialCoords.x - newX);
+        next.h = Math.max(20, Math.min(Math.round(initialCoords.h + dy), naturalH - prev.y));
+        next.x = newX;
       }
       return next;
     });
@@ -202,7 +247,7 @@ export default function AdminCropEditor({ onBack }) {
 
   return (
     <div
-      className="min-h-screen bg-slate-950 text-slate-100 flex flex-col pb-16"
+      className="min-h-screen bg-slate-950 text-slate-100 flex flex-col pb-24"
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onTouchMove={handlePointerMove}
@@ -214,6 +259,7 @@ export default function AdminCropEditor({ onBack }) {
           <button
             onClick={() => { playClick(); onBack(); }}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+            title="問題画面に戻る"
           >
             <ArrowLeft size={18} />
           </button>
@@ -222,7 +268,7 @@ export default function AdminCropEditor({ onBack }) {
               <span>🛠️ トリミング位置 調整管理</span>
             </h1>
             <p className="text-[10px] text-slate-400">
-              問題画像の切り抜き枠をドラッグや数値で微調整できます
+              {currentIndex + 1} / {cropKeys.length} 件目: {coords.label || `問${selectedKey}`}
             </p>
           </div>
         </div>
@@ -243,158 +289,106 @@ export default function AdminCropEditor({ onBack }) {
         </div>
       )}
 
-      {/* Control Bar: Question & Page selection */}
+      {/* Navigation & Selection Bar */}
       <div className="p-3 bg-slate-900 border-b border-slate-800 flex flex-wrap gap-2 items-center justify-between text-xs">
-        <div className="flex items-center space-x-2">
-          <label className="text-slate-400 font-bold">対象:</label>
+        {/* Prev / Target Selector / Next */}
+        <div className="flex items-center space-x-1.5">
+          <button
+            onClick={handlePrev}
+            disabled={!prevKey}
+            className={`p-1.5 rounded-lg border flex items-center gap-1 ${
+              prevKey
+                ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 active:scale-95'
+                : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-40'
+            }`}
+            title={prevKey ? `前へ: ${prevLabel}` : '最初の画像です'}
+          >
+            <ChevronLeft size={16} />
+            <span className="text-[11px] font-bold hidden sm:inline">前へ</span>
+          </button>
+
           <select
             value={selectedKey}
             onChange={(e) => setSelectedKey(e.target.value)}
             className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-sky-500"
           >
-            {cropKeys.map(k => (
+            {cropKeys.map((k, idx) => (
               <option key={k} value={k}>
-                {DEFAULT_CROPS[k].label || `問${k}`}
+                {idx + 1}. {DEFAULT_CROPS[k].label || `問${k}`}
               </option>
             ))}
           </select>
-        </div>
 
-        <div className="flex items-center space-x-2">
-          <label className="text-slate-400 font-bold">元頁:</label>
-          <select
-            value={pageNumber}
-            onChange={(e) => setPageNumber(Number(e.target.value))}
-            className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-sky-500"
-          >
-            {Array.from({ length: 16 }, (_, i) => i + 1).map(p => (
-              <option key={p} value={p}>
-                {p} ページ
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex items-center space-x-1.5">
           <button
-            onClick={handleReset}
-            className="py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold flex items-center gap-1 border border-slate-700"
-            title="初期値に戻す"
+            onClick={handleNext}
+            disabled={!nextKey}
+            className={`p-1.5 rounded-lg border flex items-center gap-1 ${
+              nextKey
+                ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 active:scale-95'
+                : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-40'
+            }`}
+            title={nextKey ? `次へ: ${nextLabel}` : '最後の画像です'}
           >
-            <RotateCcw size={12} />
-            <span>初期値</span>
+            <span className="text-[11px] font-bold hidden sm:inline">次へ</span>
+            <ChevronRight size={16} />
           </button>
+        </div>
+
+        {/* Page selector & Quick utility buttons */}
+        <div className="flex items-center space-x-1.5">
+          <div className="flex items-center space-x-1">
+            <span className="text-[11px] text-slate-400">元頁:</span>
+            <select
+              value={pageNumber}
+              onChange={(e) => setPageNumber(Number(e.target.value))}
+              className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white font-bold focus:outline-none focus:border-sky-500"
+            >
+              {Array.from({ length: 16 }, (_, i) => i + 1).map(p => (
+                <option key={p} value={p}>
+                  {p} 頁
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             onClick={handleDownload}
-            className="py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold flex items-center gap-1 border border-slate-700"
-            title="PNG保存"
+            className="py-1 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold flex items-center gap-1 border border-slate-700"
+            title="PNGとしてダウンロード"
           >
             <Download size={12} />
-            <span>PNG</span>
+            <span className="hidden sm:inline">PNG</span>
           </button>
           <button
             onClick={handleCopyConfig}
-            className="py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold flex items-center gap-1 border border-slate-700"
-            title="Pythonコードコピー"
+            className="py-1 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold flex items-center gap-1 border border-slate-700"
+            title="Pythonコードとしてコピー"
           >
             {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
-            <span>{copied ? 'コピー済' : 'コード'}</span>
+            <span className="hidden sm:inline">{copied ? '済' : 'コード'}</span>
           </button>
         </div>
       </div>
 
-      {/* Main Two-Panel Layout */}
+      {/* Main Content Area */}
       <div className="p-3 space-y-4 max-w-4xl mx-auto w-full">
-        {/* Live Preview Panel */}
-        <div className="p-3 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-md">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-bold text-sky-400 flex items-center gap-1.5">
-              <Eye size={14} />
-              <span>切り抜き結果プレビュー（実寸 {coords.w} × {coords.h} px）</span>
-            </h3>
-            <span className="text-[11px] text-slate-400">
-              問題画面での見え方
-            </span>
-          </div>
-
-          <div className="bg-white rounded-xl p-3 flex items-center justify-center min-h-[140px] max-h-60 overflow-hidden border border-slate-700 shadow-inner">
-            <canvas
-              ref={previewCanvasRef}
-              className="max-h-56 max-w-full object-contain"
-            />
-          </div>
-        </div>
-
-        {/* Stepper Controls Grid */}
-        <div className="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-          {/* X Stepper */}
-          <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60">
-            <div className="flex justify-between text-slate-400 text-[11px] font-bold mb-1">
-              <span>X位置 (左端)</span>
-              <span className="text-sky-400 font-mono">{coords.x}px</span>
-            </div>
-            <div className="flex gap-1">
-              <button onClick={() => adjustCoord('x', -10)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">-10</button>
-              <button onClick={() => adjustCoord('x', -2)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">-2</button>
-              <button onClick={() => adjustCoord('x', 2)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">+2</button>
-              <button onClick={() => adjustCoord('x', 10)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">+10</button>
-            </div>
-          </div>
-
-          {/* Y Stepper */}
-          <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60">
-            <div className="flex justify-between text-slate-400 text-[11px] font-bold mb-1">
-              <span>Y位置 (上端)</span>
-              <span className="text-sky-400 font-mono">{coords.y}px</span>
-            </div>
-            <div className="flex gap-1">
-              <button onClick={() => adjustCoord('y', -10)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">-10</button>
-              <button onClick={() => adjustCoord('y', -2)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">-2</button>
-              <button onClick={() => adjustCoord('y', 2)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">+2</button>
-              <button onClick={() => adjustCoord('y', 10)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">+10</button>
-            </div>
-          </div>
-
-          {/* Width Stepper */}
-          <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60">
-            <div className="flex justify-between text-slate-400 text-[11px] font-bold mb-1">
-              <span>横幅 (W)</span>
-              <span className="text-sky-400 font-mono">{coords.w}px</span>
-            </div>
-            <div className="flex gap-1">
-              <button onClick={() => adjustCoord('w', -10)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">-10</button>
-              <button onClick={() => adjustCoord('w', -2)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">-2</button>
-              <button onClick={() => adjustCoord('w', 2)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">+2</button>
-              <button onClick={() => adjustCoord('w', 10)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">+10</button>
-            </div>
-          </div>
-
-          {/* Height Stepper */}
-          <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60">
-            <div className="flex justify-between text-slate-400 text-[11px] font-bold mb-1">
-              <span>高さ (H)</span>
-              <span className="text-sky-400 font-mono">{coords.h}px</span>
-            </div>
-            <div className="flex gap-1">
-              <button onClick={() => adjustCoord('h', -10)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">-10</button>
-              <button onClick={() => adjustCoord('h', -2)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">-2</button>
-              <button onClick={() => adjustCoord('h', 2)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">+2</button>
-              <button onClick={() => adjustCoord('h', 10)} className="flex-1 py-1 bg-slate-700 rounded font-mono text-[10px] hover:bg-slate-600">+10</button>
-            </div>
-          </div>
-        </div>
-
-        {/* Visual Interactive Page Canvas */}
-        <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800">
+        {/* ========================================================= */}
+        {/* 【上段】赤枠ドラッグの処理（元ページ画像 + 赤枠インタラクティブ操作） */}
+        {/* ========================================================= */}
+        <section className="p-3 bg-slate-900 rounded-2xl border border-slate-800 shadow-xl">
           <div className="flex items-center justify-between mb-2 text-xs">
-            <h3 className="font-bold text-slate-200 flex items-center gap-1.5">
-              <Move size={14} className="text-amber-400" />
-              <span>原寸ページ（赤枠をドラッグまたは端をつかんで拡大縮小）</span>
-            </h3>
-            <span className="text-[11px] text-slate-400">
+            <h2 className="font-black text-slate-100 flex items-center gap-1.5">
+              <Move size={15} className="text-amber-400" />
+              <span>原寸ページ画像（赤枠をドラッグ移動 / 四隅で拡大縮小）</span>
+            </h2>
+            <span className="text-[11px] text-amber-300 font-bold bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
               第 {pageNumber} 頁
             </span>
           </div>
+
+          <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
+            💡 赤枠の中をつかんでドラッグ移動、四隅の丸いハンドルをつかんで拡大・縮小できます。
+          </p>
 
           <div
             ref={containerRef}
@@ -412,13 +406,13 @@ export default function AdminCropEditor({ onBack }) {
 
             {/* Draggable Crop Selection Box Overlay */}
             <div
-              style={boxStyle}
+              style={{ ...boxStyle, touchAction: 'none' }}
               onPointerDown={(e) => handlePointerDown(e, 'move')}
               onTouchStart={(e) => handlePointerDown(e, 'move')}
               className="absolute border-2 border-red-500 bg-red-500/20 cursor-move flex items-center justify-center shadow-lg group pointer-events-auto"
             >
-              {/* Center move label */}
-              <span className="bg-red-600/90 text-white font-mono text-[10px] font-bold px-1.5 py-0.5 rounded shadow pointer-events-none">
+              {/* Center move & size label */}
+              <span className="bg-red-600/90 text-white font-mono text-[10px] font-black px-1.5 py-0.5 rounded shadow pointer-events-none select-none">
                 {coords.w} × {coords.h}
               </span>
 
@@ -426,35 +420,173 @@ export default function AdminCropEditor({ onBack }) {
               <div
                 onPointerDown={(e) => { e.stopPropagation(); handlePointerDown(e, 'se'); }}
                 onTouchStart={(e) => { e.stopPropagation(); handlePointerDown(e, 'se'); }}
-                className="absolute -bottom-2 -right-2 w-5 h-5 bg-red-500 border-2 border-white rounded-full cursor-se-resize shadow-lg active:scale-125 transition"
+                style={{ touchAction: 'none' }}
+                className="absolute -bottom-2.5 -right-2.5 w-6 h-6 bg-red-500 border-2 border-white rounded-full cursor-se-resize shadow-lg active:scale-125 transition"
+                title="右下角リサイズ"
               />
 
               {/* Top-left resize handle */}
               <div
                 onPointerDown={(e) => { e.stopPropagation(); handlePointerDown(e, 'nw'); }}
                 onTouchStart={(e) => { e.stopPropagation(); handlePointerDown(e, 'nw'); }}
-                className="absolute -top-2 -left-2 w-5 h-5 bg-red-500 border-2 border-white rounded-full cursor-nw-resize shadow-lg active:scale-125 transition"
+                style={{ touchAction: 'none' }}
+                className="absolute -top-2.5 -left-2.5 w-6 h-6 bg-red-500 border-2 border-white rounded-full cursor-nw-resize shadow-lg active:scale-125 transition"
+                title="左上角リサイズ"
+              />
+
+              {/* Top-right resize handle */}
+              <div
+                onPointerDown={(e) => { e.stopPropagation(); handlePointerDown(e, 'ne'); }}
+                onTouchStart={(e) => { e.stopPropagation(); handlePointerDown(e, 'ne'); }}
+                style={{ touchAction: 'none' }}
+                className="absolute -top-2.5 -right-2.5 w-6 h-6 bg-red-500 border-2 border-white rounded-full cursor-ne-resize shadow-lg active:scale-125 transition"
+                title="右上角リサイズ"
+              />
+
+              {/* Bottom-left resize handle */}
+              <div
+                onPointerDown={(e) => { e.stopPropagation(); handlePointerDown(e, 'sw'); }}
+                onTouchStart={(e) => { e.stopPropagation(); handlePointerDown(e, 'sw'); }}
+                style={{ touchAction: 'none' }}
+                className="absolute -bottom-2.5 -left-2.5 w-6 h-6 bg-red-500 border-2 border-white rounded-full cursor-sw-resize shadow-lg active:scale-125 transition"
+                title="左下角リサイズ"
               />
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Bottom Save Action */}
-        <div className="pt-2 flex gap-2">
-          <button
-            onClick={handleReset}
-            className="py-3 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700 active:scale-95"
-          >
-            初期値に戻す
-          </button>
-          <button
-            onClick={handleSave}
-            className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-900/40 active:scale-[0.98] transition flex items-center justify-center gap-1.5"
-          >
-            <Save size={16} />
-            <span>このトリミングを保存してアプリに反映</span>
-          </button>
-        </div>
+        {/* ========================================================= */}
+        {/* 【下段】プレビュー、＋ー微調整、前後移動、初期値、保存 */}
+        {/* ========================================================= */}
+        <section className="space-y-3">
+          {/* 1. Live Preview Panel */}
+          <div className="p-3 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-md">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+                <Eye size={14} />
+                <span>切り抜き結果プレビュー（実寸 {coords.w} × {coords.h} px）</span>
+              </h3>
+              <span className="text-[11px] text-slate-400">
+                問題画面での見え方
+              </span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 flex items-center justify-center min-h-[140px] max-h-60 overflow-hidden border border-slate-700 shadow-inner">
+              <canvas
+                ref={previewCanvasRef}
+                className="max-h-56 max-w-full object-contain"
+              />
+            </div>
+          </div>
+
+          {/* 2. Stepper Controls Grid (＋ーで調整する機能) */}
+          <div className="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+            {/* X Stepper */}
+            <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60">
+              <div className="flex justify-between text-slate-400 text-[11px] font-bold mb-1">
+                <span>X位置 (左端)</span>
+                <span className="text-sky-400 font-mono font-bold">{coords.x}px</span>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => adjustCoord('x', -10)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">-10</button>
+                <button onClick={() => adjustCoord('x', -2)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">-2</button>
+                <button onClick={() => adjustCoord('x', 2)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">+2</button>
+                <button onClick={() => adjustCoord('x', 10)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">+10</button>
+              </div>
+            </div>
+
+            {/* Y Stepper */}
+            <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60">
+              <div className="flex justify-between text-slate-400 text-[11px] font-bold mb-1">
+                <span>Y位置 (上端)</span>
+                <span className="text-sky-400 font-mono font-bold">{coords.y}px</span>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => adjustCoord('y', -10)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">-10</button>
+                <button onClick={() => adjustCoord('y', -2)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">-2</button>
+                <button onClick={() => adjustCoord('y', 2)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">+2</button>
+                <button onClick={() => adjustCoord('y', 10)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">+10</button>
+              </div>
+            </div>
+
+            {/* Width Stepper */}
+            <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60">
+              <div className="flex justify-between text-slate-400 text-[11px] font-bold mb-1">
+                <span>横幅 (W)</span>
+                <span className="text-sky-400 font-mono font-bold">{coords.w}px</span>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => adjustCoord('w', -10)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">-10</button>
+                <button onClick={() => adjustCoord('w', -2)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">-2</button>
+                <button onClick={() => adjustCoord('w', 2)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">+2</button>
+                <button onClick={() => adjustCoord('w', 10)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">+10</button>
+              </div>
+            </div>
+
+            {/* Height Stepper */}
+            <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60">
+              <div className="flex justify-between text-slate-400 text-[11px] font-bold mb-1">
+                <span>高さ (H)</span>
+                <span className="text-sky-400 font-mono font-bold">{coords.h}px</span>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => adjustCoord('h', -10)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">-10</button>
+                <button onClick={() => adjustCoord('h', -2)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">-2</button>
+                <button onClick={() => adjustCoord('h', 2)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">+2</button>
+                <button onClick={() => adjustCoord('h', 10)} className="flex-1 py-1.5 bg-slate-700 rounded font-mono text-[10px] font-bold hover:bg-slate-600 active:scale-95">+10</button>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. 前後の画像に移動するボタン */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={handlePrev}
+              disabled={!prevKey}
+              className={`py-3 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${
+                prevKey
+                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700 active:scale-95 shadow'
+                  : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-40'
+              }`}
+            >
+              <ChevronLeft size={16} />
+              <span className="truncate">◀ 前の画像 {prevLabel ? `(${prevLabel})` : ''}</span>
+            </button>
+
+            <button
+              onClick={handleNext}
+              disabled={!nextKey}
+              className={`py-3 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${
+                nextKey
+                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700 active:scale-95 shadow'
+                  : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-40'
+              }`}
+            >
+              <span className="truncate">次の画像 {nextLabel ? `(${nextLabel})` : ''} ▶</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+
+          {/* 4. 初期値に戻すボタン & 保存ボタン */}
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={handleReset}
+              className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 active:scale-95 flex items-center gap-1.5"
+              title="この問題のトリミングを初期値に戻す"
+            >
+              <RotateCcw size={14} />
+              <span>初期値に戻す</span>
+            </button>
+
+            <button
+              onClick={handleSave}
+              className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-900/40 active:scale-[0.98] transition flex items-center justify-center gap-1.5"
+            >
+              <Save size={16} />
+              <span>このトリミングを保存・反映</span>
+            </button>
+          </div>
+        </section>
       </div>
     </div>
   );

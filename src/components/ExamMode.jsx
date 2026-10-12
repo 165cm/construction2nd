@@ -3,7 +3,7 @@ import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, Rota
 import confetti from 'canvas-confetti';
 import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sound';
 import { getDisplayImageUrl } from '../utils/customCrops';
-
+import ExplanationRenderer from './ExplanationRenderer';
 
 export default function ExamMode({
   allQuestions,
@@ -17,6 +17,7 @@ export default function ExamMode({
   const [timeLeft, setTimeLeft] = useState(120 * 60); // 120 minutes in seconds
   const [isFinished, setIsFinished] = useState(false);
   const [resultData, setResultData] = useState(null);
+  const [expandedResultIdx, setExpandedResultIdx] = useState(null);
 
   // Timer countdown
   useEffect(() => {
@@ -207,37 +208,69 @@ export default function ExamMode({
           <span>📝 全問の解答結果一覧</span>
         </h3>
         <div className="space-y-2">
-          {resultData.details.map((item, idx) => (
-            <div
-              key={item.question.id}
-              className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
-                item.isCorrect
-                  ? 'bg-slate-800/40 border-slate-700/60'
-                  : 'bg-rose-950/30 border-rose-800/60'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                  item.isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
-                }`}>
-                  {item.isCorrect ? '✓' : '✕'}
-                </span>
-                <span className="font-bold text-slate-300">問 {item.question.number}</span>
-                <span className="text-[11px] text-slate-400 truncate max-w-[150px]">
-                  {item.question.categoryTag}
-                </span>
-              </div>
+          {resultData.details.map((item, idx) => {
+            const isExpanded = expandedResultIdx === idx;
+            return (
+              <div
+                key={item.question.id}
+                className={`p-3 rounded-xl border text-xs transition ${
+                  item.isCorrect
+                    ? 'bg-slate-800/40 border-slate-700/60'
+                    : 'bg-rose-950/30 border-rose-800/60'
+                }`}
+              >
+                <div
+                  onClick={() => {
+                    playClick();
+                    setExpandedResultIdx(isExpanded ? null : idx);
+                  }}
+                  className="flex items-center justify-between cursor-pointer select-none"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
+                      item.isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                    }`}>
+                      {item.isCorrect ? '✓' : '✕'}
+                    </span>
+                    <span className="font-bold text-slate-300">問 {item.question.number}</span>
+                    <span className="text-[11px] text-slate-400 truncate max-w-[140px]">
+                      {item.question.categoryTag}
+                    </span>
+                  </div>
 
-              <div className="flex items-center space-x-3">
-                <span className="text-slate-400">
-                  あなたの回答: <strong className={item.isCorrect ? 'text-emerald-400' : 'text-rose-400'}>{item.userAnswer || '未'}</strong>
-                </span>
-                <span className="text-slate-400">
-                  正解: <strong className="text-emerald-400">{item.question.answer}</strong>
-                </span>
+                  <div className="flex items-center space-x-2.5">
+                    <span className="text-slate-400 text-[11px]">
+                      回答: <strong className={item.isCorrect ? 'text-emerald-400' : 'text-rose-400'}>{item.userAnswer || '未'}</strong>
+                    </span>
+                    <span className="text-slate-400 text-[11px]">
+                      正解: <strong className="text-emerald-400">{item.question.answer}</strong>
+                    </span>
+                    <span className="text-slate-500 text-[10px]">
+                      {isExpanded ? '▲' : '▼'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Expanded explanation view */}
+                {isExpanded && (
+                  <div className="mt-3 pt-3 border-t border-slate-700/60 animate-pop">
+                    <p className="text-xs text-slate-200 font-semibold mb-2 leading-relaxed">
+                      {item.question.question}
+                    </p>
+                    <ExplanationRenderer
+                      explanation={item.question.explanation}
+                      answerChoice={item.question.answer}
+                    />
+                    {item.question.keyPoint && (
+                      <div className="mt-2.5 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 text-[11px]">
+                        💡 {item.question.keyPoint}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );

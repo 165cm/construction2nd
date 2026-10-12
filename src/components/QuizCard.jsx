@@ -3,6 +3,7 @@ import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, S
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playCombo, playClick, triggerHaptic } from '../utils/sound';
 import { getDisplayImageUrl } from '../utils/customCrops';
+import ExplanationRenderer from './ExplanationRenderer';
 
 
 export default function QuizCard({
@@ -263,12 +264,13 @@ export default function QuizCard({
           {/* Detailed Explanation */}
           <div className="space-y-3 selectable-text">
             <div>
-              <h4 className="text-xs font-bold text-sky-400 mb-1 flex items-center gap-1">
-                <span>📖 詳しい解説</span>
+              <h4 className="text-xs font-bold text-sky-400 mb-1.5 flex items-center gap-1">
+                <span>📖 要点一覧・解説</span>
               </h4>
-              <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">
-                {question.explanation}
-              </p>
+              <ExplanationRenderer
+                explanation={question.explanation}
+                answerChoice={question.answer}
+              />
             </div>
 
             {/* Key takeaway point */}

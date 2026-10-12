@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playCombo, playClick, triggerHaptic } from '../utils/sound';
@@ -18,12 +18,17 @@ export default function QuizCard({
   const [isAnswered, setIsAnswered] = useState(false);
   const [startTime, setStartTime] = useState(Date.now());
   const [showImageZoom, setShowImageZoom] = useState(false);
+  const cardTopRef = useRef(null);
 
-  // Reset state when question changes
+  // Reset state and scroll to top when question changes
   useEffect(() => {
     setSelectedChoice(null);
     setIsAnswered(false);
     setStartTime(Date.now());
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (cardTopRef.current) {
+      cardTopRef.current.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }
   }, [question.id]);
 
   const handleSelectChoice = (choiceId) => {
@@ -72,8 +77,12 @@ export default function QuizCard({
     return <span className="bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10px] px-2 py-0.5 rounded font-medium">正解済 ✨</span>;
   };
 
+  const areChoicesShort = question.choices.every(
+    (c) => (c.text || '').length <= 13
+  );
+
   return (
-    <div className="flex flex-col min-h-[calc(100vh-140px)] pb-24">
+    <div ref={cardTopRef} className="flex flex-col min-h-[calc(100vh-140px)] pb-24">
       {/* Top Question Info Bar */}
       <div className="flex items-center justify-between mb-3 text-xs">
         <div className="flex items-center space-x-2">
@@ -154,8 +163,8 @@ export default function QuizCard({
         )}
       </div>
 
-      {/* Choices Grid */}
-      <div className="space-y-2.5 mb-5">
+      {/* Choices Grid (2 columns if short, 1 column if long) */}
+      <div className={`${areChoicesShort ? 'grid grid-cols-2 gap-2.5' : 'space-y-2.5'} mb-5`}>
         {question.choices.map((choice) => {
           const isSelected = selectedChoice === choice.id;
           const isCorrect = choice.id === question.answer;
@@ -181,19 +190,23 @@ export default function QuizCard({
               key={choice.id}
               disabled={isAnswered}
               onClick={() => handleSelectChoice(choice.id)}
-              className={`w-full p-3.5 rounded-xl border text-left flex items-start space-x-3 transition font-medium relative ${btnClass}`}
+              className={`w-full ${
+                areChoicesShort
+                  ? 'p-3 min-h-[52px] items-center space-x-2.5'
+                  : 'p-3.5 items-start space-x-3'
+              } rounded-xl border text-left flex transition font-medium relative ${btnClass}`}
             >
               <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm shrink-0 font-black transition ${badgeClass}`}>
                 {choice.id}
               </span>
-              <span className="flex-1 text-sm pt-0.5 leading-snug select-text">
+              <span className={`flex-1 ${areChoicesShort ? 'text-xs sm:text-sm font-semibold' : 'text-sm pt-0.5'} leading-tight select-text`}>
                 {choice.text}
               </span>
               {isAnswered && isCorrect && (
-                <CheckCircle2 size={20} className="text-emerald-400 shrink-0 mt-0.5 animate-pop" />
+                <CheckCircle2 size={18} className="text-emerald-400 shrink-0 animate-pop" />
               )}
               {isAnswered && isSelected && !isCorrect && (
-                <XCircle size={20} className="text-rose-400 shrink-0 mt-0.5 animate-pop" />
+                <XCircle size={18} className="text-rose-400 shrink-0 animate-pop" />
               )}
             </button>
           );

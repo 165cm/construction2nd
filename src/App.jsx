@@ -53,6 +53,7 @@ export default function App() {
 
   // Next Question in Quick Quiz
   const handleNextQuizQuestion = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     if (quizIndex < questionsData.length - 1) {
       setQuizIndex(i => i + 1);
     } else {
@@ -75,6 +76,7 @@ export default function App() {
   const handleSelectQuestion = (questionId) => {
     const idx = questionsData.findIndex(q => q.id === questionId);
     if (idx !== -1) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       setQuizIndex(idx);
       setCurrentMode('quiz');
     }

@@ -331,38 +331,48 @@ export default function ExamMode({
         )}
       </div>
 
-      {/* Choice Buttons */}
-      <div className="space-y-2 mb-6">
-        {activeQ.choices.map((c) => {
-          const isSelected = answers[activeQ.id] === c.id;
-          return (
-            <button
-              key={c.id}
-              onClick={() => handleSelectChoice(activeQ.id, c.id)}
-              className={`w-full p-3.5 rounded-xl border text-left flex items-start space-x-3 transition ${
-                isSelected
-                  ? 'bg-sky-600/30 border-sky-400 text-white font-bold ring-1 ring-sky-400 shadow-md'
-                  : 'bg-slate-800/70 border-slate-700 text-slate-300 hover:border-slate-600 active:scale-[0.99]'
-              }`}
-            >
-              <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 font-black ${
-                isSelected ? 'bg-sky-500 text-white' : 'bg-slate-700 text-slate-300'
-              }`}>
-                {c.id}
-              </span>
-              <span className="text-xs pt-1 leading-snug">
-                {c.text}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Choice Buttons (2 columns if short, 1 column if long) */}
+      {(() => {
+        const areChoicesShort = activeQ.choices.every((c) => (c.text || '').length <= 13);
+        return (
+          <div className={`${areChoicesShort ? 'grid grid-cols-2 gap-2' : 'space-y-2'} mb-6`}>
+            {activeQ.choices.map((c) => {
+              const isSelected = answers[activeQ.id] === c.id;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => handleSelectChoice(activeQ.id, c.id)}
+                  className={`w-full ${
+                    areChoicesShort ? 'p-3 min-h-[48px] items-center space-x-2' : 'p-3.5 items-start space-x-3'
+                  } rounded-xl border text-left flex transition ${
+                    isSelected
+                      ? 'bg-sky-600/30 border-sky-400 text-white font-bold ring-1 ring-sky-400 shadow-md'
+                      : 'bg-slate-800/70 border-slate-700 text-slate-300 hover:border-slate-600 active:scale-[0.99]'
+                  }`}
+                >
+                  <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 font-black ${
+                    isSelected ? 'bg-sky-500 text-white' : 'bg-slate-700 text-slate-300'
+                  }`}>
+                    {c.id}
+                  </span>
+                  <span className={`text-xs ${areChoicesShort ? 'font-semibold' : 'pt-1'} leading-snug`}>
+                    {c.text}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Prev / Next Buttons */}
       <div className="flex gap-2">
         <button
           disabled={currentIdx === 0}
-          onClick={() => setCurrentIdx(i => Math.max(0, i - 1))}
+          onClick={() => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            setCurrentIdx(i => Math.max(0, i - 1));
+          }}
           className="flex-1 py-3 rounded-xl bg-slate-800 text-slate-300 disabled:opacity-40 font-bold text-xs"
         >
           前の問題
@@ -370,7 +380,10 @@ export default function ExamMode({
 
         <button
           disabled={currentIdx === allQuestions.length - 1}
-          onClick={() => setCurrentIdx(i => Math.min(allQuestions.length - 1, i + 1))}
+          onClick={() => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            setCurrentIdx(i => Math.min(allQuestions.length - 1, i + 1));
+          }}
           className="flex-1 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs disabled:opacity-40"
         >
           次の問題 ➔

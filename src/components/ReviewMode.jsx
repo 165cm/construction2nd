@@ -31,6 +31,7 @@ export default function ReviewMode({
   const activeQuestion = targetQuestions[currentIndex] || targetQuestions[0];
 
   const handleNext = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     if (currentIndex < targetQuestions.length - 1) {
       setCurrentIndex(i => i + 1);
     } else {

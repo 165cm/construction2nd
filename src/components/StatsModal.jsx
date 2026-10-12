@@ -8,7 +8,8 @@ export default function StatsModal({
   onClose,
   state,
   allQuestions,
-  onResetProgress
+  onResetProgress,
+  onOpenAdmin
 }) {
   if (!isOpen) return null;
 
@@ -223,18 +224,33 @@ export default function StatsModal({
             </div>
           </div>
 
-          {/* Reset progress */}
-          <div className="text-center pt-2">
-            <button
-              onClick={() => {
-                if (window.confirm('学習記録と実績をすべて初期化しますか？この操作は取り消せません。')) {
-                  onResetProgress();
-                }
-              }}
-              className="text-[11px] text-slate-500 hover:text-rose-400 underline py-1"
-            >
-              学習データをリセットする
-            </button>
+          {/* Admin Tools & Reset */}
+          <div className="pt-3 border-t border-slate-700/60 flex flex-col gap-2">
+            {onOpenAdmin && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenAdmin();
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition"
+              >
+                <span>🛠️ 問題画像のトリミング調整（管理者画面）</span>
+              </button>
+            )}
+
+            {/* Reset progress */}
+            <div className="text-center pt-1">
+              <button
+                onClick={() => {
+                  if (window.confirm('学習記録と実績をすべて初期化しますか？この操作は取り消せません。')) {
+                    onResetProgress();
+                  }
+                }}
+                className="text-[11px] text-slate-500 hover:text-rose-400 underline py-1"
+              >
+                学習データをリセットする
+              </button>
+            </div>
           </div>
         </div>
       </div>

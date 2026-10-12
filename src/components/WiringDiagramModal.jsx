@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, ZoomIn, ZoomOut, Maximize2, RotateCcw } from 'lucide-react';
 import { getAssetUrl } from '../utils/asset';
+import { getDisplayImageUrl } from '../utils/customCrops';
 
 export default function WiringDiagramModal({ isOpen, onClose, highlightMarker }) {
   const [scale, setScale] = useState(1);
@@ -9,10 +10,9 @@ export default function WiringDiagramModal({ isOpen, onClose, highlightMarker })
   if (!isOpen) return null;
 
   const getImageSrc = () => {
-    let path = '/pages/page_15.png';
-    if (activeTab === 'floor') path = '/crops/floor_plan.png';
-    if (activeTab === 'panel') path = '/crops/panel_schedule.png';
-    return getAssetUrl(path);
+    if (activeTab === 'floor') return getDisplayImageUrl('floor_plan', '/crops/floor_plan.png');
+    if (activeTab === 'panel') return getDisplayImageUrl('panel_schedule', '/crops/panel_schedule.png');
+    return getAssetUrl('/pages/page_15.png');
   };
 
   return (

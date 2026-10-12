@@ -1,12 +1,13 @@
 import React from 'react';
-import { Volume2, VolumeX, Flame, Zap, Trophy, Clock, ChevronRight } from 'lucide-react';
+import { Volume2, VolumeX, Flame, Zap, Trophy, Clock, ChevronRight, Crop } from 'lucide-react';
 import { getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime } from '../utils/storage';
 
 export default function Header({
   state,
   soundOn,
   onToggleSound,
-  onOpenStats
+  onOpenStats,
+  onOpenAdmin
 }) {
   const levelTitle = getTitleForLevel(state.level);
   const expRequired = calculateExpForLevel(state.level);
@@ -51,6 +52,15 @@ export default function Header({
             title="成績と実績"
           >
             <Trophy size={16} className="text-amber-400" />
+          </button>
+
+          {/* Admin Crop Editor Button */}
+          <button
+            onClick={onOpenAdmin}
+            className="p-1.5 text-slate-300 hover:text-white bg-slate-800/80 rounded-lg active:scale-95 border border-slate-700/60"
+            title="画像トリミング調整（管理者）"
+          >
+            <Crop size={16} className="text-rose-400" />
           </button>
 
           {/* Sound Toggle */}

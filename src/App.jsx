@@ -12,12 +12,24 @@ import StatsModal from './components/StatsModal';
 import WiringDiagramModal from './components/WiringDiagramModal';
 import LevelUpModal from './components/LevelUpModal';
 import BottomNav from './components/BottomNav';
+import AdminCropEditor from './components/AdminCropEditor';
+
 
 export default function App() {
   const [state, setState] = useState(() => loadState());
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
-  const [currentMode, setCurrentMode] = useState('quiz'); // 'quiz' | 'review' | 'exam' | 'list'
+  const [currentMode, setCurrentMode] = useState(() => {
+    if (typeof window !== 'undefined' && (window.location.hash === '#admin' || window.location.search.includes('admin'))) {
+      return 'admin';
+    }
+    return 'quiz';
+  }); // 'quiz' | 'review' | 'exam' | 'list' | 'admin'
   const [quizIndex, setQuizIndex] = useState(0);
+
+  const handleOpenAdmin = () => {
+    playClick();
+    setCurrentMode('admin');
+  };
 
   // Modals state
   const [isWiringDiagramOpen, setIsWiringDiagramOpen] = useState(false);
@@ -109,6 +121,10 @@ export default function App() {
   const currentQuestion = questionsData[quizIndex] || questionsData[0];
   const reviewQuestionsCount = questionsData.filter(q => state.records[q.id]?.status === 'review').length;
 
+  if (currentMode === 'admin') {
+    return <AdminCropEditor onBack={() => setCurrentMode('quiz')} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       {/* Top Header */}
@@ -117,6 +133,7 @@ export default function App() {
         soundOn={soundOn}
         onToggleSound={handleToggleSound}
         onOpenStats={() => { playClick(); setIsStatsOpen(true); }}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Main Content Area (Mobile Container) */}
@@ -188,6 +205,7 @@ export default function App() {
         state={state}
         allQuestions={questionsData}
         onResetProgress={handleResetProgress}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Level Up Celebration Modal */}

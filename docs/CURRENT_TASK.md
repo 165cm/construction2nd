@@ -17,6 +17,8 @@
 3. 他年度（令和7年度・令和6年度）の過去問データ追加対応
 
 ## 最近終わったこと（新しい順）
+- 問題画像の切り抜き位置微調整用 管理画面（AdminCropEditor）の実装（視覚的赤枠ドラッグ＆微調整ステッパー、即時プレビュー、保存反映）
+- GitHub Pages 自動デプロイ設定（GitHub Actionsワークフロー整備、baseパス対応）
 - 令和8年度上期 全50問のデータ作成（問題・選択肢・解答・詳細解説・暗記ポイント）
 - PDFからの高精細画像レンダリングおよび図面・器具写真の自動トリミング
 - サクサク通常モード、弱点復習モード、本番模擬試験モードの実装
@@ -26,6 +28,8 @@
 ## 大事な決めごと
 - サーバーサイド不要のクライアント完結型とし、LocalStorageで完全自動保存
 - 効果音は外部アセット不要のWeb Audio APIシンセサイズを採用しゼロレイテンシ化
+- 管理画面で調整したトリミング画像はLocalStorage（`denkou_custom_crops_v1`）に保存し、ブラウザ上で即座に反映される
 
 ## 変えてはいけないもの
-- LocalStorageキー名: `denkou2_mastery_state_v1`
+- 学習記録 LocalStorageキー名: `denkou2_mastery_state_v1`
+- トリミング調整 LocalStorageキー名: `denkou_custom_crops_v1`

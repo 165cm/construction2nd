@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playCombo, playClick, triggerHaptic } from '../utils/sound';
-import { getAssetUrl } from '../utils/asset';
+import { getDisplayImageUrl } from '../utils/customCrops';
+
 
 export default function QuizCard({
   question,
@@ -19,7 +20,15 @@ export default function QuizCard({
   const [isAnswered, setIsAnswered] = useState(false);
   const [startTime, setStartTime] = useState(Date.now());
   const [showImageZoom, setShowImageZoom] = useState(false);
+  const [, setCropsVersion] = useState(0);
   const cardTopRef = useRef(null);
+
+  // Re-render when admin updates crop coordinates
+  useEffect(() => {
+    const handleCropUpdate = () => setCropsVersion(v => v + 1);
+    window.addEventListener('custom-crops-updated', handleCropUpdate);
+    return () => window.removeEventListener('custom-crops-updated', handleCropUpdate);
+  }, []);
 
   // Reset state and scroll to top when question changes
   useEffect(() => {
@@ -148,7 +157,7 @@ export default function QuizCard({
               className="bg-white rounded-xl p-2 cursor-pointer flex items-center justify-center border border-slate-600 shadow-inner overflow-hidden max-h-56"
             >
               <img
-                src={getAssetUrl(question.diagram)}
+                src={getDisplayImageUrl(question.id, question.diagram)}
                 alt="問題の図・写真"
                 className="max-h-52 object-contain"
               />
@@ -313,7 +322,7 @@ export default function QuizCard({
         >
           <div className="max-w-md w-full bg-white p-3 rounded-2xl shadow-2xl relative">
             <img
-              src={getAssetUrl(question.diagram)}
+              src={getDisplayImageUrl(question.id, question.diagram)}
               alt="拡大図"
               className="w-full object-contain max-h-[75vh]"
             />

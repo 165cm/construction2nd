@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Flame, Zap, Trophy, Clock, ChevronRight, Crop } from 'lucide-react';
+import { Volume2, VolumeX, Flame, Trophy, Clock, Crop } from 'lucide-react';
 import { getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime } from '../utils/storage';
 
 export default function Header({
@@ -12,119 +12,89 @@ export default function Header({
   const levelTitle = getTitleForLevel(state.level);
   const expRequired = calculateExpForLevel(state.level);
   const expPercent = Math.min(100, Math.round((state.exp / expRequired) * 100));
-
   const timeEstimate = computeRemainingPlayTime(state, 50);
 
   return (
-    <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white px-3 py-2.5 shadow-md">
-      {/* Top row: Title, Badges, Sound */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 to-amber-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-sky-500/20">
+    <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800/80 text-white shadow-md">
+      {/* Compact Main Bar (Height ~48px) */}
+      <div className="flex items-center justify-between px-3 py-2">
+        {/* Left: App Title + Level Badge */}
+        <div className="flex items-center space-x-2 shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-sky-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-sky-500/20">
             ⚡
           </div>
-          <div>
-            <h1 className="text-sm font-black tracking-tight leading-tight flex items-center gap-1.5">
-              <span>電工2種サクサク道場</span>
-              <span className="text-[10px] font-bold bg-sky-500/20 text-sky-400 px-1.5 py-0.5 rounded border border-sky-500/30">
-                令和8年上期
-              </span>
+          <div className="flex items-baseline gap-1.5">
+            <h1 className="text-xs sm:text-sm font-black tracking-tight leading-none text-slate-100">
+              電工2種サクサク道場
             </h1>
-            <p className="text-[11px] text-slate-400 leading-none mt-0.5">
-              {levelTitle}
-            </p>
+            <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 border border-sky-400/30">
+              Lv.{state.level}
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-1.5">
+        {/* Right: Streak + Time Pill + Action Buttons */}
+        <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
           {/* Streak indicator if active */}
           {state.streak > 0 && (
-            <div className="flex items-center space-x-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full text-xs font-bold animate-pulse">
-              <Flame size={14} className="text-amber-400 fill-amber-400" />
-              <span>{state.streak} 連勝!</span>
+            <div className="flex items-center space-x-0.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 px-1.5 py-0.5 rounded-full text-[10px] font-bold">
+              <Flame size={12} className="text-amber-400 fill-amber-400" />
+              <span>{state.streak}</span>
             </div>
           )}
+
+          {/* Time Estimate Pill (Compact, Tappable to open stats) */}
+          <button
+            onClick={onOpenStats}
+            className="hidden xs:flex items-center space-x-1 bg-slate-800/90 hover:bg-slate-700/80 text-slate-300 px-1.5 py-0.5 rounded-lg border border-slate-700/60 text-[10px] transition"
+            title={`全問制覇まで推計: ${timeEstimate.formattedText} (タップで詳細)`}
+          >
+            <Clock size={11} className="text-sky-400" />
+            <span className="font-semibold text-sky-300">{timeEstimate.formattedText}</span>
+          </button>
 
           {/* Stats Button */}
           <button
             onClick={onOpenStats}
-            className="p-1.5 text-slate-300 hover:text-white bg-slate-800/80 rounded-lg active:scale-95 border border-slate-700/60"
+            className="p-1.5 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 rounded-lg active:scale-95 border border-slate-700/60 transition"
             title="成績と実績"
           >
-            <Trophy size={16} className="text-amber-400" />
+            <Trophy size={14} className="text-amber-400" />
           </button>
 
           {/* Admin Crop Editor Button */}
           <button
             onClick={onOpenAdmin}
-            className="p-1.5 text-slate-300 hover:text-white bg-slate-800/80 rounded-lg active:scale-95 border border-slate-700/60"
+            className="p-1.5 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 rounded-lg active:scale-95 border border-slate-700/60 transition"
             title="画像トリミング調整（管理者）"
           >
-            <Crop size={16} className="text-rose-400" />
+            <Crop size={14} className="text-rose-400" />
           </button>
 
           {/* Sound Toggle */}
           <button
             onClick={onToggleSound}
-            className="p-1.5 text-slate-300 hover:text-white bg-slate-800/80 rounded-lg active:scale-95 border border-slate-700/60"
+            className="p-1.5 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 rounded-lg active:scale-95 border border-slate-700/60 transition"
             title={soundOn ? '消音にする' : '音声を有効化'}
           >
             {soundOn ? (
-              <Volume2 size={16} className="text-sky-400" />
+              <Volume2 size={14} className="text-sky-400" />
             ) : (
-              <VolumeX size={16} className="text-slate-500" />
+              <VolumeX size={14} className="text-slate-500" />
             )}
           </button>
         </div>
       </div>
 
-      {/* Level & EXP Progress Row */}
-      <div className="mt-2 flex items-center gap-2">
-        <div className="flex items-center gap-1 text-xs font-black text-sky-400 min-w-[52px]">
-          <span className="bg-sky-500/20 border border-sky-400/30 px-1.5 py-0.5 rounded text-[11px]">
-            Lv.{state.level}
-          </span>
-        </div>
-        <div className="flex-1">
-          <div className="flex justify-between text-[10px] text-slate-400 mb-1 leading-none">
-            <span>EXP</span>
-            <span>{state.exp} / {expRequired} ({expPercent}%)</span>
-          </div>
-          <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
-            <div
-              className="h-full bg-gradient-to-r from-sky-500 to-cyan-300 transition-all duration-300 rounded-full"
-              style={{ width: `${expPercent}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Prominent Estimated Remaining Play Time Banner */}
+      {/* Slim EXP Progress Line (Height 2px, zero vertical space wasted) */}
       <div
-        onClick={onOpenStats}
-        className="mt-2.5 p-2 rounded-xl bg-gradient-to-r from-slate-800/90 to-sky-950/40 border border-sky-500/30 flex items-center justify-between cursor-pointer active:scale-[0.99] transition shadow-sm"
+        className="w-full h-0.5 bg-slate-800/80 overflow-hidden relative"
+        title={`EXP: ${state.exp} / ${expRequired} (${expPercent}%) - ${levelTitle}`}
       >
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-md bg-sky-500/20 text-sky-400 flex items-center justify-center">
-            <Clock size={14} />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 leading-none">
-              <span>全問制覇まで推計:</span>
-              <strong className="text-volt-electric font-bold text-xs">
-                {timeEstimate.formattedText}
-              </strong>
-            </div>
-            <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-2">
-              <span>マスター: <strong>{timeEstimate.masteredCount}</strong> / 50問 ({timeEstimate.progressPercent}%)</span>
-              <span className="text-slate-500">|</span>
-              <span>1問平均: <strong>{timeEstimate.avgSeconds}秒</strong></span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center text-slate-400 text-xs">
-          <ChevronRight size={16} />
-        </div>
+        <div
+          className="h-full bg-gradient-to-r from-sky-500 via-cyan-400 to-amber-300 transition-all duration-300 rounded-full"
+          style={{ width: `${expPercent}%` }}
+        />
       </div>
     </header>
   );

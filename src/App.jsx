@@ -89,9 +89,20 @@ export default function App() {
     }
   };
 
+  const resetScrollToTop = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
+  };
+
   // Next Question in Quick Quiz (determines next based on Round 1 vs Round 2 SRS)
   const handleNextQuizQuestion = () => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    resetScrollToTop();
     const currentQId = quizStep?.question?.id || null;
     const nextStep = determineNextQuizQuestion(questionsData, state, currentQId);
     if (nextStep) {
@@ -101,6 +112,7 @@ export default function App() {
         index: nextStep.index,
         round: nextStep.round
       });
+      setTimeout(resetScrollToTop, 50);
     }
   };
 
@@ -119,7 +131,7 @@ export default function App() {
   const handleSelectQuestion = (questionId) => {
     const idx = questionsData.findIndex(q => q.id === questionId);
     if (idx !== -1) {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      resetScrollToTop();
       const targetQ = questionsData[idx];
       const rec = state.records[targetQ.id];
       const attemptedCount = questionsData.filter(q => state.records[q.id]?.attempts > 0).length;
@@ -140,6 +152,7 @@ export default function App() {
         round: state.round
       });
       setCurrentMode('quiz');
+      setTimeout(resetScrollToTop, 50);
     }
   };
 

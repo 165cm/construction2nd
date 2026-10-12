@@ -1,8 +1,28 @@
 import React from 'react';
 
+// Helper to clean any raw LaTeX / math commands into user-friendly text
+export function cleanLatex(text) {
+  if (!text || typeof text !== 'string') return text;
+  return text
+    .replace(/\\text\{([^}]+)\}/g, '$1')
+    .replace(/\\mathbf\{([^}]+)\}/g, '$1')
+    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1 / $2')
+    .replace(/\\sqrt\{([^}]+)\}/g, '√$1')
+    .replace(/\\times/g, '×')
+    .replace(/\\Omega/g, 'Ω')
+    .replace(/\\fallingdotseq/g, '≒')
+    .replace(/\\leqq/g, '≦')
+    .replace(/\\geqq/g, '≧')
+    .replace(/\\rho/g, 'ρ')
+    .replace(/\\\(/g, '')
+    .replace(/\\\)/g, '')
+    .replace(/\\/g, '');
+}
+
 // Helper to render inline markdown highlights (**bold**, ◯, ✕, 正解 badges)
-export function renderFormattedText(text, isAnswerRow = false) {
-  if (!text) return null;
+export function renderFormattedText(rawText, isAnswerRow = false) {
+  if (!rawText) return null;
+  const text = cleanLatex(rawText);
 
   // Split by bold markdown **...**
   const parts = text.split(/(\*\*.*?\*\*)/g);

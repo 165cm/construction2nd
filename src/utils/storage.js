@@ -91,8 +91,8 @@ export const saveCurrentQuizPosition = (state, { questionId, index, round }) => 
 };
 
 export const calculateExpForLevel = (level) => {
-  // Base EXP curve: Lv 1 -> 2 needs 150 exp, Lv 2 -> 3 needs 200 exp, etc.
-  return Math.floor(100 + (level - 1) * 60);
+  // 10問程度集中して解いた節目（約1,000 EXP）でレベルアップする設計
+  return Math.floor(1000 + (level - 1) * 500);
 };
 
 // Record an answer and compute gamification updates with Leitner / SRS integration

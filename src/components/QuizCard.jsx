@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, AlertCircle } from 'lucide-react';
+import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, BookOpen } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { playCorrect, playWrong, playCombo, playClick, triggerHaptic } from '../utils/sound';
+import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound';
 import { cropKeyForDiagram } from '../utils/customCrops';
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
 
+const AUTO_ADVANCE_TIME_MS = 3000;
 
 export default function QuizCard({
   question,
@@ -24,7 +25,12 @@ export default function QuizCard({
   const [startTime, setStartTime] = useState(Date.now());
   const [showImageZoom, setShowImageZoom] = useState(false);
   const [, setCropsVersion] = useState(0);
-  const cardTopRef = useRef(null);
+
+  // Auto-advance & floating popup state
+  const [showPopup, setShowPopup] = useState(false);
+  const [timeLeftMs, setTimeLeftMs] = useState(AUTO_ADVANCE_TIME_MS);
+  const timerRef = useRef(null);
+  const explanationRef = useRef(null);
 
   // Re-render when admin updates crop coordinates
   useEffect(() => {
@@ -33,16 +39,100 @@ export default function QuizCard({
     return () => window.removeEventListener('custom-crops-updated', handleCropUpdate);
   }, []);
 
-  // Reset state and scroll to top when question changes
+  // Ensure absolute top scroll on question change (handles iOS Safari layout shifts)
   useEffect(() => {
     setSelectedChoice(null);
     setIsAnswered(false);
+    setShowPopup(false);
+    setTimeLeftMs(AUTO_ADVANCE_TIME_MS);
     setStartTime(Date.now());
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    if (cardTopRef.current) {
-      cardTopRef.current.scrollIntoView({ behavior: 'instant', block: 'start' });
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
+
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    scrollToTop();
+    const r1 = requestAnimationFrame(scrollToTop);
+    const t1 = setTimeout(scrollToTop, 50);
+    const t2 = setTimeout(scrollToTop, 200);
+
+    return () => {
+      cancelAnimationFrame(r1);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [question.id]);
+
+  // Handle 3-second auto-advance countdown after answer
+  useEffect(() => {
+    if (!showPopup) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
+    const intervalStep = 50;
+    timerRef.current = setInterval(() => {
+      setTimeLeftMs((prev) => {
+        if (prev <= intervalStep) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+          // Auto advance to next question
+          handleAutoNext();
+          return 0;
+        }
+        return prev - intervalStep;
+      });
+    }, intervalStep);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [showPopup]);
+
+  const handleAutoNext = () => {
+    setShowPopup(false);
+    onNext();
+  };
+
+  const handleManualNext = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setShowPopup(false);
+    playClick();
+    onNext();
+  };
+
+  const handleReadExplanation = () => {
+    // Cancel the timer immediately so user can read at their leisure
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setShowPopup(false);
+    playClick();
+
+    setTimeout(() => {
+      if (explanationRef.current) {
+        explanationRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
 
   const handleSelectChoice = (choiceId) => {
     if (isAnswered) return;
@@ -53,13 +143,14 @@ export default function QuizCard({
     
     setSelectedChoice(choiceId);
     setIsAnswered(true);
+    setShowPopup(true);
+    setTimeLeftMs(AUTO_ADVANCE_TIME_MS);
 
     if (isCorrect) {
       playCorrect();
       triggerHaptic('success');
-      // Confetti burst on correct answer
       confetti({
-        particleCount: 45,
+        particleCount: 40,
         spread: 60,
         origin: { y: 0.8 },
         colors: ['#38bdf8', '#0ea5e9', '#facc15', '#ffffff']
@@ -97,29 +188,32 @@ export default function QuizCard({
     (c) => (c.text || '').length <= 13
   );
 
+  const progressPercent = Math.max(0, Math.min(100, (timeLeftMs / AUTO_ADVANCE_TIME_MS) * 100));
+  const remainingSeconds = Math.ceil(timeLeftMs / 1000);
+
   return (
-    <div ref={cardTopRef} className="flex flex-col min-h-[calc(100vh-140px)] pb-24">
+    <div className="flex flex-col min-h-[calc(100vh-120px)] pb-28">
       {/* Quiz Progress & SRS Mode Status Banner */}
       {quizStep?.isFirstRound ? (
-        <div className="mb-3 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-900/90 to-sky-950/60 border border-sky-500/30 flex items-center justify-between text-xs">
+        <div className="mb-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-900/90 to-sky-950/60 border border-sky-500/30 flex items-center justify-between text-xs">
           <div className="flex items-center space-x-1.5">
             <span className="text-sky-400 font-black">第1巡（全問走破中）</span>
-            <span className="text-slate-400 text-[10px]">| 中断しても次回ここから再開</span>
+            <span className="text-slate-400 text-[10px]">| 自動保存</span>
           </div>
           <span className="font-mono font-black text-sky-300 bg-sky-950/80 border border-sky-400/40 px-2 py-0.5 rounded-lg text-xs">
             {quizStep?.progressText || `${currentIndex + 1} / ${totalQuestions} 問`}
           </span>
         </div>
       ) : (
-        <div className="mb-3 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-900/90 to-purple-950/60 border border-purple-500/30 flex items-center justify-between text-xs">
+        <div className="mb-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-900/90 to-purple-950/60 border border-purple-500/30 flex items-center justify-between text-xs">
           <div className="flex items-center space-x-1.5">
             <span className="text-purple-300 font-black flex items-center gap-1">
               <span>🧠 忘却曲線 復習巡</span>
             </span>
             <span className="text-slate-400 text-[10px]">
               {record?.box === 1 || record?.status === 'review'
-                ? '要復習🔥を最優先出題中'
-                : '定着度に応じて間隔出題中'}
+                ? '要復習🔥を最優先'
+                : '定着度に応じて間隔反復'}
             </span>
           </div>
           <span className="font-bold text-xs px-2 py-0.5 rounded-lg bg-purple-950/80 border border-purple-400/40 text-purple-200">
@@ -129,13 +223,13 @@ export default function QuizCard({
       )}
 
       {/* Top Question Info Bar */}
-      <div className="flex items-center justify-between mb-3 text-xs">
+      <div className="flex items-center justify-between mb-2.5 text-xs">
         <div className="flex items-center space-x-2">
           <span className="font-black text-sky-400 bg-sky-950/60 border border-sky-500/40 px-2 py-0.5 rounded-lg text-sm">
             第 {question.number} 問
           </span>
           <span className="text-slate-400 text-[11px] font-medium bg-slate-800/80 px-2 py-0.5 rounded">
-            {question.category} ({question.categoryTag})
+            {question.category}
           </span>
           {getStatusBadge()}
         </div>
@@ -163,10 +257,10 @@ export default function QuizCard({
             playClick();
             onOpenWiringDiagram(question.wiringMark);
           }}
-          className="mb-3.5 py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-between shadow-lg shadow-sky-900/40 active:scale-[0.98] transition border border-sky-400/40 animate-pulseGlow"
+          className="mb-3 py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-between shadow-lg shadow-sky-900/40 active:scale-[0.98] transition border border-sky-400/40 animate-pulseGlow"
         >
           <div className="flex items-center space-x-2">
-            <FileText size={16} />
+            <FileText size={15} />
             <span>📄 配線図（15頁）を開く</span>
             {question.wiringMark && (
               <span className="bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded text-[11px] font-black">
@@ -174,13 +268,13 @@ export default function QuizCard({
               </span>
             )}
           </div>
-          <span className="text-sky-200 text-[11px]">タップで図面表示 ➔</span>
+          <span className="text-sky-200 text-[10px]">タップで表示 ➔</span>
         </button>
       )}
 
       {/* Question Body Card */}
-      <div className="p-4 rounded-2xl bg-slate-800/70 border border-slate-700/80 shadow-md mb-4">
-        <h2 className="text-base font-semibold leading-relaxed text-slate-100 select-text">
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-800/70 border border-slate-700/80 shadow-md mb-3.5">
+        <h2 className="text-sm sm:text-base font-semibold leading-relaxed text-slate-100 select-text">
           {question.question}
         </h2>
 
@@ -189,7 +283,7 @@ export default function QuizCard({
           <div className="mt-3 relative group">
             <div
               onClick={() => setShowImageZoom(true)}
-              className="bg-white rounded-xl p-2 cursor-pointer flex items-center justify-center border border-slate-600 shadow-inner overflow-hidden max-h-56"
+              className="bg-white rounded-xl p-2 cursor-pointer flex items-center justify-center border border-slate-600 shadow-inner overflow-hidden min-h-[120px] max-h-56"
             >
               <CropImage
                 cropKey={cropKeyForDiagram(question.id, question.diagram)}
@@ -209,8 +303,8 @@ export default function QuizCard({
         )}
       </div>
 
-      {/* Choices Grid (2 columns if short, 1 column if long) */}
-      <div className={`${areChoicesShort ? 'grid grid-cols-2 gap-2.5' : 'space-y-2.5'} mb-5`}>
+      {/* Choices Grid */}
+      <div className={`${areChoicesShort ? 'grid grid-cols-2 gap-2' : 'space-y-2'} mb-4`}>
         {question.choices.map((choice) => {
           const isSelected = selectedChoice === choice.id;
           const isCorrect = choice.id === question.answer;
@@ -238,30 +332,34 @@ export default function QuizCard({
               onClick={() => handleSelectChoice(choice.id)}
               className={`w-full ${
                 areChoicesShort
-                  ? 'p-3 min-h-[52px] items-center space-x-2.5'
-                  : 'p-3.5 items-start space-x-3'
+                  ? 'p-2.5 sm:p-3 min-h-[48px] items-center space-x-2'
+                  : 'p-3 items-start space-x-2.5'
               } rounded-xl border text-left flex transition font-medium relative ${btnClass}`}
             >
-              <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm shrink-0 font-black transition ${badgeClass}`}>
+              <span className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-xs sm:text-sm shrink-0 font-black transition ${badgeClass}`}>
                 {choice.id}
               </span>
-              <span className={`flex-1 ${areChoicesShort ? 'text-xs sm:text-sm font-semibold' : 'text-sm pt-0.5'} leading-tight select-text`}>
+              <span className={`flex-1 ${areChoicesShort ? 'text-xs sm:text-sm font-semibold' : 'text-xs sm:text-sm pt-0.5'} leading-tight select-text`}>
                 {choice.text}
               </span>
+
               {isAnswered && isCorrect && (
-                <CheckCircle2 size={18} className="text-emerald-400 shrink-0 animate-pop" />
+                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 animate-pop" />
               )}
               {isAnswered && isSelected && !isCorrect && (
-                <XCircle size={18} className="text-rose-400 shrink-0 animate-pop" />
+                <XCircle size={16} className="text-rose-400 shrink-0 animate-pop" />
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Answer & Explanation Card */}
+      {/* Answer & Explanation Card (Always in DOM when answered, targeted by scroll) */}
       {isAnswered && (
-        <div className="rounded-2xl border p-4 mb-4 animate-pop bg-slate-800/95 border-slate-700/80 shadow-xl">
+        <div
+          ref={explanationRef}
+          className="rounded-2xl border p-4 mb-4 animate-pop bg-slate-800/95 border-slate-700/80 shadow-xl"
+        >
           {/* Result Banner */}
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-700/70">
             <div className="flex items-center space-x-2">
@@ -273,7 +371,6 @@ export default function QuizCard({
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-emerald-400 font-black text-sm">正解！ お見事です！</span>
-                      <span className="text-slate-400 text-[10px]">+100〜130 EXP</span>
                     </div>
                     <div className="text-emerald-300/80 text-[11px] font-medium mt-0.5">
                       {record?.box >= 3
@@ -290,7 +387,6 @@ export default function QuizCard({
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-rose-400 font-black text-sm">不正解… 要復習に追加</span>
-                      <span className="text-slate-400 text-[10px]">+20 EXP</span>
                     </div>
                     <div className="text-rose-300/90 text-[11px] font-medium mt-0.5">
                       🔥 忘却防止のため最優先（3問以内）で再出題されます
@@ -312,7 +408,8 @@ export default function QuizCard({
           <div className="space-y-3 selectable-text">
             <div>
               <h4 className="text-xs font-bold text-sky-400 mb-1.5 flex items-center gap-1">
-                <span>📖 要点一覧・解説</span>
+                <BookOpen size={13} />
+                <span>要点一覧・解説</span>
               </h4>
               <ExplanationRenderer
                 explanation={question.explanation}
@@ -334,13 +431,14 @@ export default function QuizCard({
             )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons inside explanation card */}
           <div className="mt-4 pt-3 border-t border-slate-700/70 flex gap-2">
             <button
               onClick={() => {
                 playClick();
                 setSelectedChoice(null);
                 setIsAnswered(false);
+                setShowPopup(false);
                 setStartTime(Date.now());
               }}
               className="py-3 px-4 rounded-xl bg-slate-700/80 text-slate-300 hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition"
@@ -350,15 +448,68 @@ export default function QuizCard({
             </button>
 
             <button
-              onClick={() => {
-                playClick();
-                onNext();
-              }}
+              onClick={handleManualNext}
               className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white text-sm font-black flex items-center justify-center gap-1.5 shadow-lg shadow-sky-600/30 active:scale-[0.98] transition"
             >
               <span>次の問題へ進む</span>
               <ArrowRight size={16} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Action Popup with 3s Auto-Advance & Time Seek Animation */}
+      {showPopup && (
+        <div className="fixed bottom-16 left-0 right-0 z-40 px-3 pb-2 max-w-md mx-auto pointer-events-none animate-slideUp">
+          <div className="pointer-events-auto bg-slate-900/95 backdrop-blur-md border border-sky-400/50 shadow-2xl shadow-sky-950/80 rounded-2xl p-3 flex flex-col gap-2.5">
+            {/* Top row: Result status & Time Indicator */}
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                {selectedChoice === question.answer ? (
+                  <span className="flex items-center gap-1 font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/40 text-[11px]">
+                    <CheckCircle2 size={13} />
+                    <span>正解！</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 font-black text-rose-400 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/40 text-[11px]">
+                    <XCircle size={13} />
+                    <span>不正解</span>
+                  </span>
+                )}
+                <span className="text-slate-300 text-xs">
+                  正解: <strong className="text-emerald-400 font-black">【{question.answer}】</strong>
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400">
+                {remainingSeconds}秒後に自動で次へ
+              </span>
+            </div>
+
+            {/* Bottom row: [解説を読む] and [次に進む (3s) with time seek bar] */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleReadExplanation}
+                className="flex-1 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition"
+              >
+                <BookOpen size={14} className="text-sky-400" />
+                <span>解説を読む</span>
+              </button>
+
+              <button
+                onClick={handleManualNext}
+                className="flex-1 relative overflow-hidden py-2.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs flex items-center justify-center gap-1 shadow-lg shadow-sky-600/30 active:scale-95 transition"
+              >
+                {/* Time Seek Animation Bar (drains from left to right) */}
+                <div
+                  className="absolute top-0 bottom-0 left-0 bg-sky-400/40 pointer-events-none transition-all duration-75 ease-linear"
+                  style={{ width: `${progressPercent}%` }}
+                />
+                <span className="relative z-10 flex items-center gap-1">
+                  <span>次に進む ({remainingSeconds}s)</span>
+                  <ArrowRight size={13} />
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       )}

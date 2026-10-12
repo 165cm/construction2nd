@@ -15,7 +15,8 @@ export default function QuizCard({
   onToggleBookmark,
   onOpenWiringDiagram,
   totalQuestions = 50,
-  currentIndex = 0
+  currentIndex = 0,
+  quizStep
 }) {
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -79,13 +80,16 @@ export default function QuizCard({
     if (!record || record.status === 'unattempted') {
       return <span className="bg-slate-700/60 text-slate-300 text-[10px] px-2 py-0.5 rounded font-medium">未挑戦</span>;
     }
-    if (record.status === 'mastered') {
+    if (record.status === 'mastered' || record.box === 4) {
       return <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded font-bold">完全マスター 👑</span>;
     }
-    if (record.status === 'review') {
-      return <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded font-bold">要復習 🔥</span>;
+    if (record.status === 'review' || record.box === 1) {
+      return <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded font-bold animate-pulse">要復習 🔥</span>;
     }
-    return <span className="bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10px] px-2 py-0.5 rounded font-medium">正解済 ✨</span>;
+    if (record.box === 3) {
+      return <span className="bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] px-2 py-0.5 rounded font-medium">安定 🌿</span>;
+    }
+    return <span className="bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10px] px-2 py-0.5 rounded font-medium">定着中 🌱</span>;
   };
 
   const areChoicesShort = question.choices.every(
@@ -94,6 +98,35 @@ export default function QuizCard({
 
   return (
     <div ref={cardTopRef} className="flex flex-col min-h-[calc(100vh-140px)] pb-24">
+      {/* Quiz Progress & SRS Mode Status Banner */}
+      {quizStep?.isFirstRound ? (
+        <div className="mb-3 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-900/90 to-sky-950/60 border border-sky-500/30 flex items-center justify-between text-xs">
+          <div className="flex items-center space-x-1.5">
+            <span className="text-sky-400 font-black">第1巡（全問走破中）</span>
+            <span className="text-slate-400 text-[10px]">| 中断しても次回ここから再開</span>
+          </div>
+          <span className="font-mono font-black text-sky-300 bg-sky-950/80 border border-sky-400/40 px-2 py-0.5 rounded-lg text-xs">
+            {quizStep?.progressText || `${currentIndex + 1} / ${totalQuestions} 問`}
+          </span>
+        </div>
+      ) : (
+        <div className="mb-3 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-900/90 to-purple-950/60 border border-purple-500/30 flex items-center justify-between text-xs">
+          <div className="flex items-center space-x-1.5">
+            <span className="text-purple-300 font-black flex items-center gap-1">
+              <span>🧠 忘却曲線 復習巡</span>
+            </span>
+            <span className="text-slate-400 text-[10px]">
+              {record?.box === 1 || record?.status === 'review'
+                ? '要復習🔥を最優先出題中'
+                : '定着度に応じて間隔出題中'}
+            </span>
+          </div>
+          <span className="font-bold text-xs px-2 py-0.5 rounded-lg bg-purple-950/80 border border-purple-400/40 text-purple-200">
+            {record?.box ? `Box ${record.box}` : '復習'}
+          </span>
+        </div>
+      )}
+
       {/* Top Question Info Bar */}
       <div className="flex items-center justify-between mb-3 text-xs">
         <div className="flex items-center space-x-2">
@@ -232,22 +265,34 @@ export default function QuizCard({
             <div className="flex items-center space-x-2">
               {selectedChoice === question.answer ? (
                 <>
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0">
                     ✓
                   </div>
                   <div>
-                    <span className="text-emerald-400 font-black text-sm">正解！ お見事です！</span>
-                    <span className="text-slate-400 text-xs ml-2">+100〜130 EXP</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-emerald-400 font-black text-sm">正解！ お見事です！</span>
+                      <span className="text-slate-400 text-[10px]">+100〜130 EXP</span>
+                    </div>
+                    <div className="text-emerald-300/80 text-[11px] font-medium mt-0.5">
+                      {record?.box >= 3
+                        ? '🧠 長期記憶に定着中（間隔拡大）'
+                        : `🌱 定着度UP (次回は約${record?.interval || 8}問後に再確認)`}
+                    </div>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold">
+                  <div className="w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold shrink-0">
                     ✕
                   </div>
                   <div>
-                    <span className="text-rose-400 font-black text-sm">不正解… 復習リストに追加</span>
-                    <span className="text-slate-400 text-xs ml-2">+20 EXP (学び)</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-rose-400 font-black text-sm">不正解… 要復習に追加</span>
+                      <span className="text-slate-400 text-[10px]">+20 EXP</span>
+                    </div>
+                    <div className="text-rose-300/90 text-[11px] font-medium mt-0.5">
+                      🔥 忘却防止のため最優先（3問以内）で再出題されます
+                    </div>
                   </div>
                 </>
               )}

@@ -29,13 +29,17 @@
 | `src/components/StatsModal.jsx` | 残り時間推計・分野別進捗率・実績バッジギャラリー |
 | `src/components/BottomNav.jsx` | スマホ下部固定ナビゲーション（5タブ） |
 | `src/utils/sound.js` | Web Audio APIシンセサイザー（正解・不正解・コンボ・ファンファーレ・タップ） |
+| `src/utils/spacedRepetition.js` | 科学的忘却曲線（ライトナーBox）間隔反復エンジン・中断再開ロジック |
 | `src/utils/storage.js` | 理解度・平均解答速度・残りプレイ時間算出・実績判定ロジック |
+| `src/components/Round1CompleteModal.jsx` | 第1巡（全50問）走破達成＆SRS復習移行アナウンスモーダル |
 | `public/crops/` | 回路図・材料写真・工具写真・器具記号の個別クロップ画像 |
 | `public/pages/` | 全頁高精細PNG（配線図含む） |
 
 ## データ
 - LocalStorage キー: `denkou2_mastery_state_v1`
-  - `records`: 各問題の挑戦回数、正解数、不正解数、連続正解数、ステータス（unattempted / review / correct / mastered）
+  - `currentQuestionId`: 現在挑戦中・中断時の再開問題ID（問10中断なら問11から自動再開）
+  - `round`: 巡回フェーズ（1: 初回全問走破中、2: 科学的適応型間隔反復復習ループ）
+  - `records`: 各問題の挑戦回数、正解数、不正解数、連続正解数、ステータス（unattempted / review / correct / mastered）、Leitner Box（1〜4）、出題間隔（interval）
   - `responseTimes`: 直近30問の回答所要時間（秒）配列（平均速度算出用）
   - `exp`, `level`, `streak`, `maxStreak`
   - `badges`: 獲得済み実績バッジID配列

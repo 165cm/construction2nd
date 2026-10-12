@@ -9,10 +9,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Move
+  Move,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
-import { getCustomCrops, saveCustomCrop, resetCustomCrop } from '../utils/customCrops';
+import { getCustomCrops, saveCustomCrop, resetCustomCrop, clearAllCustomCrops } from '../utils/customCrops';
 import { getAssetUrl } from '../utils/asset';
 import { playClick, triggerHaptic } from '../utils/sound';
 
@@ -23,6 +25,8 @@ export default function AdminCropEditor({ onBack }) {
   const [pageNumber, setPageNumber] = useState(DEFAULT_CROPS['1'].page);
   const [copied, setCopied] = useState(false);
   const [savedMessage, setSavedMessage] = useState('');
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [savedCount, setSavedCount] = useState(0);
 
   const imgRef = useRef(null);
   const previewCanvasRef = useRef(null);
@@ -42,14 +46,22 @@ export default function AdminCropEditor({ onBack }) {
   const prevLabel = prevKey ? (DEFAULT_CROPS[prevKey]?.label || `問${prevKey}`) : '';
   const nextLabel = nextKey ? (DEFAULT_CROPS[nextKey]?.label || `問${nextKey}`) : '';
 
+  // Update saved count
+  const refreshSavedCount = () => {
+    const custom = getCustomCrops();
+    setSavedCount(Object.keys(custom).length);
+  };
+
   // Load custom or default coords when selected key changes
   useEffect(() => {
     const custom = getCustomCrops();
+    refreshSavedCount();
     const active = custom[selectedKey]?.coords || DEFAULT_CROPS[selectedKey] || {
       page: 5, filename: 'custom.png', x: 200, y: 200, w: 400, h: 300, label: `問${selectedKey}`
     };
     setCoords(active);
     setPageNumber(active.page);
+    setIsImageLoading(true);
   }, [selectedKey]);
 
   // Update live preview canvas whenever image loads or coords change
@@ -58,6 +70,7 @@ export default function AdminCropEditor({ onBack }) {
     const canvas = previewCanvasRef.current;
     if (!img || !canvas || !img.complete || img.naturalWidth === 0) return;
 
+    setIsImageLoading(false);
     const naturalW = img.naturalWidth;
     const naturalH = img.naturalHeight;
 
@@ -71,7 +84,9 @@ export default function AdminCropEditor({ onBack }) {
     canvas.height = safeH;
 
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, safeW, safeH);
+    // Fill white paper background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, safeW, safeH);
     ctx.drawImage(img, safeX, safeY, safeW, safeH, 0, 0, safeW, safeH);
   };
 
@@ -94,24 +109,64 @@ export default function AdminCropEditor({ onBack }) {
     }
   };
 
-  // Handle Save
+  // Handle Save (Robust JPEG compression: solves mobile Chrome LocalStorage quota limit)
   const handleSave = () => {
     playClick();
-    triggerHaptic('success');
-    const canvas = previewCanvasRef.current;
-    if (!canvas) return;
+    const img = imgRef.current;
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      alert('⚠️ 元ページ画像を読み込み中です。画像が表示されてから保存してください。');
+      return;
+    }
 
-    const dataUrl = canvas.toDataURL('image/png');
-    saveCustomCrop(selectedKey, {
-      dataUrl,
-      coords: { ...coords, page: pageNumber }
-    });
+    try {
+      const naturalW = img.naturalWidth;
+      const naturalH = img.naturalHeight;
+      const safeX = Math.max(0, Math.min(coords.x, naturalW - 10));
+      const safeY = Math.max(0, Math.min(coords.y, naturalH - 10));
+      const safeW = Math.max(20, Math.min(coords.w, naturalW - safeX));
+      const safeH = Math.max(20, Math.min(coords.h, naturalH - safeY));
 
-    setSavedMessage(`✅ ${coords.label || `問${selectedKey}`} のトリミングを保存・反映しました！`);
-    setTimeout(() => setSavedMessage(''), 3000);
+      const offscreen = document.createElement('canvas');
+      offscreen.width = safeW;
+      offscreen.height = safeH;
+      const ctx = offscreen.getContext('2d');
+
+      // 1. Fill clean white paper background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, safeW, safeH);
+
+      // 2. Draw cropped area
+      ctx.drawImage(img, safeX, safeY, safeW, safeH, 0, 0, safeW, safeH);
+
+      // 3. Export as high-quality compressed JPEG (0.88 quality): 30KB instead of 800KB PNG!
+      const dataUrl = offscreen.toDataURL('image/jpeg', 0.88);
+
+      if (!dataUrl || dataUrl.length < 500) {
+        throw new Error('画像データの生成に失敗しました');
+      }
+
+      const success = saveCustomCrop(selectedKey, {
+        dataUrl,
+        coords: { ...coords, page: pageNumber }
+      });
+
+      if (success) {
+        triggerHaptic('success');
+        refreshSavedCount();
+        setSavedMessage(`✅ ${coords.label || `問${selectedKey}`} のトリミングを保存・反映しました！`);
+        setTimeout(() => setSavedMessage(''), 3500);
+      } else {
+        triggerHaptic('error');
+        alert('⚠️ ブラウザの保存容量制限（LocalStorage Quota）により保存できませんでした。「全初期化」を行ってから再度お試しください。');
+      }
+    } catch (err) {
+      console.error('Failed to save crop:', err);
+      triggerHaptic('error');
+      alert(`⚠️ 保存エラー: ${err.message}`);
+    }
   };
 
-  // Handle Reset
+  // Handle Reset for current question
   const handleReset = () => {
     playClick();
     triggerHaptic('light');
@@ -121,8 +176,26 @@ export default function AdminCropEditor({ onBack }) {
       setCoords(def);
       setPageNumber(def.page);
     }
+    refreshSavedCount();
     setSavedMessage('🔄 初期値にリセットしました');
     setTimeout(() => setSavedMessage(''), 3000);
+  };
+
+  // Handle Clear ALL custom crops (Recovery for corrupted/blank data on mobile)
+  const handleClearAll = () => {
+    if (window.confirm('⚠️ すべてのカスタムトリミングを破棄して初期画像に戻しますか？\n（スマホで画像が白くなったり表示されない場合に有効です）')) {
+      playClick();
+      clearAllCustomCrops();
+      const def = DEFAULT_CROPS[selectedKey];
+      if (def) {
+        setCoords(def);
+        setPageNumber(def.page);
+      }
+      refreshSavedCount();
+      triggerHaptic('light');
+      setSavedMessage('🔄 すべてのカスタムトリミングを初期化しました');
+      setTimeout(() => setSavedMessage(''), 3000);
+    }
   };
 
   // Download cropped PNG
@@ -381,9 +454,16 @@ export default function AdminCropEditor({ onBack }) {
               <Move size={15} className="text-amber-400" />
               <span>原寸ページ画像（赤枠をドラッグ移動 / 四隅で拡大縮小）</span>
             </h2>
-            <span className="text-[11px] text-amber-300 font-bold bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-              第 {pageNumber} 頁
-            </span>
+            <div className="flex items-center gap-2">
+              {isImageLoading && (
+                <span className="text-[10px] text-sky-400 animate-pulse font-bold">
+                  読込中...
+                </span>
+              )}
+              <span className="text-[11px] text-amber-300 font-bold bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                第 {pageNumber} 頁
+              </span>
+            </div>
           </div>
 
           <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
@@ -394,9 +474,10 @@ export default function AdminCropEditor({ onBack }) {
             ref={containerRef}
             className="relative bg-slate-950 rounded-xl overflow-hidden border border-slate-700 shadow-2xl select-none"
           >
-            {/* Full page image */}
+            {/* Full page image with crossOrigin */}
             <img
               ref={imgRef}
+              crossOrigin="anonymous"
               src={getAssetUrl(`/pages/page_${pageNumber}.png`)}
               alt="元頁"
               onLoad={updatePreview}
@@ -466,9 +547,16 @@ export default function AdminCropEditor({ onBack }) {
                 <Eye size={14} />
                 <span>切り抜き結果プレビュー（実寸 {coords.w} × {coords.h} px）</span>
               </h3>
-              <span className="text-[11px] text-slate-400">
-                問題画面での見え方
-              </span>
+              <div className="flex items-center gap-2">
+                {savedCount > 0 && (
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                    💾 カスタム保存中: {savedCount}件
+                  </span>
+                )}
+                <span className="text-[11px] text-slate-400">
+                  問題画面での見え方
+                </span>
+              </div>
             </div>
 
             <div className="bg-white rounded-xl p-3 flex items-center justify-center min-h-[140px] max-h-60 overflow-hidden border border-slate-700 shadow-inner">
@@ -571,11 +659,11 @@ export default function AdminCropEditor({ onBack }) {
           <div className="flex gap-2 pt-1">
             <button
               onClick={handleReset}
-              className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 active:scale-95 flex items-center gap-1.5"
+              className="py-3 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 active:scale-95 flex items-center gap-1.5"
               title="この問題のトリミングを初期値に戻す"
             >
               <RotateCcw size={14} />
-              <span>初期値に戻す</span>
+              <span>この画像を初期値へ</span>
             </button>
 
             <button
@@ -584,6 +672,17 @@ export default function AdminCropEditor({ onBack }) {
             >
               <Save size={16} />
               <span>このトリミングを保存・反映</span>
+            </button>
+          </div>
+
+          {/* 5. 全初期化救済ボタン（破損データ・容量オーバー時用） */}
+          <div className="pt-2 text-center">
+            <button
+              onClick={handleClearAll}
+              className="text-[11px] text-slate-500 hover:text-rose-400 underline flex items-center gap-1 mx-auto py-1"
+            >
+              <Trash2 size={12} />
+              <span>カスタム保存したすべての画像を全消去して初期状態に戻す</span>
             </button>
           </div>
         </section>

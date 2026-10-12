@@ -20,8 +20,10 @@ export const saveCustomCrop = (key, cropData) => {
     crops[key] = cropData;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(crops));
     window.dispatchEvent(new Event('custom-crops-updated'));
+    return true;
   } catch (e) {
-    console.error('Failed to save custom crop:', e);
+    console.error('Failed to save custom crop (quota or storage error):', e);
+    return false;
   }
 };
 
@@ -31,20 +33,37 @@ export const resetCustomCrop = (key) => {
     delete crops[key];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(crops));
     window.dispatchEvent(new Event('custom-crops-updated'));
+    return true;
   } catch (e) {
     console.error('Failed to reset custom crop:', e);
+    return false;
+  }
+};
+
+export const clearAllCustomCrops = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    window.dispatchEvent(new Event('custom-crops-updated'));
+    return true;
+  } catch (e) {
+    console.error('Failed to clear custom crops:', e);
+    return false;
   }
 };
 
 export const getDisplayImageUrl = (key, defaultPath) => {
-  const custom = getCustomCrops();
-  const k = String(key);
-  if (custom[k]?.dataUrl) {
-    return custom[k].dataUrl;
-  }
-  if (custom[key]?.dataUrl) {
-    return custom[key].dataUrl;
+  try {
+    const custom = getCustomCrops();
+    const k = String(key);
+    // Ensure the dataUrl is present and of realistic length (filters out empty/corrupt 1x1 dataUrls)
+    if (custom[k]?.dataUrl && custom[k].dataUrl.length > 500) {
+      return custom[k].dataUrl;
+    }
+    if (custom[key]?.dataUrl && custom[key].dataUrl.length > 500) {
+      return custom[key].dataUrl;
+    }
+  } catch (e) {
+    console.error('Error getting display image url:', e);
   }
   return defaultPath ? getAssetUrl(defaultPath) : '';
 };
-

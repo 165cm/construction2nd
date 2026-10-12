@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 import { X, ZoomIn, ZoomOut, Maximize2, RotateCcw } from 'lucide-react';
 import { getAssetUrl } from '../utils/asset';
-import { getDisplayImageUrl } from '../utils/customCrops';
+import CropImage from './CropImage';
 
 export default function WiringDiagramModal({ isOpen, onClose, highlightMarker }) {
   const [scale, setScale] = useState(1);
   const [activeTab, setActiveTab] = useState('full'); // 'full' | 'floor' | 'panel'
 
   if (!isOpen) return null;
-
-  const getImageSrc = () => {
-    if (activeTab === 'floor') return getDisplayImageUrl('floor_plan', '/crops/floor_plan.png');
-    if (activeTab === 'panel') return getDisplayImageUrl('panel_schedule', '/crops/panel_schedule.png');
-    return getAssetUrl('/pages/page_15.png');
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/95 backdrop-blur-md animate-pop">
@@ -101,12 +95,23 @@ export default function WiringDiagramModal({ isOpen, onClose, highlightMarker })
           className="transition-transform duration-150 origin-center max-w-full"
           style={{ transform: `scale(${scale})` }}
         >
-          <img
-            src={getImageSrc()}
-            alt="第二種電気工事士 配線図"
-            className="max-h-[82vh] object-contain rounded shadow-2xl bg-white select-none pointer-events-auto"
-            draggable="false"
-          />
+          {activeTab === 'full' ? (
+            <img
+              src={getAssetUrl('/pages/page_15.png')}
+              alt="第二種電気工事士 配線図"
+              className="max-h-[82vh] object-contain rounded shadow-2xl bg-white select-none pointer-events-auto"
+              draggable="false"
+            />
+          ) : (
+            <CropImage
+              key={activeTab}
+              cropKey={activeTab === 'floor' ? 'floor_plan' : 'panel_schedule'}
+              defaultPath={activeTab === 'floor' ? '/crops/floor_plan.png' : '/crops/panel_schedule.png'}
+              alt="第二種電気工事士 配線図"
+              className="max-h-[82vh] object-contain rounded shadow-2xl bg-white select-none pointer-events-auto"
+              draggable="false"
+            />
+          )}
         </div>
       </div>
 

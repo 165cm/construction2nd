@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playCombo, playClick, triggerHaptic } from '../utils/sound';
-import { getDisplayImageUrl } from '../utils/customCrops';
+import { cropKeyForDiagram } from '../utils/customCrops';
+import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
 
 
@@ -190,8 +191,9 @@ export default function QuizCard({
               onClick={() => setShowImageZoom(true)}
               className="bg-white rounded-xl p-2 cursor-pointer flex items-center justify-center border border-slate-600 shadow-inner overflow-hidden max-h-56"
             >
-              <img
-                src={getDisplayImageUrl(question.id, question.diagram)}
+              <CropImage
+                cropKey={cropKeyForDiagram(question.id, question.diagram)}
+                defaultPath={question.diagram}
                 alt="問題の図・写真"
                 className="max-h-52 object-contain"
               />
@@ -368,8 +370,9 @@ export default function QuizCard({
           className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4"
         >
           <div className="max-w-md w-full bg-white p-3 rounded-2xl shadow-2xl relative">
-            <img
-              src={getDisplayImageUrl(question.id, question.diagram)}
+            <CropImage
+              cropKey={cropKeyForDiagram(question.id, question.diagram)}
+              defaultPath={question.diagram}
               alt="拡大図"
               className="w-full object-contain max-h-[75vh]"
             />

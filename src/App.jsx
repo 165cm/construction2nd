@@ -14,6 +14,7 @@ import StatsModal from './components/StatsModal';
 import WiringDiagramModal from './components/WiringDiagramModal';
 import LevelUpModal from './components/LevelUpModal';
 import Round1CompleteModal from './components/Round1CompleteModal';
+import AttributionModal from './components/AttributionModal';
 import BottomNav from './components/BottomNav';
 import AdminCropEditor from './components/AdminCropEditor';
 
@@ -51,6 +52,7 @@ export default function App() {
   const [isWiringDiagramOpen, setIsWiringDiagramOpen] = useState(false);
   const [wiringHighlightMarker, setWiringHighlightMarker] = useState(null);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
+  const [isAttributionOpen, setIsAttributionOpen] = useState(false);
   const [levelUpData, setLevelUpData] = useState(null); // { oldLevel, newLevel }
 
   // Sound toggle handler
@@ -214,6 +216,7 @@ export default function App() {
             totalQuestions={questionsData.length}
             currentIndex={quizStep.index}
             quizStep={quizStep}
+            onOpenAttribution={() => setIsAttributionOpen(true)}
           />
         )}
 
@@ -225,6 +228,7 @@ export default function App() {
             onToggleBookmark={handleToggleBookmark}
             onOpenWiringDiagram={handleOpenWiringDiagram}
             onSwitchToQuick={() => setCurrentMode('quiz')}
+            onOpenAttribution={() => setIsAttributionOpen(true)}
           />
         )}
 
@@ -234,6 +238,7 @@ export default function App() {
             onOpenWiringDiagram={handleOpenWiringDiagram}
             onRecordExamResults={handleRecordExamResults}
             onGoToReview={() => setCurrentMode('review')}
+            onOpenAttribution={() => setIsAttributionOpen(true)}
           />
         )}
 
@@ -243,6 +248,7 @@ export default function App() {
             state={state}
             onSelectQuestion={handleSelectQuestion}
             onToggleBookmark={handleToggleBookmark}
+            onOpenAttribution={() => setIsAttributionOpen(true)}
           />
         )}
       </main>
@@ -270,6 +276,13 @@ export default function App() {
         allQuestions={questionsData}
         onResetProgress={handleResetProgress}
         onOpenAdmin={handleOpenAdmin}
+        onOpenAttribution={() => setIsAttributionOpen(true)}
+      />
+
+      {/* Attribution & Copyright Notice Modal */}
+      <AttributionModal
+        isOpen={isAttributionOpen}
+        onClose={() => setIsAttributionOpen(false)}
       />
 
       {/* Level Up Celebration Modal */}

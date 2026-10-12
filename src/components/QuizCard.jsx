@@ -20,7 +20,8 @@ export default function QuizCard({
   onOpenWiringDiagram,
   totalQuestions = 50,
   currentIndex = 0,
-  quizStep
+  quizStep,
+  onOpenAttribution
 }) {
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -543,6 +544,21 @@ export default function QuizCard({
           </div>
         </div>
       )}
+
+      {/* Attribution & Copyright Footer */}
+      <div className="mt-8 pt-4 border-t border-slate-800/80 text-center select-none">
+        <button
+          type="button"
+          onClick={() => { playClick(); onOpenAttribution?.(); }}
+          className="text-[10px] text-slate-500 hover:text-sky-400 inline-flex items-center gap-1 transition"
+        >
+          <span>出典: 一般財団法人 電気技術者試験センター 令和8年度上期（午前）</span>
+          <span className="underline ml-0.5 text-sky-500/80">著作権・留意事項</span>
+        </button>
+        <p className="text-[9px] text-slate-600 mt-0.5">
+          ※ 電気工事士試験制度の趣旨に基づく学習教育目的利用・表示レイアウト最適化
+        </p>
+      </div>
     </div>
   );
 }

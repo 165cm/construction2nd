@@ -8,7 +8,8 @@ export default function ReviewMode({
   onAnswer,
   onToggleBookmark,
   onOpenWiringDiagram,
-  onSwitchToQuick
+  onSwitchToQuick,
+  onOpenAttribution
 }) {
   const [filterType, setFilterType] = useState('review'); // 'review' | 'bookmark' | 'unmastered'
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -169,6 +170,7 @@ export default function ReviewMode({
             onOpenWiringDiagram={onOpenWiringDiagram}
             totalQuestions={targetQuestions.length}
             currentIndex={currentIndex}
+            onOpenAttribution={onOpenAttribution}
           />
         </div>
       )}

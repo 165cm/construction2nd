@@ -12,7 +12,8 @@ export default function StatsModal({
   state,
   allQuestions,
   onResetProgress,
-  onOpenAdmin
+  onOpenAdmin,
+  onOpenAttribution
 }) {
   const [activeTab, setActiveTab] = useState('stats'); // 'stats' | 'cheatsheets'
 
@@ -305,8 +306,19 @@ export default function StatsModal({
                 </div>
               </div>
 
-              {/* Admin Tools & Reset */}
+              {/* Admin Tools & Legal Notice */}
               <div className="pt-3 border-t border-slate-700/60 flex flex-col gap-2">
+                {onOpenAttribution && (
+                  <button
+                    onClick={() => {
+                      onOpenAttribution();
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition"
+                  >
+                    <span>⚖️ 著作権・過去問の出典について</span>
+                  </button>
+                )}
+
                 {onOpenAdmin && (
                   <button
                     onClick={() => {

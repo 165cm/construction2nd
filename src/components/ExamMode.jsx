@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sound';
+import { getAssetUrl } from '../utils/asset';
 
 export default function ExamMode({
   allQuestions,
@@ -326,7 +327,7 @@ export default function ExamMode({
 
         {activeQ.diagram && (
           <div className="bg-white rounded-xl p-2 my-2 flex items-center justify-center max-h-52 overflow-hidden border border-slate-600">
-            <img src={activeQ.diagram} alt="問題図" className="max-h-48 object-contain" />
+            <img src={getAssetUrl(activeQ.diagram)} alt="問題図" className="max-h-48 object-contain" />
           </div>
         )}
       </div>

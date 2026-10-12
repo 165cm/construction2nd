@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ZoomIn, ZoomOut, Maximize2, RotateCcw } from 'lucide-react';
+import { getAssetUrl } from '../utils/asset';
 
 export default function WiringDiagramModal({ isOpen, onClose, highlightMarker }) {
   const [scale, setScale] = useState(1);
@@ -8,9 +9,10 @@ export default function WiringDiagramModal({ isOpen, onClose, highlightMarker })
   if (!isOpen) return null;
 
   const getImageSrc = () => {
-    if (activeTab === 'floor') return '/crops/floor_plan.png';
-    if (activeTab === 'panel') return '/crops/panel_schedule.png';
-    return '/pages/page_15.png';
+    let path = '/pages/page_15.png';
+    if (activeTab === 'floor') path = '/crops/floor_plan.png';
+    if (activeTab === 'panel') path = '/crops/panel_schedule.png';
+    return getAssetUrl(path);
   };
 
   return (

@@ -7,13 +7,11 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| Antigravity | feat/question-editor-quick-crop-and-preview | ②原本対照表での簡易トリミング機能（配線図等でのざっくり範囲調整）および回答一覧・正解確認プレビューの実装 | `src/components/QuestionEditor.jsx`, `src/utils/customCrops.js` |
+| Antigravity | feat/question-editor-quick-crop-and-preview | ②原本対照表での簡易トリミング機能および回答一覧・正解確認プレビューの実装（PR #22 作成完了） | `src/components/QuestionEditor.jsx`, `src/utils/customCrops.js` |
 
 ## 次のタスク（上から優先）
-1. ②原本対照表での原本PDF上ドラッグによる簡易トリミング操作と保存機能の実装
-2. 問題文＋回答一覧（イ・ロ・ハ・ニ）正解ハイライト付きプレビュー表示の実装
-3. ビルド検証・動作テスト
-4. ユーザーへの「PR #22 を本番公開してよいですか？」の確認
+1. ユーザーへの「PR #22 を本番公開してよいですか？」の確認
+2. 承認後に PR #22 をマージしてGitHub Pagesへ自動デプロイ
 
 ## 最近終わったこと（新しい順）
 - PR #21 マージ＆本番デプロイ完了（ユーザー調整済みの画像トリミング座標［全73件：令和8年上期・令和7年下期・上期の問31〜50配線図P15切り抜き含む］を共有設定ファイル cropOverrides.json に本番反映）

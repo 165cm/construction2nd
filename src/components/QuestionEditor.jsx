@@ -12,6 +12,7 @@ import {
   exportAllOverrides, 
   importQuestionOverrides 
 } from '../utils/objections';
+import { getAssetUrl } from '../utils/asset';
 
 export default function QuestionEditor() {
   const [selectedExamId, setSelectedExamId] = useState('r8_1');
@@ -20,6 +21,7 @@ export default function QuestionEditor() {
   const [copiedNotice, setCopiedNotice] = useState(false);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
   const [filterOnlyModified, setFilterOnlyModified] = useState(false);
+  const [customPageNum, setCustomPageNum] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const fileInputRef = useRef(null);
 
@@ -35,6 +37,11 @@ export default function QuestionEditor() {
   // 現在の問題
   const currentQuestion = rawQuestions[selectedQuestionIndex] || rawQuestions[0];
   const questionId = currentQuestion?.id;
+
+  // 問題や試験が変わったら、手動ページ切り替えをリセット
+  useEffect(() => {
+    setCustomPageNum(null);
+  }, [selectedExamId, selectedQuestionIndex]);
 
   // フォーム編集用のローカルステート
   const [formData, setFormData] = useState({
@@ -161,8 +168,11 @@ export default function QuestionEditor() {
     e.target.value = '';
   };
 
-  // 原本画像パスの算出
-  const originalPdfPageUrl = currentQuestion?.fullPage || `${examMeta.pageDir}/page_5.png`;
+  // 原本画像パスの算出（問題デフォルトまたは手動切り替えページ）
+  const defaultPageMatch = currentQuestion?.fullPage?.match(/page_(\d+)\.png/);
+  const defaultPageNum = defaultPageMatch ? parseInt(defaultPageMatch[1], 10) : 5;
+  const activePageNum = customPageNum !== null ? customPageNum : defaultPageNum;
+  const originalPdfPageUrl = `${examMeta.pageDir}/page_${activePageNum}.png`;
 
   // 表示フィルタ付き問題一覧
   const filteredQuestionIndices = useMemo(() => {
@@ -303,19 +313,61 @@ export default function QuestionEditor() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span className="truncate">原本ページ: {originalPdfPageUrl}</span>
+          <div className="flex items-center justify-between flex-wrap gap-2 text-xs text-slate-400 bg-slate-950/80 p-2 rounded-xl border border-slate-800">
+            {/* ページめくりコントロール */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-300">原本頁:</span>
+              <button
+                onClick={() => setCustomPageNum(Math.max(1, activePageNum - 1))}
+                disabled={activePageNum <= 1}
+                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-xs font-bold"
+                title="前の原本ページへ"
+              >
+                ◀
+              </button>
+              <span className="font-mono text-xs font-black text-sky-400 px-1 bg-slate-900 border border-slate-700 rounded">
+                P.{activePageNum}
+              </span>
+              <button
+                onClick={() => setCustomPageNum(Math.min(16, activePageNum + 1))}
+                disabled={activePageNum >= 16}
+                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-xs font-bold"
+                title="次の原本ページへ"
+              >
+                ▶
+              </button>
+              <button
+                onClick={() => setCustomPageNum(examMeta.floorPlanPage || 15)}
+                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-amber-300 border border-amber-500/30"
+                title="配線図原本ページへジャンプ"
+              >
+                配線図(P15)
+              </button>
+              {customPageNum !== null && customPageNum !== defaultPageNum && (
+                <button
+                  onClick={() => setCustomPageNum(null)}
+                  className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-slate-400"
+                  title="この問題のデフォルトページに戻す"
+                >
+                  問{currentQuestion?.id}の頁
+                </button>
+              )}
+            </div>
+
+            {/* ズームコントロール */}
             <div className="flex items-center gap-1">
               <button
-                onClick={() => setZoomLevel(prev => Math.max(0.75, prev - 0.25))}
+                onClick={() => setZoomLevel(prev => Math.max(0.75, Math.round((prev - 0.25) * 100) / 100))}
                 className="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-xs font-bold"
+                title="縮小"
               >
                 -
               </button>
               <span className="font-mono text-[10px] w-8 text-center">{Math.round(zoomLevel * 100)}%</span>
               <button
-                onClick={() => setZoomLevel(prev => Math.min(2.5, prev + 0.25))}
+                onClick={() => setZoomLevel(prev => Math.min(3, Math.round((prev + 0.25) * 100) / 100))}
                 className="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-xs font-bold"
+                title="拡大"
               >
                 +
               </button>
@@ -329,15 +381,19 @@ export default function QuestionEditor() {
           </div>
 
           {/* 原本画像コンテナ */}
-          <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-auto max-h-[70vh] flex items-start justify-center p-2 relative">
+          <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-auto max-h-[70vh] min-h-[360px] flex items-start justify-center p-2 relative shadow-inner">
             <img
-              src={originalPdfPageUrl}
+              src={getAssetUrl(originalPdfPageUrl)}
               alt={`原本 問${currentQuestion?.id}`}
-              style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.1s ease-out' }}
+              style={{ 
+                transform: `scale(${zoomLevel})`, 
+                transformOrigin: 'top center', 
+                transition: 'transform 0.15s ease-out' 
+              }}
               className="max-w-full rounded shadow object-contain"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = '/pages/page_5.png'; // フォールバック
+                e.target.src = getAssetUrl('/pages/page_5.png'); // ベースURL付きフォールバック
               }}
             />
           </div>

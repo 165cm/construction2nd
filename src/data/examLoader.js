@@ -67,7 +67,7 @@ const CATEGORY_ALIASES = {
   '配電理論・配線設計': '配線設計・機器',
   '配線器具・材料・工具': '材料・工具'
 };
-const normalizeCategory = (category) => CATEGORY_ALIASES[category] || category;
+export const normalizeCategory = (category) => CATEGORY_ALIASES[category] || category;
 
 export function getExamMeta(examId) {
   return EXAM_LIST.find(e => e.id === examId) || EXAM_LIST[0];

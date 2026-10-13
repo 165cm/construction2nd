@@ -26,6 +26,20 @@ export const cropKeyForDiagram = (questionId, diagramPath, examId) => {
 const STORAGE_KEY = 'denkou_custom_crops_v1';
 
 export const SHARED_OVERRIDES_ENDPOINT = '/__admin/crop-overrides';
+export const CAN_WRITE_SHARED = import.meta.env.DEV;
+
+export const writeSharedOverrides = async (updates = {}, removals = []) => {
+  const res = await fetch(SHARED_OVERRIDES_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ updates, removals })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || `書き込みに失敗しました (HTTP ${res.status})`);
+  }
+  return data;
+};
 
 // 端末内の保存データを取得（巨大なdataUrlが含まれていれば自動クリーンアップして容量を解放）
 export const getCustomCrops = () => {

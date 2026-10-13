@@ -27,27 +27,14 @@ import {
   clearAllCustomCrops,
   importCustomCrops,
   exportAllCropsData,
-  SHARED_OVERRIDES_ENDPOINT
+  SHARED_OVERRIDES_ENDPOINT,
+  CAN_WRITE_SHARED,
+  writeSharedOverrides
 } from '../utils/customCrops';
 import { getAssetUrl } from '../utils/asset';
 import { playClick, triggerHaptic } from '../utils/sound';
 
-// 手元の開発サーバー（npm run dev）で開いているときだけ、共有ファイルへ直接書き込める
-const CAN_WRITE_SHARED = import.meta.env.DEV;
 const SELECTED_KEY_STORAGE = 'denkou_admin_selected_key';
-
-const writeSharedOverrides = async (updates = {}, removals = []) => {
-  const res = await fetch(SHARED_OVERRIDES_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ updates, removals })
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.ok) {
-    throw new Error(data.error || `書き込みに失敗しました (HTTP ${res.status})`);
-  }
-  return data;
-};
 
 export default function AdminCropEditor({ onBack, isEmbedded = false }) {
   const [selectedExamId, setSelectedExamId] = useState('r8_1');

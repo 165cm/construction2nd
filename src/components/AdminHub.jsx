@@ -212,7 +212,9 @@ export default function AdminHub({ onBack }) {
         )}
 
         {activeTab === 'question' && (
-          <QuestionEditor />
+          <QuestionEditor onOpenCropEditor={(examId, key) => {
+            setActiveTab('crop');
+          }} />
         )}
 
         {activeTab === 'objection' && (

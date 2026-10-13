@@ -4,7 +4,8 @@ import { EXAM_LIST } from '../data/examList';
 import { getExamQuestions, getSharedQuestionOverrides } from '../data/examLoader';
 import { getCheatsheetsForQuestion } from '../data/cheatsheets';
 import { cropKeyForDiagram, getActiveCropCoords } from '../utils/customCrops';
-import { getQuestionOverrides, getObjections } from '../utils/objections';
+import { getQuestionOverrides } from '../utils/objections';
+import { getResolvedObjections } from '../utils/objectionExams';
 import { getAssetUrl } from '../utils/asset';
 
 const CHOICE_IDS = ['イ', 'ロ', 'ハ', 'ニ'];
@@ -101,7 +102,8 @@ export default function QuestionChecklist({ onOpenEditor }) {
 
   const localOverrides = getQuestionOverrides()[examId] || {};
   const sharedOverrides = getSharedQuestionOverrides()[examId] || {};
-  const pendingObjections = getObjections().filter(o => o.status === 'pending' && o.examId === examId);
+  // 年度を取り違えて保存された古い報告も、正しい年度に読み替えてから数える
+  const pendingObjections = getResolvedObjections().filter(o => o.status === 'pending' && o.examId === examId);
 
   const rows = questions.map((q) => {
     const result = checkQuestion(q, examId, missingImages);

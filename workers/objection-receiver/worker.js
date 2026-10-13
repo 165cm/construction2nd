@@ -53,8 +53,9 @@ const sanitize = (value, max) =>
 // 1行で載せる値（改行を空白にする）
 const oneLine = (value, max) => sanitize(value, max).replace(/\n+/g, ' ');
 
-// 引用ブロックとして載せる（各行の先頭に > を付け、引用の外に出られないようにする）
-const quote = (text) => (text ? text.split('\n').map((l) => `> ${l}`).join('\n') : '> （コメントなし）');
+// 引用ブロックとして載せる（各行の先頭に > を付け、引用の外に出られないようにする）。
+// 行と行の間に空の引用行をはさみ、GitHub でも1行ずつ表示されるようにする
+const quote = (text) => (text ? text.split('\n').map((l) => `> ${l}`).join('\n>\n') : '> （コメントなし）');
 
 // ロボット確認の結果。失敗した時は Cloudflare が返す理由（例: invalid-input-secret）も返す
 const verifyTurnstile = async (token, ip, env) => {
@@ -76,7 +77,7 @@ const buildIssue = (r) => {
   const comment = sanitize(r.comment, MAX_COMMENT).trim();
   const snap = r.questionSnapshot || {};
   const choices = Array.isArray(snap.choices)
-    ? snap.choices.slice(0, 4).map((c) => `> ${oneLine(c?.id, 2)}：${oneLine(c?.text, 200)}`).join('\n')
+    ? snap.choices.slice(0, 4).map((c) => `> - ${oneLine(c?.id, 2)}：${oneLine(c?.text, 200)}`).join('\n')
     : '';
 
   const title = `【異議あり】${examName} 問${Number.isFinite(number) ? number : '?'}：${categoryLabel}`;

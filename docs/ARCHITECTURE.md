@@ -76,3 +76,14 @@
 - `src/data/questionOverrides.json` … 全端末に反映する問題文の修正。`{ 年度ID: { 問題番号: { 変えた項目だけ } } }`。書き換えてよい項目は `question`・`choices`・`answer`・`explanation`・`keyPoint`・`category`・`categoryTag`（`examLoader.js` の `QUESTION_TEXT_FIELDS`）
 - 問題データの重なり順：元データ（`src/data/exams/*.json`）→ 共有ファイル（`cropOverrides.json` の `showImage`、`questionOverrides.json`）→ そのブラウザだけの修正（LocalStorage `denkou2_question_overrides_v1`）
 - 反映用データ・未反映の件数は `src/utils/publishSync.js` が作る。保存していない変更は `src/utils/unsavedGuard.js` で見張り、問題・年度・タブを移る時やページを閉じる時に確認を出す
+
+## 「異議あり」の報告の届け方（方式A）
+
+```
+アプリの「⚡️異議あり」 → Cloudflare Turnstile（ロボット確認） → Cloudflare Workers（workers/objection-receiver/worker.js） → GitHub の issue（ラベル「異議あり」と年度ID）
+```
+
+- 送信先（Worker の URL）と Turnstile のサイトキーは `src/config/objectionReport.js` に書く（公開してよい値）。空なら送信せず、その端末にだけ保存する
+- 秘密の値（GitHub トークン・Turnstile シークレット）は Cloudflare の Worker の設定にだけ置く。準備手順は `workers/objection-receiver/README.md`
+- Worker は、許可したサイト（`ALLOWED_ORIGIN`）からの送信だけを受け付け、Turnstile を確かめてから issue を作る。利用者の文字は @ や # を無効化して載せる
+- 報告はその端末の LocalStorage（`denkou2_objections_v1`）にも残る（送信できたら issue 番号を記録）

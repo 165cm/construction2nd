@@ -7,7 +7,6 @@ export const EXAM_LIST = [
     year: '令和8年',
     season: '上期',
     examDate: '2026年5月24日実施',
-    session: '午前',
     questionCount: 50,
     isFree: true,
     pageDir: '/pages',

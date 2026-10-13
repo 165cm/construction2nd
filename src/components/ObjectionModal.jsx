@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Send, Sparkles, CheckCircle2, MessageSquare, AlertCircle } from 'lucide-react';
-import { OBJECTION_CATEGORIES, saveObjection } from '../utils/objections';
+import { OBJECTION_CATEGORIES, saveObjection, updateObjection, sendObjectionReport } from '../utils/objections';
+import { isObjectionSendingEnabled, TURNSTILE_SITE_KEY } from '../config/objectionReport';
+import { loadTurnstile } from '../utils/turnstile';
 import { playClick, triggerHaptic } from '../utils/sound';
 
 export default function ObjectionModal({
@@ -12,17 +14,51 @@ export default function ObjectionModal({
   const [selectedCategory, setSelectedCategory] = useState('choice_text');
   const [comment, setComment] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  // 送信の状態: 'idle' | 'sending' | 'sent'（GitHub に登録できた）| 'local'（この端末だけに保存）| 'error'
+  const [sendStatus, setSendStatus] = useState('idle');
+  const [turnstileToken, setTurnstileToken] = useState(null);
+  const [turnstileError, setTurnstileError] = useState(false);
+  const turnstileRef = useRef(null);
+  const sendingEnabled = isObjectionSendingEnabled();
+
+  // ロボット確認（Turnstile）を表示する。多くの場合は操作不要で自動的に終わる
+  useEffect(() => {
+    if (!isOpen || !sendingEnabled || isSubmitted) return undefined;
+    let widgetId = null;
+    let cancelled = false;
+    setTurnstileToken(null);
+    setTurnstileError(false);
+    loadTurnstile()
+      .then((ts) => {
+        if (cancelled || !turnstileRef.current) return;
+        widgetId = ts.render(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          size: 'flexible',
+          theme: 'dark',
+          language: 'ja',
+          callback: (token) => setTurnstileToken(token),
+          'expired-callback': () => setTurnstileToken(null),
+          'error-callback': () => setTurnstileError(true)
+        });
+      })
+      .catch(() => setTurnstileError(true));
+    return () => {
+      cancelled = true;
+      if (widgetId !== null && window.turnstile) window.turnstile.remove(widgetId);
+    };
+  }, [isOpen, sendingEnabled, isSubmitted]);
 
   if (!isOpen || !question) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (sendStatus === 'sending') return;
     playClick();
     triggerHaptic('success');
 
     const catObj = OBJECTION_CATEGORIES.find(c => c.id === selectedCategory);
 
-    saveObjection({
+    const saved = saveObjection({
       // 問題データ自身が持つ年度を最優先（画面から渡される年度情報が無くても取り違えない）
       examId: question.examId || currentExamMeta?.id || 'r8_1',
       examName: question.examName || currentExamMeta?.name || '令和8年度 上期',
@@ -39,19 +75,38 @@ export default function ObjectionModal({
       }
     });
 
+    // 送信先が設定されていれば、受付窓口へ送って GitHub の issue にする（失敗してもこの端末には保存済み）
+    let status = 'local';
+    if (sendingEnabled && saved) {
+      setSendStatus('sending');
+      try {
+        const result = await sendObjectionReport(saved, turnstileToken);
+        updateObjection(saved.id, { sentAt: new Date().toISOString(), issueNumber: result.number });
+        status = 'sent';
+      } catch (err) {
+        console.error('Failed to send objection:', err);
+        status = 'error';
+      }
+    }
+    setSendStatus(status);
     setIsSubmitted(true);
     setTimeout(() => {
       setIsSubmitted(false);
+      setSendStatus('idle');
       setComment('');
       onClose();
-    }, 2200);
+    }, status === 'error' ? 4000 : 2200);
   };
 
   const handleClose = () => {
     setIsSubmitted(false);
+    setSendStatus('idle');
     setComment('');
     onClose();
   };
+
+  // 送信ボタンを押せるか（送信先があるときは、ロボット確認が済んでから）
+  const canSubmit = sendStatus !== 'sending' && (!sendingEnabled || Boolean(turnstileToken) || turnstileError);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-md animate-pop">
@@ -84,11 +139,12 @@ export default function ObjectionModal({
               ⚖️
             </div>
             <h4 className="font-black text-base text-white mb-1">
-              異議申し立てを受理しました！
+              {sendStatus === 'error' ? '送信できませんでした' : '異議申し立てを受理しました！'}
             </h4>
             <p className="text-xs text-slate-300 leading-relaxed max-w-xs mx-auto">
-              ツッコミありがとうございます！<br />
-              AIと管理者が原本と照合して精査し、アプリへ即座に反映します⚡️
+              {sendStatus === 'sent' && (<>ツッコミありがとうございます！<br />原本と照らし合わせて確認し、必要があれば修正します⚡️</>)}
+              {sendStatus === 'local' && (<>ツッコミありがとうございます！<br />この端末に記録しました。</>)}
+              {sendStatus === 'error' && (<>通信がうまくいきませんでした。時間をおいてもう一度お試しください。<br />（内容はこの端末に記録しました）</>)}
             </p>
           </div>
         ) : (
@@ -136,12 +192,28 @@ export default function ObjectionModal({
               />
             </div>
 
+            {sendingEnabled && (
+              <div className="space-y-1">
+                <div ref={turnstileRef} className="min-h-[1px]" />
+                <p className="text-[10px] text-slate-500 leading-snug">
+                  ※ 報告は修正のため公開の場（GitHub）に記録されます。お名前など個人情報は書かないでください。
+                </p>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-950/50 flex items-center justify-center gap-1.5 active:scale-95 transition"
+              disabled={!canSubmit}
+              className="w-full min-h-[44px] py-3 rounded-xl disabled:opacity-50 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-950/50 flex items-center justify-center gap-1.5 active:scale-95 transition"
             >
-              <span>⚡️ 異議を申し立てる！（送信）</span>
+              <span>
+                {sendStatus === 'sending'
+                  ? '送信中…'
+                  : sendingEnabled && !turnstileToken && !turnstileError
+                    ? 'ロボット確認中…'
+                    : '⚡️ 異議を申し立てる！（送信）'}
+              </span>
             </button>
           </form>
         )}

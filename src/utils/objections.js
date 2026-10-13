@@ -1,4 +1,5 @@
 // 異議申し立て（ユーザー報告＆AI修正提案）データ管理
+import { OBJECTION_ENDPOINT } from '../config/objectionReport';
 const OBJECTIONS_STORAGE_KEY = 'denkou2_objections_v1';
 const QUESTION_OVERRIDES_STORAGE_KEY = 'denkou2_question_overrides_v1';
 
@@ -214,4 +215,24 @@ export const applyOverridesToQuestions = (examId, questionsList) => {
     }
     return q;
   });
+};
+
+// 受付窓口（Cloudflare Workers）へ送り、GitHub の issue として登録する。成功なら { ok: true, number }
+export const sendObjectionReport = async (objection, turnstileToken) => {
+  const res = await fetch(OBJECTION_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      examId: objection.examId,
+      examName: objection.examName,
+      questionNumber: objection.questionNumber,
+      category: objection.category,
+      comment: objection.userComment || '',
+      questionSnapshot: objection.questionSnapshot,
+      turnstileToken
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
 };

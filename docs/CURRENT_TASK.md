@@ -10,9 +10,8 @@
 | Antigravity | feat/q31-floor-plan-crop-page | 問31以降の画像を問題文ではなく配線図ページ（P15）からトリミングするよう修正 | `src/data/examLoader.js`, `src/components/AdminCropEditor.jsx`, `src/data/cropsConfig.js`, `src/data/cropOverrides.json` |
 
 ## 次のタスク（上から優先）
-1. 問31以降のソースページを配線図（P15）に統一し、古い問題文ページ（P11〜13）の初期設定・保存データを刷新
-2. AdminCropEditor で問31以降選択時に配線図（P15）を自動表示＆案内バナー配備
-3. 動作確認およびPR作成、ユーザーへの本番公開確認
+1. ユーザーへの「PR #20 を本番公開してよいですか？」の確認
+2. 承認後にPR #20 をマージしてGitHub Pagesへの自動反映
 
 ## 最近終わったこと（新しい順）
 - PR #19 マージ＆本番デプロイ完了（トリミング一覧で画像不要な問題を自動スキップ・除外＆問題文エディタからの画像あり設定・自動追加連動の実装）

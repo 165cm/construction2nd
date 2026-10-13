@@ -44,6 +44,14 @@ const getQuestionTextPage = (q, floorPlanPageNum) => {
   return raw || 5;
 };
 
+// 年度によって分野名の書き方が違うため、アプリ共通の5分野にそろえる
+// （そろえないと、分野別の成績・問題一覧の分野絞り込み・弱点特訓の分野絞り込みで0件になる）
+const CATEGORY_ALIASES = {
+  '配電理論・配線設計': '配線設計・機器',
+  '配線器具・材料・工具': '材料・工具'
+};
+const normalizeCategory = (category) => CATEGORY_ALIASES[category] || category;
+
 export function getExamMeta(examId) {
   return EXAM_LIST.find(e => e.id === examId) || EXAM_LIST[0];
 }
@@ -62,6 +70,7 @@ export function getExamQuestions(examId) {
       // 問題文が載っている原本ページ（配線図問題でも、問題文側の図や写真を切り抜くときに使う）
       questionPage: getQuestionTextPage(q, floorPlanPageNum),
       ...applySharedImageSetting(meta.id, q),
+      category: normalizeCategory(q.category),
       examId: meta.id,
       examName: meta.name,
       globalId,

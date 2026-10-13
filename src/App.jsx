@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
+import { EXAM_LIST } from './data/examList';
 import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition, getExamView, recordKey } from './utils/storage';
 import { getInitialResumeQuestion, determineNextQuizQuestion } from './utils/spacedRepetition';
 import { isSoundEnabled, setSoundEnabled, playClick } from './utils/sound';
@@ -33,6 +34,13 @@ export default function App() {
     () => getExamQuestions(currentExamId),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentExamId, overridesVersion]
+  );
+
+  // 全年度の問題（弱点特訓の「全年度まとめて」で使う）
+  const allExamQuestions = useMemo(
+    () => EXAM_LIST.flatMap(e => getExamQuestions(e.id)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [overridesVersion]
   );
 
   const [state, setState] = useState(() => loadState());
@@ -74,6 +82,7 @@ export default function App() {
   });
 
   const [showRound1CompleteModal, setShowRound1CompleteModal] = useState(false);
+  const [round1ExamId, setRound1ExamId] = useState(null);
   const [isExamSelectOpen, setIsExamSelectOpen] = useState(false);
 
   const handleOpenAdmin = () => {
@@ -84,6 +93,7 @@ export default function App() {
   // Modals state
   const [isWiringDiagramOpen, setIsWiringDiagramOpen] = useState(false);
   const [wiringHighlightMarker, setWiringHighlightMarker] = useState(null);
+  const [wiringExamId, setWiringExamId] = useState(null);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isAttributionOpen, setIsAttributionOpen] = useState(false);
   const [levelUpData, setLevelUpData] = useState(null); // { oldLevel, newLevel }
@@ -96,20 +106,22 @@ export default function App() {
   };
 
   // Answer handler
-  const handleAnswer = ({ questionId, isCorrect, timeSpentSec, category }) => {
+  // examId は解いた問題の年度（弱点特訓の「全年度まとめて」では選択中の年度と違うことがある）
+  const handleAnswer = ({ examId = currentExamId, questionId, isCorrect, timeSpentSec, category }) => {
     const result = recordAnswer(state, {
-      examId: currentExamId,
+      examId,
       questionId,
       isCorrect,
       timeSpentSec,
       category,
-      totalQuestions: questionsData.length
+      totalQuestions: getExamMeta(examId).questionCount || questionsData.length
     });
 
     setState(result.nextState);
 
     // Milestone celebration: User completed all 50 questions for the first time!
     if (result.didCompleteRound1) {
+      setRound1ExamId(examId);
       setShowRound1CompleteModal(true);
       confetti({
         particleCount: 75,
@@ -155,13 +167,14 @@ export default function App() {
   };
 
   // Bookmark toggle
-  const handleToggleBookmark = (questionId) => {
-    setState(prev => toggleBookmark(prev, recordKey(currentExamId, questionId)));
+  const handleToggleBookmark = (questionId, examId = currentExamId) => {
+    setState(prev => toggleBookmark(prev, recordKey(examId, questionId)));
   };
 
   // Wiring Diagram Open
-  const handleOpenWiringDiagram = (marker = null) => {
+  const handleOpenWiringDiagram = (marker = null, examId = currentExamId) => {
     setWiringHighlightMarker(marker);
+    setWiringExamId(examId);
     setIsWiringDiagramOpen(true);
   };
 
@@ -298,9 +311,9 @@ export default function App() {
         {currentMode === 'review' && (
           <ReviewMode
             key={currentExamId}
-            allQuestions={questionsData}
-            state={examState}
-            currentExamMeta={currentExamMeta}
+            allExamQuestions={allExamQuestions}
+            fullState={state}
+            currentExamId={currentExamId}
             onAnswer={handleAnswer}
             onToggleBookmark={handleToggleBookmark}
             onOpenWiringDiagram={handleOpenWiringDiagram}
@@ -347,7 +360,7 @@ export default function App() {
         isOpen={isWiringDiagramOpen}
         onClose={() => setIsWiringDiagramOpen(false)}
         highlightMarker={wiringHighlightMarker}
-        currentExamMeta={currentExamMeta}
+        currentExamMeta={getExamMeta(wiringExamId || currentExamId)}
       />
 
       {/* Stats and Achievements Modal */}
@@ -390,7 +403,7 @@ export default function App() {
         isOpen={showRound1CompleteModal}
         onClose={() => setShowRound1CompleteModal(false)}
         reviewCount={reviewQuestionsCount}
-        examName={currentExamMeta?.name}
+        examName={getExamMeta(round1ExamId || currentExamId)?.name}
         totalQuestions={questionsData.length}
       />
     </div>

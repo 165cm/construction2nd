@@ -17,7 +17,7 @@ import Round1CompleteModal from './components/Round1CompleteModal';
 import AttributionModal from './components/AttributionModal';
 import ExamSelectModal from './components/ExamSelectModal';
 import BottomNav from './components/BottomNav';
-import AdminCropEditor from './components/AdminCropEditor';
+import AdminHub from './components/AdminHub';
 
 export default function App() {
   const [currentExamId, setCurrentExamId] = useState(() => loadCurrentExamId());
@@ -32,6 +32,19 @@ export default function App() {
     }
     return 'quiz';
   }); // 'quiz' | 'review' | 'exam' | 'list' | 'admin'
+
+  // URLハッシュ（#admin）の同期
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#admin') {
+        setCurrentMode('admin');
+      } else if (currentMode === 'admin') {
+        setCurrentMode('quiz');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [currentMode]);
 
   // Quiz position state: auto-resumes where user left off
   const [quizStep, setQuizStep] = useState(() => {
@@ -210,7 +223,16 @@ export default function App() {
   const reviewQuestionsCount = questionsData.filter(q => state.records[q.id]?.status === 'review' || (state.records[q.id]?.wrong > 0 && state.records[q.id]?.status !== 'mastered')).length;
 
   if (currentMode === 'admin') {
-    return <AdminCropEditor onBack={() => setCurrentMode('quiz')} />;
+    return (
+      <AdminHub 
+        onBack={() => {
+          setCurrentMode('quiz');
+          if (typeof window !== 'undefined' && window.location.hash === '#admin') {
+            window.history.pushState('', document.title, window.location.pathname + window.location.search);
+          }
+        }} 
+      />
+    );
   }
 
   return (
@@ -242,6 +264,7 @@ export default function App() {
             currentIndex={quizStep.index}
             quizStep={quizStep}
             onOpenAttribution={() => setIsAttributionOpen(true)}
+            currentExamMeta={currentExamMeta}
           />
         )}
 

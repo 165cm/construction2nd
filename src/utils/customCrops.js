@@ -20,10 +20,28 @@ const STORAGE_KEY = 'denkou_custom_crops_v1';
 
 export const SHARED_OVERRIDES_ENDPOINT = '/__admin/crop-overrides';
 
+// 端末内の保存データを取得（巨大なdataUrlが含まれていれば自動クリーンアップして容量を解放）
 export const getCustomCrops = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    let needClean = false;
+    // クリーンアップ: dataUrl が残っていれば削除して coords のみ保持
+    Object.keys(parsed).forEach((k) => {
+      if (parsed[k]?.dataUrl) {
+        delete parsed[k].dataUrl;
+        needClean = true;
+      }
+    });
+    if (needClean) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      } catch (e) {
+        console.warn('Could not resave cleaned crops:', e);
+      }
+    }
+    return parsed;
   } catch (e) {
     console.error('Failed to load custom crops:', e);
     return {};
@@ -32,17 +50,85 @@ export const getCustomCrops = () => {
 
 export const getSharedOverrides = () => sharedOverrides || {};
 
+// 座標データのみを保存（dataUrlを保存しないため、LocalStorage容量制限5MBに絶対に引っかからない）
 export const saveCustomCrop = (key, cropData) => {
   try {
     const crops = getCustomCrops();
-    crops[key] = cropData;
+    const coords = cropData?.coords || (cropData?.page ? cropData : null);
+    if (!coords) return false;
+
+    // dataUrlは保存せず座標のみ保持（1問あたり50バイト・250問で12KBの超軽量）
+    crops[String(key)] = {
+      coords: {
+        page: coords.page,
+        x: Math.round(coords.x),
+        y: Math.round(coords.y),
+        w: Math.round(coords.w),
+        h: Math.round(coords.h),
+        label: coords.label || `問${key}`
+      }
+    };
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(crops));
     window.dispatchEvent(new Event('custom-crops-updated'));
     return true;
   } catch (e) {
-    console.error('Failed to save custom crop (quota or storage error):', e);
+    console.error('Failed to save custom crop:', e);
     return false;
   }
+};
+
+// JSONバックアップをインポート（復元）
+export const importCustomCrops = (jsonData) => {
+  try {
+    const target = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+    const current = getCustomCrops();
+    Object.keys(target).forEach((k) => {
+      const item = target[k];
+      const coords = item.coords || item;
+      if (coords?.page !== undefined) {
+        current[String(k)] = {
+          coords: {
+            page: coords.page,
+            x: Math.round(coords.x),
+            y: Math.round(coords.y),
+            w: Math.round(coords.w),
+            h: Math.round(coords.h),
+            label: coords.label || `問${k}`
+          }
+        };
+      }
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    window.dispatchEvent(new Event('custom-crops-updated'));
+    return { success: true, count: Object.keys(target).length };
+  } catch (e) {
+    console.error('Failed to import custom crops:', e);
+    return { success: false, error: e.message };
+  }
+};
+
+// 全トリミング座標をJSONとしてエクスポート（共有データ＋ローカル調整データの完全マージ）
+export const exportAllCropsData = () => {
+  const merged = { ...getSharedOverrides() };
+  const custom = getCustomCrops();
+  Object.keys(custom).forEach((k) => {
+    if (custom[k]?.coords) {
+      merged[k] = custom[k].coords;
+    }
+  });
+  return JSON.stringify(merged, null, 2);
+};
+
+export const getCustomCropsCount = () => {
+  const merged = { ...getSharedOverrides() };
+  const custom = getCustomCrops();
+  Object.keys(custom).forEach((k) => {
+    if (custom[k]?.coords) {
+      merged[k] = custom[k].coords;
+    }
+  });
+  return Object.keys(merged).length;
 };
 
 export const resetCustomCrop = (key) => {
@@ -69,20 +155,8 @@ export const clearAllCustomCrops = () => {
   }
 };
 
-// この端末で保存した切り抜き画像（dataUrl）。無ければ null
-export const getLocalCropDataUrl = (key) => {
-  try {
-    const custom = getCustomCrops();
-    const entry = custom[String(key)];
-    // Filters out empty/corrupt 1x1 dataUrls
-    if (entry?.dataUrl && entry.dataUrl.length > 500) {
-      return entry.dataUrl;
-    }
-  } catch (e) {
-    console.error('Error reading local crop:', e);
-  }
-  return null;
-};
+// この端末で保存した切り抜き画像。無ければ null
+export const getLocalCropDataUrl = () => null; // dataUrlは保持せず動的レンダリングまたは共有座標を使用
 
 // 共有ファイルにある座標。無ければ null
 export const getSharedCropCoords = (key) => {
@@ -91,6 +165,20 @@ export const getSharedCropCoords = (key) => {
   const { page, x, y, w, h } = entry;
   if ([page, x, y, w, h].some((v) => typeof v !== 'number' || Number.isNaN(v))) return null;
   return entry;
+};
+
+// 端末ローカルの保存座標を優先し、無ければ共有ファイル座標を返す
+export const getActiveCropCoords = (key) => {
+  try {
+    const custom = getCustomCrops();
+    const localEntry = custom[String(key)];
+    if (localEntry?.coords && typeof localEntry.coords.page === 'number') {
+      return localEntry.coords;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return getSharedCropCoords(key);
 };
 
 // 同期版（共有ファイルの切り抜きは含まない）。CropImage コンポーネントの利用を推奨

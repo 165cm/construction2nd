@@ -13,6 +13,8 @@ const EXAM_DATA_MAP = {
   r8_1
 };
 
+import { applyOverridesToQuestions } from '../utils/objections';
+
 export function getExamMeta(examId) {
   return EXAM_LIST.find(e => e.id === examId) || EXAM_LIST[0];
 }
@@ -22,7 +24,7 @@ export function getExamQuestions(examId) {
   const rawList = EXAM_DATA_MAP[examId] || EXAM_DATA_MAP[DEFAULT_EXAM_ID];
   
   // 各問題に examId と globalId（年度をまたいでも一意なID）を付与
-  return rawList.map(q => {
+  const formattedList = rawList.map(q => {
     const globalId = `${meta.id}_${q.id}`;
     return {
       ...q,
@@ -33,6 +35,9 @@ export function getExamQuestions(examId) {
       fullPage: q.fullPage || `${meta.pageDir}/page_5.png`
     };
   });
+
+  // 管理者画面等で保存されたローカルオーバーライド（手動修正/AI承認済みデータ）を合成反映
+  return applyOverridesToQuestions(meta.id, formattedList);
 }
 
 const STORAGE_EXAM_KEY = 'denkou2_current_exam_id';

@@ -11,7 +11,9 @@ import {
   Eye,
   Move,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Upload,
+  FileJson
 } from 'lucide-react';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
 import {
@@ -20,6 +22,8 @@ import {
   saveCustomCrop,
   resetCustomCrop,
   clearAllCustomCrops,
+  importCustomCrops,
+  exportAllCropsData,
   SHARED_OVERRIDES_ENDPOINT
 } from '../utils/customCrops';
 import { getAssetUrl } from '../utils/asset';
@@ -42,7 +46,7 @@ const writeSharedOverrides = async (updates = {}, removals = []) => {
   return data;
 };
 
-export default function AdminCropEditor({ onBack }) {
+export default function AdminCropEditor({ onBack, isEmbedded = false }) {
   const cropKeys = Object.keys(DEFAULT_CROPS);
   const [selectedKey, setSelectedKey] = useState(() => {
     try {
@@ -177,22 +181,21 @@ export default function AdminCropEditor({ onBack }) {
       // 2. Draw cropped area
       ctx.drawImage(img, safeX, safeY, safeW, safeH, 0, 0, safeW, safeH);
 
-      // 3. Export as high-quality compressed JPEG (0.88 quality): 30KB instead of 800KB PNG!
-      const dataUrl = offscreen.toDataURL('image/jpeg', 0.88);
+      const savedCoords = {
+        ...coords,
+        page: pageNumber,
+        x: Math.round(safeX),
+        y: Math.round(safeY),
+        w: Math.round(safeW),
+        h: Math.round(safeH)
+      };
 
-      if (!dataUrl || dataUrl.length < 500) {
-        throw new Error('画像データの生成に失敗しました');
-      }
-
-      const savedCoords = { ...coords, page: pageNumber };
-      const success = saveCustomCrop(selectedKey, {
-        dataUrl,
-        coords: savedCoords
-      });
+      // 座標データのみ保存（dataUrlを保存しないため、LocalStorage容量制限5MBに絶対に引っかからない）
+      const success = saveCustomCrop(selectedKey, savedCoords);
 
       if (!success) {
         triggerHaptic('error');
-        alert('⚠️ ブラウザの保存容量制限（LocalStorage Quota）により保存できませんでした。「全初期化」を行ってから再度お試しください。');
+        alert('⚠️ 保存に失敗しました。');
         return;
       }
 
@@ -205,10 +208,10 @@ export default function AdminCropEditor({ onBack }) {
           .then(() => showMessage(`✅ ${label} を共有ファイルに保存しました（公開すると全端末に反映）`))
           .catch((err) => {
             console.error(err);
-            showMessage(`⚠️ ${label} はこの端末にだけ保存されました（共有ファイルへの書き込み失敗: ${err.message}）`, 6000);
+            showMessage(`⚠️ ${label} はこの端末に保存されました（共有ファイルへの書き込み失敗: ${err.message}）`, 6000);
           });
       } else {
-        showMessage(`✅ ${label} をこの端末に保存しました。スマホ等へ反映するには下の「全端末へ反映するデータをコピー」を使ってください`, 6000);
+        showMessage(`✅ ${label} のトリミング座標を保存しました！（容量制限なし）`, 4000);
       }
     } catch (err) {
       console.error('Failed to save crop:', err);
@@ -217,14 +220,47 @@ export default function AdminCropEditor({ onBack }) {
     }
   };
 
+  // バックアップJSONファイルをダウンロード
+  const handleDownloadBackup = () => {
+    playClick();
+    const data = exportAllCropsData();
+    const jsonStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `denkou2_crops_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showMessage('💾 全トリミング設定のバックアップJSONをダウンロードしました！', 5000);
+  };
+
+  // バックアップJSONファイルから復元
+  const handleUploadBackup = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const res = importCustomCrops(event.target.result);
+        if (res.success) {
+          triggerHaptic('success');
+          refreshSavedCount();
+          showMessage(`✅ バックアップから ${res.count} 件のトリミング設定を復元しました！`, 5000);
+        } else {
+          alert(`インポート失敗: ${res.error}`);
+        }
+      } catch (err) {
+        alert(`ファイル読み込みエラー: ${err.message}`);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   // この端末で保存した座標（共有ファイルの内容と合わせたもの）
   const collectShareData = () => {
-    const merged = { ...getSharedOverrides() };
-    const custom = getCustomCrops();
-    Object.keys(custom).forEach((k) => {
-      if (custom[k]?.coords) merged[k] = custom[k].coords;
-    });
-    return merged;
+    return exportAllCropsData();
   };
 
   // 全端末へ反映するデータ（座標のJSON）をコピー
@@ -430,15 +466,19 @@ export default function AdminCropEditor({ onBack }) {
       onTouchEnd={handlePointerUp}
     >
       {/* Top Header */}
-      <div className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 py-2.5 flex items-center justify-between">
+      <div className={`z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 py-2.5 flex items-center justify-between ${
+        isEmbedded ? 'rounded-2xl border mb-3' : 'sticky top-0'
+      }`}>
         <div className="flex items-center space-x-2">
-          <button
-            onClick={() => { playClick(); onBack(); }}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
-            title="問題画面に戻る"
-          >
-            <ArrowLeft size={18} />
-          </button>
+          {!isEmbedded && (
+            <button
+              onClick={() => { playClick(); onBack(); }}
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+              title="問題画面に戻る"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          )}
           <div>
             <h1 className="text-sm font-black text-white flex items-center gap-1.5">
               <span>🛠️ トリミング位置 調整管理</span>
@@ -813,6 +853,27 @@ export default function AdminCropEditor({ onBack }) {
                 {shareCopied ? <Check size={14} /> : <Copy size={14} />}
                 <span>{shareCopied ? 'コピーしました' : '全端末へ反映するデータをコピー'}</span>
               </button>
+            </div>
+
+            {/* バックアップ保存 ＆ 復元ボタン */}
+            <div className="pt-2 border-t border-slate-800 flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={handleDownloadBackup}
+                className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition"
+              >
+                <Download size={14} className="text-emerald-400" />
+                <span>📥 バックアップJSON保存</span>
+              </button>
+              <label className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer">
+                <Upload size={14} className="text-sky-400" />
+                <span>📤 バックアップJSON読込</span>
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  className="hidden"
+                  onChange={handleUploadBackup}
+                />
+              </label>
             </div>
           </div>
 

@@ -7,7 +7,7 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| Claude | claude/keen-einstein-0i4ebd | 異議ありの送信先（Worker の URL・Turnstile サイトキー）を設定して有効化（PR作成・本番公開の確認待ち） | src/config/objectionReport.js |
+| Claude | claude/keen-einstein-0i4ebd | 異議ありの受付窓口の改善（Markdown の無害化・ラベルの自動作成。自動レビューの指摘）。公開後、ユーザーが Cloudflare の Worker にコードを貼り直す | workers/objection-receiver/ |
 
 ## 次のタスク（上から優先）
 1. ✅ 利用者側の改善を3つのPRに分けて進める（完了）
@@ -25,6 +25,7 @@
    - PR G：管理画面を開いた時だけ読み込む（一般の利用者の読み込みを軽く）
 
 ## 最近終わったこと（新しい順）
+- PR #33 マージ＆本番デプロイ：「異議あり」の送信先（Worker の URL・Turnstile サイトキー）を設定し、GitHub の issue への送信を有効化
 - PR #32 マージ＆本番デプロイ：「異議あり」の受付窓口（Cloudflare Workers ＋ Turnstile → GitHub の issue）とアプリ側の送信、準備手順書、出典表記を「出典：令和◯年度◯期第二種電気工事士試験」に統一
 - PR #31 マージ＆本番デプロイ：管理画面の「● 未保存」表示と移動前の確認、公開サイトに未反映の変更の件数バー＆反映用データのコピー、問題文の修正を questionOverrides.json から全端末へ反映、バックアップ読み込み前の型チェック
 - PR #30 マージ＆本番デプロイ：令和7年度下期の問3・問8・問11を「画像なし（テキスト問題）」に（PR #24 で一括で画像ありにした際の誤りの修正）

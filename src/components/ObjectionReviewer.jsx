@@ -11,10 +11,12 @@ import {
   getQuestionOverrides
 } from '../utils/objections';
 import { getExamQuestions } from '../data/examLoader';
+import { EXAM_LIST } from '../data/examList';
 
 export default function ObjectionReviewer({ onOpenEditorWithQuestion }) {
   const [objections, setObjections] = useState(getObjections);
   const [filterTab, setFilterTab] = useState('pending'); // 'pending' | 'approved' | 'all'
+  const [examFilter, setExamFilter] = useState('all'); // 'all' | 'r8_1' | 'r7_2' | 'r7_1' | 'r6_2' | 'r6_1'
   const [actionNotice, setActionNotice] = useState(null);
 
   const refreshList = () => {
@@ -84,8 +86,9 @@ export default function ObjectionReviewer({ onOpenEditorWithQuestion }) {
     }
   };
 
-  // フィルタリング
+  // フィルタリング（年度フィルター + ステータスフィルター）
   const filteredList = objections.filter(item => {
+    if (examFilter !== 'all' && item.examId && item.examId !== examFilter) return false;
     if (filterTab === 'pending') return item.status === 'pending';
     if (filterTab === 'approved') return item.status === 'approved';
     return true;
@@ -121,7 +124,7 @@ export default function ObjectionReviewer({ onOpenEditorWithQuestion }) {
         </div>
 
         {/* タブ切り替え */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 self-start sm:self-auto">
           <button
             onClick={() => setFilterTab('pending')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
@@ -153,6 +156,37 @@ export default function ObjectionReviewer({ onOpenEditorWithQuestion }) {
             全件 ({objections.length})
           </button>
         </div>
+      </div>
+
+      {/* アプリ全体年度統合フィルターバー */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs text-slate-400">
+        <span className="font-bold text-slate-400 shrink-0">表示年度:</span>
+        <button
+          onClick={() => setExamFilter('all')}
+          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
+            examFilter === 'all'
+              ? 'bg-sky-500 text-slate-950 font-black'
+              : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800'
+          }`}
+        >
+          全年度まとめて ({objections.length})
+        </button>
+        {EXAM_LIST.map(e => {
+          const count = objections.filter(o => o.examId === e.id).length;
+          return (
+            <button
+              key={e.id}
+              onClick={() => setExamFilter(e.id)}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition shrink-0 ${
+                examFilter === e.id
+                  ? 'bg-sky-500 text-slate-950 font-black'
+                  : 'bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-800'
+              }`}
+            >
+              {e.badge} ({count})
+            </button>
+          );
+        })}
       </div>
 
       {/* 報告カード一覧 */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Flame, Trophy, Clock, Crop, ChevronDown } from 'lucide-react';
+import { Volume2, VolumeX, Flame, Trophy, Clock, ChevronDown } from 'lucide-react';
 import { getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime } from '../utils/storage';
 
 export default function Header({
@@ -73,15 +73,6 @@ export default function Header({
             title="成績と実績"
           >
             <Trophy size={14} className="text-amber-400" />
-          </button>
-
-          {/* Admin Crop Editor Button */}
-          <button
-            onClick={onOpenAdmin}
-            className="p-1.5 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 rounded-lg active:scale-95 border border-slate-700/60 transition"
-            title="画像トリミング調整（管理者）"
-          >
-            <Crop size={14} className="text-rose-400" />
           </button>
 
           {/* Sound Toggle */}

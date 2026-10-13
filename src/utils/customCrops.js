@@ -10,10 +10,13 @@ import sharedOverrides from '../data/cropOverrides.json';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
 
 // 問題の画像パス（例: /crops/floor_plan.png）から、管理画面のトリミング設定キーを求める
-export const cropKeyForDiagram = (questionId, diagramPath) => {
+export const cropKeyForDiagram = (questionId, diagramPath, examId) => {
+  if (examId && examId !== 'r8_1') {
+    return `${examId}_${questionId}`;
+  }
   const file = (diagramPath || '').split('/').pop();
   const found = Object.keys(DEFAULT_CROPS).find((k) => DEFAULT_CROPS[k].filename === file);
-  return found ?? String(questionId);
+  return found ?? (examId ? `${examId}_${questionId}` : String(questionId));
 };
 
 const STORAGE_KEY = 'denkou_custom_crops_v1';
@@ -193,7 +196,7 @@ export const getDisplayImageUrl = (key, defaultPath) => {
 const renderedCache = new Map(); // signature -> objectURL
 const pendingRenders = new Map(); // signature -> Promise
 
-export const cropSignature = (c) => `${c.page}:${c.x}:${c.y}:${c.w}:${c.h}`;
+export const cropSignature = (c) => `${c.pageDir || ''}:${c.page}:${c.x}:${c.y}:${c.w}:${c.h}`;
 
 export const getCachedCropUrl = (coords) => renderedCache.get(cropSignature(coords)) || null;
 
@@ -236,7 +239,10 @@ export const renderCropFromPage = (coords) => {
       }
     };
     img.onerror = () => reject(new Error(`元ページ画像を読み込めません (page ${coords.page})`));
-    img.src = getAssetUrl(`/pages/page_${coords.page}.png`);
+    const pagePath = coords.pageDir 
+      ? `${coords.pageDir}/page_${coords.page}.png` 
+      : `/pages/page_${coords.page}.png`;
+    img.src = getAssetUrl(pagePath);
   }).finally(() => {
     pendingRenders.delete(sig);
   });

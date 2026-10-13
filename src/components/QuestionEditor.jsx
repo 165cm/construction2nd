@@ -186,26 +186,41 @@ export default function QuestionEditor() {
     <div className="space-y-6">
       {/* 上部コントロールバー */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        {/* 試験選択 */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Layers className="text-sky-400" size={18} />
-            <span className="text-xs font-bold text-slate-300">対象試験:</span>
+        {/* 試験選択ピル */}
+        <div className="flex items-center flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 mr-1">
+            <Layers className="text-sky-400" size={16} />
+            <span className="text-xs font-black text-slate-200">対象試験:</span>
           </div>
-          <select
-            value={selectedExamId}
-            onChange={(e) => {
-              setSelectedExamId(e.target.value);
-              setSelectedQuestionIndex(0);
-            }}
-            className="bg-slate-950 border border-slate-700 text-slate-100 text-xs rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-sky-500"
-          >
-            {EXAM_LIST.map(e => (
-              <option key={e.id} value={e.id}>
-                {e.name} ({Object.keys(overrides[e.id] || {}).length}問修正済)
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            {EXAM_LIST.map(e => {
+              const isSelected = e.id === selectedExamId;
+              const modCount = Object.keys(overrides[e.id] || {}).length;
+              return (
+                <button
+                  key={e.id}
+                  onClick={() => {
+                    setSelectedExamId(e.id);
+                    setSelectedQuestionIndex(0);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
+                    isSelected
+                      ? 'bg-sky-500 text-slate-950 font-black shadow-md shadow-sky-500/20'
+                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  <span>{e.name}</span>
+                  {modCount > 0 && (
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                      isSelected ? 'bg-slate-950/20 text-slate-950 font-black' : 'bg-emerald-500/20 text-emerald-400'
+                    }`}>
+                      {modCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* バルク処理・バックアップアクション */}

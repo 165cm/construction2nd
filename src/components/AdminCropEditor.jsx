@@ -16,6 +16,8 @@ import {
   FileJson
 } from 'lucide-react';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
+import { EXAM_LIST } from '../data/examList';
+import { getExamQuestions } from '../data/examLoader';
 import {
   getCustomCrops,
   getSharedOverrides,
@@ -47,16 +49,94 @@ const writeSharedOverrides = async (updates = {}, removals = []) => {
 };
 
 export default function AdminCropEditor({ onBack, isEmbedded = false }) {
-  const cropKeys = Object.keys(DEFAULT_CROPS);
+  const [selectedExamId, setSelectedExamId] = useState('r8_1');
+  const examMeta = EXAM_LIST.find(e => e.id === selectedExamId) || EXAM_LIST[0];
+
+  // 対象試験に応じたアイテム一覧の生成
+  const cropItems = React.useMemo(() => {
+    if (selectedExamId === 'r8_1') {
+      const list = Object.keys(DEFAULT_CROPS).map(k => ({
+        key: k,
+        label: DEFAULT_CROPS[k].label || `問${k}`,
+        page: DEFAULT_CROPS[k].page,
+        defaultCoords: DEFAULT_CROPS[k]
+      }));
+      return list;
+    }
+
+    // 他年度の場合：Q1〜Q50 ＋ 配線図（平面図・分電盤）
+    const examQuestions = getExamQuestions(selectedExamId);
+    const list = examQuestions.map(q => {
+      const pageMatch = q.fullPage?.match(/page_(\d+)\.png/);
+      const pageNum = pageMatch ? parseInt(pageMatch[1], 10) : 5;
+      return {
+        key: `${selectedExamId}_${q.id}`,
+        label: `問${q.id} ${q.categoryTag || q.category}`,
+        page: pageNum,
+        defaultCoords: {
+          page: pageNum,
+          pageDir: examMeta.pageDir,
+          x: 200,
+          y: 350,
+          w: 500,
+          h: 320,
+          label: `${examMeta.badge} 問${q.id}`
+        }
+      };
+    });
+
+    // 配線図2種を追加
+    list.push({
+      key: `${selectedExamId}_floor_plan`,
+      label: '配線図: 平面図',
+      page: examMeta.floorPlanPage || 15,
+      defaultCoords: {
+        page: examMeta.floorPlanPage || 15,
+        pageDir: examMeta.pageDir,
+        x: 200,
+        y: 100,
+        w: 1300,
+        h: 1400,
+        label: `${examMeta.badge} 配線図: 平面図`
+      }
+    });
+    list.push({
+      key: `${selectedExamId}_panel_schedule`,
+      label: '配線図: 分電盤結線図',
+      page: examMeta.floorPlanPage || 15,
+      defaultCoords: {
+        page: examMeta.floorPlanPage || 15,
+        pageDir: examMeta.pageDir,
+        x: 200,
+        y: 1500,
+        w: 1300,
+        h: 700,
+        label: `${examMeta.badge} 配線図: 分電盤結線図`
+      }
+    });
+
+    return list;
+  }, [selectedExamId, examMeta]);
+
+  const cropKeys = cropItems.map(item => item.key);
+
   const [selectedKey, setSelectedKey] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem(SELECTED_KEY_STORAGE);
-      if (saved && DEFAULT_CROPS[saved]) return saved;
-    } catch (e) { /* ignore */ }
     return '1';
   });
-  const [coords, setCoords] = useState(DEFAULT_CROPS['1']);
-  const [pageNumber, setPageNumber] = useState(DEFAULT_CROPS['1'].page);
+
+  // 試験が切り替わったら選択キーを更新
+  useEffect(() => {
+    if (cropKeys.length > 0 && !cropKeys.includes(selectedKey)) {
+      setSelectedKey(cropKeys[0]);
+    }
+  }, [cropKeys, selectedKey]);
+
+  const currentItem = cropItems.find(i => i.key === selectedKey) || cropItems[0] || {
+    key: '1', label: '問1', page: 5, defaultCoords: { page: 5, x: 200, y: 200, w: 400, h: 300 }
+  };
+
+  const [coords, setCoords] = useState(currentItem.defaultCoords);
+  const [pageNumber, setPageNumber] = useState(currentItem.page);
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [savedMessage, setSavedMessage] = useState('');
@@ -74,12 +154,14 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
   const [initialCoords, setInitialCoords] = useState({ x: 0, y: 0, w: 0, h: 0 });
 
   // Navigation indices
-  const currentIndex = cropKeys.indexOf(selectedKey);
+  const currentIndex = Math.max(0, cropKeys.indexOf(selectedKey));
   const prevKey = currentIndex > 0 ? cropKeys[currentIndex - 1] : null;
   const nextKey = currentIndex < cropKeys.length - 1 ? cropKeys[currentIndex + 1] : null;
 
-  const prevLabel = prevKey ? (DEFAULT_CROPS[prevKey]?.label || `問${prevKey}`) : '';
-  const nextLabel = nextKey ? (DEFAULT_CROPS[nextKey]?.label || `問${nextKey}`) : '';
+  const prevItem = cropItems.find(i => i.key === prevKey);
+  const nextItem = cropItems.find(i => i.key === nextKey);
+  const prevLabel = prevItem ? prevItem.label : '';
+  const nextLabel = nextItem ? nextItem.label : '';
 
   const showMessage = (msg, ms = 4000) => {
     setSavedMessage(msg);
@@ -93,19 +175,32 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
   };
 
   // Load custom or default coords when selected key changes
-  // 優先順位: この端末の保存 > 共有ファイル > 初期値
   useEffect(() => {
     try { sessionStorage.setItem(SELECTED_KEY_STORAGE, selectedKey); } catch (e) { /* ignore */ }
     const custom = getCustomCrops();
     const shared = getSharedOverrides();
     refreshSavedCount();
-    const active = custom[selectedKey]?.coords || shared[selectedKey] || DEFAULT_CROPS[selectedKey] || {
-      page: 5, filename: 'custom.png', x: 200, y: 200, w: 400, h: 300, label: `問${selectedKey}`
+    
+    const active = custom[selectedKey]?.coords || shared[selectedKey] || currentItem.defaultCoords || {
+      page: currentItem.page || 5, 
+      pageDir: examMeta.pageDir, 
+      x: 200, 
+      y: 200, 
+      w: 400, 
+      h: 300, 
+      label: currentItem.label
     };
-    setCoords(active);
-    setPageNumber(active.page);
+    
+    // pageDir がなければ補完
+    const normalizedCoords = {
+      ...active,
+      pageDir: active.pageDir || examMeta.pageDir
+    };
+
+    setCoords(normalizedCoords);
+    setPageNumber(normalizedCoords.page || currentItem.page || 5);
     setIsImageLoading(true);
-  }, [selectedKey]);
+  }, [selectedKey, selectedExamId, currentItem, examMeta]);
 
   // Update live preview canvas whenever image loads or coords change
   const updatePreview = () => {
@@ -184,6 +279,8 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       const savedCoords = {
         ...coords,
         page: pageNumber,
+        pageDir: examMeta.pageDir,
+        examId: selectedExamId,
         x: Math.round(safeX),
         y: Math.round(safeY),
         w: Math.round(safeW),
@@ -517,48 +614,71 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       )}
 
       {/* Navigation & Selection Bar */}
-      <div className="p-3 bg-slate-900 border-b border-slate-800 flex flex-wrap gap-2 items-center justify-between text-xs">
-        {/* Prev / Target Selector / Next */}
-        <div className="flex items-center space-x-1.5">
-          <button
-            onClick={handlePrev}
-            disabled={!prevKey}
-            className={`p-1.5 rounded-lg border flex items-center gap-1 ${
-              prevKey
-                ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 active:scale-95'
-                : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-40'
-            }`}
-            title={prevKey ? `前へ: ${prevLabel}` : '最初の画像です'}
-          >
-            <ChevronLeft size={16} />
-            <span className="text-[11px] font-bold hidden sm:inline">前へ</span>
-          </button>
+      <div className="p-3 bg-slate-900 border-b border-slate-800 flex flex-wrap gap-3 items-center justify-between text-xs">
+        {/* Exam Selector + Prev / Target Selector / Next */}
+        <div className="flex items-center flex-wrap gap-2">
+          {/* 対象試験切り替え */}
+          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <span className="text-[11px] font-bold text-slate-400 pl-1">試験:</span>
+            <select
+              value={selectedExamId}
+              onChange={(e) => {
+                setSelectedExamId(e.target.value);
+              }}
+              className="bg-slate-900 border border-slate-700 text-sky-300 font-black text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-sky-500"
+            >
+              {EXAM_LIST.map(e => (
+                <option key={e.id} value={e.id}>
+                  {e.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            value={selectedKey}
-            onChange={(e) => setSelectedKey(e.target.value)}
-            className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-sky-500"
-          >
-            {cropKeys.map((k, idx) => (
-              <option key={k} value={k}>
-                {idx + 1}. {DEFAULT_CROPS[k].label || `問${k}`}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={handlePrev}
+              disabled={!prevKey}
+              className={`p-1.5 rounded-lg border flex items-center gap-1 ${
+                prevKey
+                  ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 active:scale-95'
+                  : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-40'
+              }`}
+              title={prevKey ? `前へ: ${prevLabel}` : '最初の画像です'}
+            >
+              <ChevronLeft size={16} />
+              <span className="text-[11px] font-bold hidden sm:inline">前へ</span>
+            </button>
 
-          <button
-            onClick={handleNext}
-            disabled={!nextKey}
-            className={`p-1.5 rounded-lg border flex items-center gap-1 ${
-              nextKey
-                ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 active:scale-95'
-                : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-40'
-            }`}
-            title={nextKey ? `次へ: ${nextLabel}` : '最後の画像です'}
-          >
-            <span className="text-[11px] font-bold hidden sm:inline">次へ</span>
-            <ChevronRight size={16} />
-          </button>
+            <select
+              value={selectedKey}
+              onChange={(e) => setSelectedKey(e.target.value)}
+              className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-sky-500 max-w-[200px] truncate"
+            >
+              {cropKeys.map((k, idx) => {
+                const item = cropItems.find(i => i.key === k);
+                return (
+                  <option key={k} value={k}>
+                    {idx + 1}. {item?.label || k}
+                  </option>
+                );
+              })}
+            </select>
+
+            <button
+              onClick={handleNext}
+              disabled={!nextKey}
+              className={`p-1.5 rounded-lg border flex items-center gap-1 ${
+                nextKey
+                  ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 active:scale-95'
+                  : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-40'
+              }`}
+              title={nextKey ? `次へ: ${nextLabel}` : '最後の画像です'}
+            >
+              <span className="text-[11px] font-bold hidden sm:inline">次へ</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Page selector & Quick utility buttons */}
@@ -632,7 +752,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
             <img
               ref={imgRef}
               crossOrigin="anonymous"
-              src={getAssetUrl(`/pages/page_${pageNumber}.png`)}
+              src={getAssetUrl(`${examMeta.pageDir}/page_${pageNumber}.png`)}
               alt="元頁"
               onLoad={updatePreview}
               className="w-full h-auto block select-none pointer-events-none"

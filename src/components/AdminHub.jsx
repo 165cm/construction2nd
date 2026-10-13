@@ -39,6 +39,13 @@ export default function AdminHub({ onBack }) {
     setEditorTarget({ examId, questionId, openedAt: Date.now() });
     setActiveTab('question');
   };
+  // ①切り抜きエディタで、指定した年度・画像を開く（②エディタの「①で微調整」から）
+  const [cropTarget, setCropTarget] = useState(null);
+  const openCropEditor = (examId, key) => {
+    if (!confirmDiscardUnsaved()) return;
+    setCropTarget({ examId, key, openedAt: Date.now() });
+    setActiveTab('crop');
+  };
   const handleBack = () => {
     if (!confirmDiscardUnsaved()) return;
     onBack();
@@ -254,7 +261,13 @@ export default function AdminHub({ onBack }) {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
         {activeTab === 'crop' && (
           <div>
-            <AdminCropEditor onBack={onBack} isEmbedded />
+            <AdminCropEditor
+              key={cropTarget?.openedAt || 'crop'}
+              onBack={onBack}
+              isEmbedded
+              initialExamId={cropTarget?.examId}
+              initialKey={cropTarget?.key}
+            />
           </div>
         )}
 
@@ -262,7 +275,7 @@ export default function AdminHub({ onBack }) {
           <QuestionEditor
             key={editorTarget?.openedAt || 'editor'}
             initialTarget={editorTarget}
-            onOpenCropEditor={() => switchTab('crop')}
+            onOpenCropEditor={openCropEditor}
           />
         )}
 

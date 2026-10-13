@@ -26,13 +26,17 @@ export function getExamQuestions(examId) {
   // 各問題に examId と globalId（年度をまたいでも一意なID）を付与
   const formattedList = rawList.map(q => {
     const globalId = `${meta.id}_${q.id}`;
+    // 31問以降は配線図問題のため、原本配線図ページ（P15）を紐付け
+    const isWiring = q.id >= 31;
+    const floorPlanPageNum = meta.floorPlanPage || 15;
     return {
       ...q,
       examId: meta.id,
       examName: meta.name,
       globalId,
-      // 画像パスの年度補正（fullPage が /pages/ 始まりの相対パスのとき）
-      fullPage: q.fullPage || `${meta.pageDir}/page_5.png`
+      fullPage: isWiring
+        ? `${meta.pageDir}/page_${floorPlanPageNum}.png`
+        : (q.fullPage || `${meta.pageDir}/page_5.png`)
     };
   });
 

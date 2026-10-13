@@ -7,10 +7,11 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| - | - | 待機中（ユーザーからの次回指示待ち） | - |
+| Antigravity | feat/q31-floor-plan-crop-page | 問31以降の画像を問題文ではなく配線図ページ（P15）からトリミングするよう修正 | `src/data/examLoader.js`, `src/components/AdminCropEditor.jsx`, `src/data/cropsConfig.js`, `src/data/cropOverrides.json` |
 
 ## 次のタスク（上から優先）
-1. ユーザーからのフィードバック確認および次の要望対応
+1. ユーザーへの「PR #20 を本番公開してよいですか？」の確認
+2. 承認後にPR #20 をマージしてGitHub Pagesへの自動反映
 
 ## 最近終わったこと（新しい順）
 - PR #19 マージ＆本番デプロイ完了（トリミング一覧で画像不要な問題を自動スキップ・除外＆問題文エディタからの画像あり設定・自動追加連動の実装）

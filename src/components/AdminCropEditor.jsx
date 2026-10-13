@@ -65,7 +65,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
         return {
           key: String(q.id),
           label: isWiringQuestion
-            ? `問${q.id} ${q.wiringMark ? `【${q.wiringMark}】` : ''}${q.categoryTag || q.category || ''}（配線図P${floorPlanPageNum}）`
+            ? `問${q.id} ${q.wiringMark ? `【${q.wiringMark}】` : ''}${q.categoryTag || q.category || ''}（配線図問題）`
             : (defCrop?.label || `問${q.id} ${q.categoryTag || q.category || ''}`),
           page: itemPage,
           defaultCoords: (defCrop && !isWiringQuestion) ? defCrop : {
@@ -85,7 +85,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       return {
         key: `${selectedExamId}_${q.id}`,
         label: isWiringQuestion
-          ? `問${q.id} ${q.wiringMark ? `【${q.wiringMark}】` : ''}${q.categoryTag || q.category || ''}（配線図P${floorPlanPageNum}）`
+          ? `問${q.id} ${q.wiringMark ? `【${q.wiringMark}】` : ''}${q.categoryTag || q.category || ''}（配線図問題）`
           : `問${q.id} ${q.categoryTag || q.category || ''}`,
         page: itemPage,
         defaultCoords: {
@@ -232,6 +232,26 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     }
   };
 
+  // 31問以降：画像の取得元（配線図ページ／問題文ページ）を切り替える
+  const switchCropSource = (source) => {
+    const floorP = examMeta.floorPlanPage || 15;
+    const qPage = targetQuestionObj?.questionPage || 11;
+    const page = source === 'floor' ? floorP : qPage;
+    if (page === pageNumber) return;
+    playClick();
+    const sharedEntry = getSharedOverrides()[selectedKey];
+    const saved = getCustomCrops()[selectedKey]?.coords || (typeof sharedEntry?.page === 'number' ? sharedEntry : null);
+    // その取得元で保存済みの枠があれば使い、無ければ初期枠
+    const base = saved && saved.page === page
+      ? saved
+      : source === 'floor'
+        ? currentItem.defaultCoords
+        : { x: 150, y: 250, w: 450, h: 300 };
+    setCoords(prev => ({ ...prev, x: base.x, y: base.y, w: base.w, h: base.h, page, pageDir: examMeta.pageDir }));
+    setPageNumber(page);
+    setIsImageLoading(true);
+  };
+
   const showMessage = (msg, ms = 4000) => {
     setSavedMessage(msg);
     setTimeout(() => setSavedMessage(''), ms);
@@ -253,7 +273,10 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     const isWiringQuestion = targetQuestionNumber && targetQuestionNumber >= 31;
     const floorPlanPageNum = examMeta.floorPlanPage || 15;
     
-    const active = custom[selectedKey]?.coords || shared[selectedKey] || currentItem.defaultCoords || {
+    // 保存済みの座標（共有ファイルの項目は、座標がそろっているものだけ）
+    const sharedEntry = shared[selectedKey];
+    const saved = custom[selectedKey]?.coords || (typeof sharedEntry?.page === 'number' ? sharedEntry : null);
+    const active = saved || currentItem.defaultCoords || {
       page: currentItem.page || (isWiringQuestion ? floorPlanPageNum : 5), 
       pageDir: examMeta.pageDir, 
       x: 200, 
@@ -263,9 +286,9 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       label: currentItem.label
     };
     
-    // 31問以降は配線図ページ（P15）からトリミング（過去の保存データが問題文ページP11〜13ならP15へ自動補正）
-    const resolvedPage = isWiringQuestion 
-      ? floorPlanPageNum 
+    // 31問以降は、保存済みならその取得元（配線図 or 問題文）のページ、未保存なら配線図ページから始める
+    const resolvedPage = isWiringQuestion
+      ? (saved?.page || floorPlanPageNum)
       : (active.page || currentItem.page || 5);
 
     // pageDir と page を正規化
@@ -843,33 +866,44 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
             </div>
           </div>
 
-          {/* 31問以降：配線図ページからのトリミング案内バナー */}
-          {targetQuestionNumber && targetQuestionNumber >= 31 && (
-            <div className="mb-2.5 p-2.5 bg-amber-950/60 border border-amber-500/40 rounded-xl flex items-center justify-between gap-2 text-xs text-amber-200">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-bold text-amber-300">📐 問{targetQuestionNumber} は配線図問題です。</span>
-                <span>問題文ではなく「配線図（第 {examMeta.floorPlanPage || 15} 頁）」から該当箇所をトリミングしてください。</span>
-                {targetQuestionObj?.wiringMark && (
-                  <span className="bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md font-black text-[11px] shadow-sm">
-                    🎯 対象: {targetQuestionObj.wiringMark} 周辺
-                  </span>
-                )}
+          {/* 31問以降：画像の取得元（配線図／問題文）の切り替え */}
+          {targetQuestionNumber && targetQuestionNumber >= 31 && (() => {
+            const floorP = examMeta.floorPlanPage || 15;
+            const qPage = targetQuestionObj?.questionPage || 11;
+            const isFloor = pageNumber === floorP;
+            const isQuestion = pageNumber === qPage;
+            const btn = (active) => `px-3 py-1.5 rounded-lg text-[11px] font-black border transition active:scale-95 ${
+              active
+                ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
+                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+            }`;
+            return (
+              <div className="mb-2.5 p-2.5 bg-amber-950/60 border border-amber-500/40 rounded-xl text-xs text-amber-200 space-y-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-bold text-amber-300">📐 問{targetQuestionNumber} は配線図問題です。画像の取得元を選んでください：</span>
+                  {targetQuestionObj?.wiringMark && (
+                    <span className="bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md font-black text-[11px] shadow-sm">
+                      🎯 対象: {targetQuestionObj.wiringMark}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button type="button" onClick={() => switchCropSource('floor')} className={btn(isFloor)}>
+                    🗺️ 配線図（P{floorP}）
+                  </button>
+                  <button type="button" onClick={() => switchCropSource('question')} className={btn(isQuestion)}>
+                    📝 問題文（P{qPage}）
+                  </button>
+                  {!isFloor && !isQuestion && (
+                    <span className="text-[11px] text-amber-300/80">いまは P{pageNumber} を表示中</span>
+                  )}
+                </div>
+                <p className="text-[11px] text-amber-200/80 leading-relaxed">
+                  問題文の中に図・写真がある問題は「問題文」を選び、その図を赤枠で囲んでください。選んだ取得元は「保存」で記録されます。
+                </p>
               </div>
-              {pageNumber !== (examMeta.floorPlanPage || 15) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = examMeta.floorPlanPage || 15;
-                    setPageNumber(p);
-                    setCoords(prev => ({ ...prev, page: p }));
-                  }}
-                  className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-lg text-[11px] flex-shrink-0 transition active:scale-95 shadow-sm"
-                >
-                  配線図(P{examMeta.floorPlanPage || 15})に戻す
-                </button>
-              )}
-            </div>
-          )}
+            );
+          })()}
 
           <div className="flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-400 mb-2 leading-relaxed">
             <span>💡 赤枠の中をつかんでドラッグ移動、四隅の丸いハンドルをつかんで拡大・縮小できます。</span>

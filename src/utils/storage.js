@@ -69,6 +69,9 @@ const readCurrentExamId = () => {
 
 // 旧判定では「正解→不正解→正解」のような連続していない2回正解でもマスターになっていた。
 // 新しい判定（2回連続正解＝Box 3 以上）に合わない記録は「定着中」に戻す。
+// 1つの年度の問題数（収録している年度はすべて50問）
+const ALL_MASTER_QUESTION_COUNT = 50;
+
 const normalizeLegacyRecord = (rec) => {
   if (!rec || rec.status !== 'mastered') return rec;
   if ((rec.box || 1) >= 3 || (rec.consecutiveCorrect || 0) >= 2) return rec;
@@ -151,6 +154,16 @@ export const loadState = () => {
         ...parsed,
         records: Object.fromEntries(Object.entries(parsed.records || {}).map(([k, v]) => [k, normalizeLegacyRecord(v)]))
       };
+      // 補正の結果、どの年度でも全問マスターになっていなければ「全問完全マスター」バッジも外す
+      if ((parsed.badges || []).includes('all_master')) {
+        const masteredByExam = {};
+        Object.entries(parsed.records).forEach(([k, r]) => {
+          const m = k.match(/^(.+)_\d+$/);
+          if (m && r?.status === 'mastered') masteredByExam[m[1]] = (masteredByExam[m[1]] || 0) + 1;
+        });
+        const stillAllMastered = Object.values(masteredByExam).some((n) => n >= ALL_MASTER_QUESTION_COUNT);
+        if (!stillAllMastered) parsed = { ...parsed, badges: parsed.badges.filter((b) => b !== 'all_master') };
+      }
     }
     parsed.schemaVersion = STATE_SCHEMA_VERSION;
     const initial = getInitialState();

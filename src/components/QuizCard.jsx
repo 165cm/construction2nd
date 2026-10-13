@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, BookOpen, Shuffle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound';
-import { cropKeyForDiagram } from '../utils/customCrops';
+import { cropKeyForDiagram, isCropFromFloorPlan } from '../utils/customCrops';
 import { getShuffleChoicesSetting, setShuffleChoicesSetting } from '../utils/settings';
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
@@ -350,7 +350,10 @@ export default function QuizCard({
         {/* Diagram Image if available */}
         {question.diagram && (
           <div className="mt-3 relative group">
-            {question.wiringMark && (
+            {question.wiringMark && isCropFromFloorPlan(
+              cropKeyForDiagram(question.id, question.diagram, question.examId || currentExamMeta?.id),
+              currentExamMeta?.floorPlanPage || 15
+            ) && (
               <div className="absolute top-2 left-2 z-10 bg-slate-900/90 backdrop-blur border border-amber-500/50 text-amber-300 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-md">
                 <span>🎯 対象箇所:</span>
                 <span className="text-amber-400 font-black">{question.wiringMark} 周辺拡大</span>

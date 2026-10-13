@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import questionsData from './data/questions.json';
+import React, { useState, useEffect, useMemo } from 'react';
+import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
 import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition } from './utils/storage';
 import { getInitialResumeQuestion, determineNextQuizQuestion } from './utils/spacedRepetition';
 import { isSoundEnabled, setSoundEnabled, playClick } from './utils/sound';
@@ -15,10 +15,15 @@ import WiringDiagramModal from './components/WiringDiagramModal';
 import LevelUpModal from './components/LevelUpModal';
 import Round1CompleteModal from './components/Round1CompleteModal';
 import AttributionModal from './components/AttributionModal';
+import ExamSelectModal from './components/ExamSelectModal';
 import BottomNav from './components/BottomNav';
 import AdminCropEditor from './components/AdminCropEditor';
 
 export default function App() {
+  const [currentExamId, setCurrentExamId] = useState(() => loadCurrentExamId());
+  const currentExamMeta = useMemo(() => getExamMeta(currentExamId), [currentExamId]);
+  const questionsData = useMemo(() => getExamQuestions(currentExamId), [currentExamId]);
+
   const [state, setState] = useState(() => loadState());
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
   const [currentMode, setCurrentMode] = useState(() => {
@@ -31,8 +36,9 @@ export default function App() {
   // Quiz position state: auto-resumes where user left off
   const [quizStep, setQuizStep] = useState(() => {
     const initialState = loadState();
-    return getInitialResumeQuestion(questionsData, initialState) || {
-      question: questionsData[0],
+    const initialQuestions = getExamQuestions(loadCurrentExamId());
+    return getInitialResumeQuestion(initialQuestions, initialState) || {
+      question: initialQuestions[0],
       index: 0,
       isFirstRound: true,
       round: 1,
@@ -42,6 +48,7 @@ export default function App() {
   });
 
   const [showRound1CompleteModal, setShowRound1CompleteModal] = useState(false);
+  const [isExamSelectOpen, setIsExamSelectOpen] = useState(false);
 
   const handleOpenAdmin = () => {
     playClick();
@@ -183,6 +190,22 @@ export default function App() {
     setState(curState);
   };
 
+  // Exam Selection Handler
+  const handleSelectExam = (examId) => {
+    saveCurrentExamId(examId);
+    setCurrentExamId(examId);
+    const newQuestions = getExamQuestions(examId);
+    setQuizStep({
+      question: newQuestions[0],
+      index: 0,
+      isFirstRound: true,
+      round: 1,
+      modeDescription: '第1巡：全問走破中',
+      progressText: `1 / ${newQuestions.length} 問`
+    });
+    resetScrollToTop();
+  };
+
   const currentQuestion = quizStep.question || questionsData[0];
   const reviewQuestionsCount = questionsData.filter(q => state.records[q.id]?.status === 'review' || (state.records[q.id]?.wrong > 0 && state.records[q.id]?.status !== 'mastered')).length;
 
@@ -199,6 +222,8 @@ export default function App() {
         onToggleSound={handleToggleSound}
         onOpenStats={() => { playClick(); setIsStatsOpen(true); }}
         onOpenAdmin={handleOpenAdmin}
+        currentExamMeta={currentExamMeta}
+        onOpenExamSelect={() => { playClick(); setIsExamSelectOpen(true); }}
       />
 
       {/* Main Content Area (Mobile Container) */}
@@ -249,6 +274,8 @@ export default function App() {
             onSelectQuestion={handleSelectQuestion}
             onToggleBookmark={handleToggleBookmark}
             onOpenAttribution={() => setIsAttributionOpen(true)}
+            currentExamMeta={currentExamMeta}
+            onOpenExamSelect={() => { playClick(); setIsExamSelectOpen(true); }}
           />
         )}
       </main>
@@ -266,6 +293,7 @@ export default function App() {
         isOpen={isWiringDiagramOpen}
         onClose={() => setIsWiringDiagramOpen(false)}
         highlightMarker={wiringHighlightMarker}
+        currentExamMeta={currentExamMeta}
       />
 
       {/* Stats and Achievements Modal */}
@@ -283,6 +311,16 @@ export default function App() {
       <AttributionModal
         isOpen={isAttributionOpen}
         onClose={() => setIsAttributionOpen(false)}
+        currentExamMeta={currentExamMeta}
+      />
+
+      {/* Exam Selection Modal */}
+      <ExamSelectModal
+        isOpen={isExamSelectOpen}
+        onClose={() => setIsExamSelectOpen(false)}
+        currentExamId={currentExamId}
+        onSelectExam={handleSelectExam}
+        state={state}
       />
 
       {/* Level Up Celebration Modal */}

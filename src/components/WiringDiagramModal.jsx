@@ -3,11 +3,14 @@ import { X, ZoomIn, ZoomOut, Maximize2, RotateCcw } from 'lucide-react';
 import { getAssetUrl } from '../utils/asset';
 import CropImage from './CropImage';
 
-export default function WiringDiagramModal({ isOpen, onClose, highlightMarker }) {
+export default function WiringDiagramModal({ isOpen, onClose, highlightMarker, currentExamMeta }) {
   const [scale, setScale] = useState(1);
   const [activeTab, setActiveTab] = useState('full'); // 'full' | 'floor' | 'panel'
 
   if (!isOpen) return null;
+
+  const examPageDir = currentExamMeta?.pageDir || '/pages';
+  const fullPageSrc = `${examPageDir}/page_15.png`;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/95 backdrop-blur-md animate-pop">
@@ -97,7 +100,7 @@ export default function WiringDiagramModal({ isOpen, onClose, highlightMarker })
         >
           {activeTab === 'full' ? (
             <img
-              src={getAssetUrl('/pages/page_15.png')}
+              src={getAssetUrl(fullPageSrc)}
               alt="第二種電気工事士 配線図"
               className="max-h-[82vh] object-contain rounded shadow-2xl bg-white select-none pointer-events-auto"
               draggable="false"

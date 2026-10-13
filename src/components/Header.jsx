@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Flame, Trophy, Clock, Crop } from 'lucide-react';
+import { Volume2, VolumeX, Flame, Trophy, Clock, Crop, ChevronDown } from 'lucide-react';
 import { getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime } from '../utils/storage';
 
 export default function Header({
@@ -7,7 +7,9 @@ export default function Header({
   soundOn,
   onToggleSound,
   onOpenStats,
-  onOpenAdmin
+  onOpenAdmin,
+  currentExamMeta,
+  onOpenExamSelect
 }) {
   const levelTitle = getTitleForLevel(state.level);
   const expRequired = calculateExpForLevel(state.level);
@@ -18,16 +20,27 @@ export default function Header({
     <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800/80 text-white shadow-md">
       {/* Compact Main Bar (Height ~48px) */}
       <div className="flex items-center justify-between px-3 py-2">
-        {/* Left: App Title + Level Badge */}
-        <div className="flex items-center space-x-2 shrink-0">
+        {/* Left: App Title + Exam Badge + Level */}
+        <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-sky-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-sky-500/20">
             ⚡
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <h1 className="text-xs sm:text-sm font-black tracking-tight leading-none text-slate-100">
-              電工2種サクサク道場
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-xs sm:text-sm font-black tracking-tight leading-none text-slate-100 hidden xxs:inline">
+              電工2種
             </h1>
-            <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 border border-sky-400/30">
+
+            {/* Exam selector pill */}
+            <button
+              onClick={onOpenExamSelect}
+              className="flex items-center space-x-0.5 text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/40 transition active:scale-95 shadow-sm"
+              title="タップして試験年度を切り替え"
+            >
+              <span>{currentExamMeta?.badge || '令8上'}</span>
+              <ChevronDown size={11} className="text-sky-400" />
+            </button>
+
+            <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
               Lv.{state.level}
             </span>
           </div>

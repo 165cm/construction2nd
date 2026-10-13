@@ -1,10 +1,11 @@
 import React from 'react';
 import { X, Scale, ExternalLink, ShieldCheck, BookOpen } from 'lucide-react';
-import { ATTRIBUTION_CONFIG } from '../data/attribution';
+import { getAttributionConfig } from '../data/attribution';
 import { playClick } from '../utils/sound';
 
-export default function AttributionModal({ isOpen, onClose }) {
+export default function AttributionModal({ isOpen, onClose, currentExamMeta }) {
   if (!isOpen) return null;
+  const config = getAttributionConfig(currentExamMeta);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/85 backdrop-blur-md animate-pop">
@@ -43,7 +44,7 @@ export default function AttributionModal({ isOpen, onClose }) {
               <span>出典の明記</span>
             </h4>
             <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-200 font-medium">
-              {ATTRIBUTION_CONFIG.sourceCredit}
+              {config.sourceCredit}
             </div>
           </div>
 
@@ -54,7 +55,7 @@ export default function AttributionModal({ isOpen, onClose }) {
               <span>著作権について</span>
             </h4>
             <p className="text-slate-300 text-[11px]">
-              {ATTRIBUTION_CONFIG.copyrightNotice}
+              {config.copyrightNotice}
             </p>
           </div>
 
@@ -65,7 +66,7 @@ export default function AttributionModal({ isOpen, onClose }) {
               <span>使用目的（教育目的）</span>
             </h4>
             <p className="text-slate-300 text-[11px]">
-              {ATTRIBUTION_CONFIG.purposeNotice}
+              {config.purposeNotice}
             </p>
           </div>
 
@@ -76,14 +77,14 @@ export default function AttributionModal({ isOpen, onClose }) {
               <span>問題の改変・表示調整について</span>
             </h4>
             <p className="text-slate-300 text-[11px]">
-              {ATTRIBUTION_CONFIG.modificationNotice}
+              {config.modificationNotice}
             </p>
           </div>
 
           {/* Official Link */}
           <div className="pt-2">
             <a
-              href={ATTRIBUTION_CONFIG.officialUrl}
+              href={config.officialUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 flex items-center justify-between text-sky-400 hover:text-sky-300 transition"

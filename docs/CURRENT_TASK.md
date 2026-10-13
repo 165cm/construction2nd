@@ -7,7 +7,7 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| なし | - | - | - |
+| Claude | claude/keen-einstein-0i4ebd | 令和7年度上期・令和6年度下期・上期の切り抜き位置の反映 | src/data/cropOverrides.json, src/utils/publishSync.js, src/data/examLoader.js |
 
 ## 次のタスク（上から優先）
 1. ✅ 利用者側の改善を3つのPRに分けて進める（完了）

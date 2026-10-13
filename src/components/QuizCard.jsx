@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, BookOpen, Shuffle } from 'lucide-react';
+import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, BookOpen, Shuffle, HelpCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound';
 import { cropKeyForDiagram, isCropFromFloorPlan } from '../utils/customCrops';
@@ -12,6 +12,9 @@ import { getCheatsheetsForQuestion } from '../data/cheatsheets';
 import { getShortSourceLabel } from '../data/attribution';
 
 const AUTO_ADVANCE_TIME_MS = 3000;
+
+// 「わからない」を選んだ時の印（選択肢の イ・ロ・ハ・ニ とは別）
+const UNKNOWN_CHOICE = '?';
 
 export default function QuizCard({
   question,
@@ -29,6 +32,7 @@ export default function QuizCard({
 }) {
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const isUnknownAnswer = selectedChoice === UNKNOWN_CHOICE;
   // 「もう一度」で解き直し中（学習記録・EXPには数えない）
   const [isRetry, setIsRetry] = useState(false);
   const [startTime, setStartTime] = useState(Date.now());
@@ -202,6 +206,7 @@ export default function QuizCard({
     playClick();
     const timeSpent = Math.max(1, (Date.now() - startTime) / 1000);
     const isCorrect = choiceId === question.answer;
+    const isUnknown = choiceId === UNKNOWN_CHOICE;
     
     setSelectedChoice(choiceId);
     setIsAnswered(true);
@@ -218,7 +223,7 @@ export default function QuizCard({
         origin: { y: 0.8 },
         colors: ['#38bdf8', '#0ea5e9', '#facc15', '#ffffff']
       });
-    } else {
+    } else if (!isUnknown) {
       playWrong();
       triggerHaptic('error');
     }
@@ -463,6 +468,18 @@ export default function QuizCard({
         })}
       </div>
 
+      {/* 答えがわからない時は、当てずっぽうで選ばずに正直に「わからない」（不正解として記録し、要復習に入る） */}
+      {!isAnswered && (
+        <button
+          type="button"
+          onClick={() => handleSelectChoice(UNKNOWN_CHOICE)}
+          className="w-full mb-4 min-h-[44px] py-2.5 px-3 rounded-xl border border-dashed border-slate-600 bg-slate-900/60 text-slate-300 hover:text-white hover:border-slate-500 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.99] transition"
+        >
+          <HelpCircle size={15} />
+          <span>わからない（正解と解説を見る）</span>
+        </button>
+      )}
+
       {/* Answer & Explanation Card (Always in DOM when answered, targeted by scroll) */}
       {isAnswered && (
         <div
@@ -495,7 +512,7 @@ export default function QuizCard({
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-rose-400 font-black text-sm">不正解… 要復習に追加</span>
+                      <span className="text-rose-400 font-black text-sm">{isUnknownAnswer ? 'わからない → 要復習に追加' : '不正解… 要復習に追加'}</span>
                     </div>
                     <div className="text-rose-300/90 text-[11px] font-medium mt-0.5">
                       🔥 忘却防止のため最優先（3問以内）で再出題されます
@@ -588,7 +605,7 @@ export default function QuizCard({
                 ) : (
                   <span className="flex items-center gap-1 font-black text-rose-400 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/40 text-[11px]">
                     <XCircle size={13} />
-                    <span>不正解</span>
+                    <span>{isUnknownAnswer ? 'わからない' : '不正解'}</span>
                   </span>
                 )}
                 <span className="text-slate-300 text-xs">

@@ -32,6 +32,11 @@ function cropOverridesWriter() {
               : {}
 
             for (const [key, c] of Object.entries(updates)) {
+              // 座標なしで「テキスト問題（画像なし）」の設定だけを持つ項目
+              if (c && c.showImage === false && c.page === undefined) {
+                current[String(key)] = { ...(current[String(key)] || {}), showImage: false }
+                continue
+              }
               const entry = {
                 page: toInt(c.page),
                 filename: String(c.filename || ''),
@@ -42,6 +47,7 @@ function cropOverridesWriter() {
                 label: String(c.label || '')
               }
               // 年度ごとの元ページ画像フォルダ（例: /pages/r7_2）。抜けると令和8年のページから切り抜かれる
+              if (typeof c.showImage === 'boolean') entry.showImage = c.showImage
               if (typeof c.pageDir === 'string' && /^\/pages(\/[a-z0-9_]+)?$/.test(c.pageDir)) {
                 entry.pageDir = c.pageDir
               }

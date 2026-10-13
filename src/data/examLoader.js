@@ -14,6 +14,23 @@ const EXAM_DATA_MAP = {
 };
 
 import { applyOverridesToQuestions } from '../utils/objections';
+import sharedCropOverrides from './cropOverrides.json';
+
+// 共有ファイル（cropOverrides.json）の showImage で、問題の「画像あり／テキスト問題」を全端末にそろえる
+const applySharedImageSetting = (examId, q) => {
+  const key = examId === 'r8_1' ? String(q.id) : `${examId}_${q.id}`;
+  const entry = sharedCropOverrides[key];
+  const showImage = entry?.showImage;
+  // 「画像あり」は切り抜き座標がそろっている時だけ（座標が無いと表示する画像が無いため）
+  if (showImage === true && !q.diagram && typeof entry.page === 'number') {
+    const diagram = examId === 'r8_1' ? `/crops/q${q.id}_diagram.png` : `/crops/${examId}/q${q.id}_diagram.png`;
+    return { ...q, diagram };
+  }
+  if (showImage === false && q.diagram) {
+    return { ...q, diagram: null };
+  }
+  return q;
+};
 
 export function getExamMeta(examId) {
   return EXAM_LIST.find(e => e.id === examId) || EXAM_LIST[0];
@@ -30,7 +47,7 @@ export function getExamQuestions(examId) {
     const isWiring = q.id >= 31;
     const floorPlanPageNum = meta.floorPlanPage || 15;
     return {
-      ...q,
+      ...applySharedImageSetting(meta.id, q),
       examId: meta.id,
       examName: meta.name,
       globalId,

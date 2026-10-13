@@ -303,7 +303,8 @@
     "w": 158,
     "h": 73,
     "label": "令7下 問1",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_2": {
     "page": 5,
@@ -312,7 +313,8 @@
     "w": 342,
     "h": 48,
     "label": "令7下 問2",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_3": {
     "page": 5,
@@ -321,7 +323,8 @@
     "w": 340,
     "h": 49,
     "label": "令7下 問3",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_4": {
     "page": 5,
@@ -330,7 +333,8 @@
     "w": 595,
     "h": 190,
     "label": "令7下 問4",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_5": {
     "page": 5,
@@ -339,7 +343,8 @@
     "w": 222,
     "h": 145,
     "label": "令7下 問5",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_6": {
     "page": 6,
@@ -348,7 +353,8 @@
     "w": 225,
     "h": 149,
     "label": "令7下 問6",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_7": {
     "page": 6,
@@ -357,7 +363,8 @@
     "w": 222,
     "h": 146,
     "label": "令7下 問7",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_8": {
     "page": 6,
@@ -366,7 +373,8 @@
     "w": 338,
     "h": 34,
     "label": "令7下 問8",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_9": {
     "page": 6,
@@ -375,7 +383,8 @@
     "w": 176,
     "h": 108,
     "label": "令7下 問9",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_10": {
     "page": 7,
@@ -384,7 +393,8 @@
     "w": 377,
     "h": 158,
     "label": "令7下 問10",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_11": {
     "page": 7,
@@ -393,7 +403,8 @@
     "w": 387,
     "h": 111,
     "label": "令7下 問11",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_1_1": {
     "page": 5,
@@ -411,7 +422,8 @@
     "w": 219,
     "h": 147,
     "label": "令7下 問16",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_17": {
     "page": 8,
@@ -420,7 +432,8 @@
     "w": 219,
     "h": 189,
     "label": "令7下 問17",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_18": {
     "page": 8,
@@ -429,7 +442,8 @@
     "w": 219,
     "h": 127,
     "label": "令7下 問18",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_23": {
     "page": 9,
@@ -438,7 +452,8 @@
     "w": 346,
     "h": 253,
     "label": "令7下 問23",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_24": {
     "page": 9,
@@ -447,7 +462,8 @@
     "w": 222,
     "h": 197,
     "label": "令7下 問24",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_27": {
     "page": 10,
@@ -456,7 +472,8 @@
     "w": 136,
     "h": 66,
     "label": "令7下 問27",
-    "pageDir": "/pages/r7_2"
+    "pageDir": "/pages/r7_2",
+    "showImage": true
   },
   "r7_2_floor_plan": {
     "page": 15,

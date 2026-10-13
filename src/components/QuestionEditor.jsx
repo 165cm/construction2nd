@@ -24,9 +24,14 @@ import {
 import { getAssetUrl } from '../utils/asset';
 import { playClick, triggerHaptic } from '../utils/sound';
 
-export default function QuestionEditor({ onOpenCropEditor }) {
-  const [selectedExamId, setSelectedExamId] = useState('r8_1');
-  const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
+// initialTarget: { examId, questionId } を渡すと、その問題を開いた状態で始まる（チェック一覧・異議ありから移動する時）
+export default function QuestionEditor({ onOpenCropEditor, initialTarget = null }) {
+  const [selectedExamId, setSelectedExamId] = useState(() => initialTarget?.examId || 'r8_1');
+  const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(() => {
+    if (!initialTarget) return 0;
+    const idx = getExamQuestions(initialTarget.examId).findIndex(q => String(q.id) === String(initialTarget.questionId));
+    return idx >= 0 ? idx : 0;
+  });
   const [overrides, setOverrides] = useState(getQuestionOverrides);
   const [copiedNotice, setCopiedNotice] = useState(false);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);

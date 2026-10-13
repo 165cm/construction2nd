@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Crop, FileEdit, Sparkles, Database, 
-  Download, Upload, CheckCircle2, ShieldCheck, RefreshCw, AlertTriangle
+  Download, Upload, CheckCircle2, ShieldCheck, RefreshCw, AlertTriangle, ClipboardCheck
 } from 'lucide-react';
 import AdminCropEditor from './AdminCropEditor';
 import PublishBar from './PublishBar';
+import QuestionChecklist from './QuestionChecklist';
 import { confirmDiscardUnsaved, hasUnsavedChanges } from '../utils/unsavedGuard';
 import QuestionEditor from './QuestionEditor';
 import ObjectionReviewer from './ObjectionReviewer';
@@ -25,8 +26,18 @@ export default function AdminHub({ onBack }) {
 
   // 保存していない変更があれば、タブを移る・アプリに戻る・ページを閉じる前に確認する
   const switchTab = (tab) => {
-    if (tab === activeTab || !confirmDiscardUnsaved()) return;
+    if (tab === activeTab) return true;
+    if (!confirmDiscardUnsaved()) return false;
     setActiveTab(tab);
+    return true;
+  };
+
+  // ②問題文エディタで、指定した問題を開く（チェック一覧・異議ありから）
+  const [editorTarget, setEditorTarget] = useState(null);
+  const openQuestionEditor = (examId, questionId) => {
+    if (!confirmDiscardUnsaved()) return;
+    setEditorTarget({ examId, questionId, openedAt: Date.now() });
+    setActiveTab('question');
   };
   const handleBack = () => {
     if (!confirmDiscardUnsaved()) return;
@@ -221,6 +232,18 @@ export default function AdminHub({ onBack }) {
             <Database size={15} />
             <span>④ バックアップ＆データ安全管理</span>
           </button>
+
+          <button
+            onClick={() => switchTab('checklist')}
+            className={`px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap ${
+              activeTab === 'checklist'
+                ? 'border-sky-400 text-sky-400 bg-sky-500/10'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <ClipboardCheck size={15} />
+            <span>⑤ 全問チェック</span>
+          </button>
         </div>
       </header>
 
@@ -236,13 +259,21 @@ export default function AdminHub({ onBack }) {
         )}
 
         {activeTab === 'question' && (
-          <QuestionEditor onOpenCropEditor={() => switchTab('crop')} />
+          <QuestionEditor
+            key={editorTarget?.openedAt || 'editor'}
+            initialTarget={editorTarget}
+            onOpenCropEditor={() => switchTab('crop')}
+          />
         )}
 
         {activeTab === 'objection' && (
           <ObjectionReviewer 
-            onOpenEditorWithQuestion={() => switchTab('question')}
+            onOpenEditorWithQuestion={(examId, questionId) => openQuestionEditor(examId, questionId)}
           />
+        )}
+
+        {activeTab === 'checklist' && (
+          <QuestionChecklist onOpenEditor={(examId, questionId) => openQuestionEditor(examId, questionId)} />
         )}
 
         {activeTab === 'backup' && (

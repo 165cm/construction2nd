@@ -87,3 +87,7 @@
 - 秘密の値（GitHub トークン・Turnstile シークレット）は Cloudflare の Worker の設定にだけ置く。準備手順は `workers/objection-receiver/README.md`
 - Worker は、許可したサイト（`ALLOWED_ORIGIN`）からの送信だけを受け付け、Turnstile を確かめてから issue を作る。利用者の文字は @ や # を無効化して載せる
 - 報告はその端末の LocalStorage（`denkou2_objections_v1`）にも残る（送信できたら issue 番号を記録）
+
+## 管理画面の「⑤ 全問チェック」
+
+`src/components/QuestionChecklist.jsx`。年度ごとに全問を見て、直すべき点（選択肢が4つない・空の選択肢・正解が選択肢にない・問題文や解説が空・画像ありなのに切り抜き位置も画像ファイルも無い・未対応の異議あり）を一覧にする。行を押すと②問題文エディタでその問題を開く（`AdminHub` の `openQuestionEditor`）。

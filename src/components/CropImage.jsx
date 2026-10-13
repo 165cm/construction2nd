@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAssetUrl } from '../utils/asset';
 import {
-  getLocalCropDataUrl,
-  getSharedCropCoords,
+  getActiveCropCoords,
   getCachedCropUrl,
   renderCropFromPage,
   cropSignature
@@ -10,7 +9,7 @@ import {
 
 /**
  * 問題画像の表示用コンポーネント。
- * 優先順位: この端末で保存したトリミング > 共有ファイルのトリミング > 初期画像
+ * 優先順位: 端末調整座標 > 共有ファイル座標 > 初期画像（事前切り抜き静的ファイル）
  */
 export default function CropImage({ cropKey, defaultPath, alt = '', className = '', draggable }) {
   const [, setVersion] = useState(0);
@@ -21,35 +20,32 @@ export default function CropImage({ cropKey, defaultPath, alt = '', className = 
     return () => window.removeEventListener('custom-crops-updated', onUpdate);
   }, []);
 
-  const localUrl = getLocalCropDataUrl(cropKey);
-  const shared = localUrl ? null : getSharedCropCoords(cropKey);
-  const sharedSig = shared ? cropSignature(shared) : null;
+  const activeCoords = getActiveCropCoords(cropKey);
+  const sig = activeCoords ? cropSignature(activeCoords) : null;
 
-  const [rendered, setRendered] = useState(() => (shared ? { sig: sharedSig, url: getCachedCropUrl(shared) } : null));
+  const [rendered, setRendered] = useState(() => (activeCoords ? { sig, url: getCachedCropUrl(activeCoords) } : null));
   const [failedSig, setFailedSig] = useState(null);
 
   useEffect(() => {
-    if (!shared) return undefined;
+    if (!activeCoords) return undefined;
     let alive = true;
-    renderCropFromPage(shared)
+    renderCropFromPage(activeCoords)
       .then((url) => {
-        if (alive) setRendered({ sig: sharedSig, url });
+        if (alive) setRendered({ sig, url });
       })
       .catch((err) => {
         console.error(err);
-        if (alive) setFailedSig(sharedSig);
+        if (alive) setFailedSig(sig);
       });
     return () => {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sharedSig]);
+  }, [sig]);
 
   let src = null;
-  if (localUrl) {
-    src = localUrl;
-  } else if (shared && failedSig !== sharedSig) {
-    src = rendered?.sig === sharedSig ? rendered.url : getCachedCropUrl(shared);
+  if (activeCoords && failedSig !== sig) {
+    src = rendered?.sig === sig ? rendered.url : getCachedCropUrl(activeCoords);
   } else {
     src = defaultPath ? getAssetUrl(defaultPath) : '';
   }

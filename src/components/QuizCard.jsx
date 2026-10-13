@@ -7,6 +7,7 @@ import { getShuffleChoicesSetting, setShuffleChoicesSetting } from '../utils/set
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
 import CheatsheetAccordion from './CheatsheetAccordion';
+import ObjectionModal from './ObjectionModal';
 import { getCheatsheetsForQuestion } from '../data/cheatsheets';
 
 const AUTO_ADVANCE_TIME_MS = 3000;
@@ -22,12 +23,14 @@ export default function QuizCard({
   totalQuestions = 50,
   currentIndex = 0,
   quizStep,
-  onOpenAttribution
+  onOpenAttribution,
+  currentExamMeta
 }) {
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [startTime, setStartTime] = useState(Date.now());
   const [showImageZoom, setShowImageZoom] = useState(false);
+  const [isObjectionOpen, setIsObjectionOpen] = useState(false);
   const [, setCropsVersion] = useState(0);
 
   // Auto-advance & floating popup state
@@ -293,6 +296,18 @@ export default function QuizCard({
             title="ブックマーク"
           >
             <Star size={16} className={isBookmarked ? 'fill-amber-400' : ''} />
+          </button>
+
+          <button
+            onClick={() => {
+              playClick();
+              setIsObjectionOpen(true);
+            }}
+            className="p-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 active:scale-95 transition flex items-center gap-1 text-[11px] font-bold"
+            title="この問題に異議あり！（問題・選択肢のツッコミ報告）"
+          >
+            <span>⚡️</span>
+            <span className="hidden sm:inline">異議あり</span>
           </button>
         </div>
       </div>
@@ -609,6 +624,14 @@ export default function QuizCard({
           ※ 電気工事士試験制度の趣旨に基づく学習教育目的利用・表示レイアウト最適化
         </p>
       </div>
+
+      {/* 5-Second Gamified Objection Modal */}
+      <ObjectionModal
+        isOpen={isObjectionOpen}
+        onClose={() => setIsObjectionOpen(false)}
+        question={question}
+        examMeta={currentExamMeta}
+      />
     </div>
   );
 }

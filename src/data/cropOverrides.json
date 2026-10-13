@@ -324,7 +324,7 @@
     "h": 49,
     "label": "令7下 問3",
     "pageDir": "/pages/r7_2",
-    "showImage": true
+    "showImage": false
   },
   "r7_2_4": {
     "page": 5,
@@ -404,7 +404,7 @@
     "h": 111,
     "label": "令7下 問11",
     "pageDir": "/pages/r7_2",
-    "showImage": true
+    "showImage": false
   },
   "r7_1_1": {
     "page": 5,

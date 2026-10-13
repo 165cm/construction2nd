@@ -11,12 +11,16 @@ import { DEFAULT_CROPS } from '../data/cropsConfig';
 
 // 問題の画像パス（例: /crops/floor_plan.png）から、管理画面のトリミング設定キーを求める
 export const cropKeyForDiagram = (questionId, diagramPath, examId) => {
+  if (diagramPath && diagramPath.includes('floor_plan')) {
+    return examId && examId !== 'r8_1' ? `${examId}_floor_plan` : 'floor_plan';
+  }
+  if (diagramPath && diagramPath.includes('panel_schedule')) {
+    return examId && examId !== 'r8_1' ? `${examId}_panel_schedule` : 'panel_schedule';
+  }
   if (examId && examId !== 'r8_1') {
     return `${examId}_${questionId}`;
   }
-  const file = (diagramPath || '').split('/').pop();
-  const found = Object.keys(DEFAULT_CROPS).find((k) => DEFAULT_CROPS[k].filename === file);
-  return found ?? (examId ? `${examId}_${questionId}` : String(questionId));
+  return String(questionId);
 };
 
 const STORAGE_KEY = 'denkou_custom_crops_v1';

@@ -52,27 +52,46 @@ const writeSharedOverrides = async (updates = {}, removals = []) => {
 export default function AdminCropEditor({ onBack, isEmbedded = false }) {
   const [selectedExamId, setSelectedExamId] = useState('r8_1');
   const examMeta = EXAM_LIST.find(e => e.id === selectedExamId) || EXAM_LIST[0];
+  const [overridesVersion, setOverridesVersion] = useState(0);
 
-  // 対象試験に応じたアイテム一覧の生成
+  useEffect(() => {
+    const handleOverridesUpdate = () => setOverridesVersion(v => v + 1);
+    window.addEventListener('question-overrides-updated', handleOverridesUpdate);
+    return () => window.removeEventListener('question-overrides-updated', handleOverridesUpdate);
+  }, []);
+
+  // 対象試験に応じたアイテム一覧の生成（画像不要の問題はスキップ・除外）
   const cropItems = React.useMemo(() => {
-    if (selectedExamId === 'r8_1') {
-      const list = Object.keys(DEFAULT_CROPS).map(k => ({
-        key: k,
-        label: DEFAULT_CROPS[k].label || `問${k}`,
-        page: DEFAULT_CROPS[k].page,
-        defaultCoords: DEFAULT_CROPS[k]
-      }));
-      return list;
-    }
-
-    // 他年度の場合：Q1〜Q50 ＋ 配線図（平面図・分電盤）
     const examQuestions = getExamQuestions(selectedExamId);
-    const list = examQuestions.map(q => {
+    // 画像が必要な問題のみを抽出（diagram が null または空のものはスキップ）
+    const imageQuestions = examQuestions.filter(q => Boolean(q.diagram));
+
+    const list = imageQuestions.map(q => {
       const pageMatch = q.fullPage?.match(/page_(\d+)\.png/);
       const pageNum = pageMatch ? parseInt(pageMatch[1], 10) : 5;
+
+      if (selectedExamId === 'r8_1') {
+        const defCrop = DEFAULT_CROPS[String(q.id)];
+        return {
+          key: String(q.id),
+          label: defCrop?.label || `問${q.id} ${q.categoryTag || q.category || ''}`,
+          page: defCrop?.page || pageNum,
+          defaultCoords: defCrop || {
+            page: pageNum,
+            pageDir: examMeta.pageDir,
+            x: 200,
+            y: 350,
+            w: 500,
+            h: 320,
+            label: `${examMeta.badge} 問${q.id}`
+          }
+        };
+      }
+
+      // 他年度の場合
       return {
         key: `${selectedExamId}_${q.id}`,
-        label: `問${q.id} ${q.categoryTag || q.category}`,
+        label: `問${q.id} ${q.categoryTag || q.category || ''}`,
         page: pageNum,
         defaultCoords: {
           page: pageNum,
@@ -86,38 +105,57 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       };
     });
 
-    // 配線図2種を追加
-    list.push({
-      key: `${selectedExamId}_floor_plan`,
-      label: '配線図: 平面図',
-      page: examMeta.floorPlanPage || 15,
-      defaultCoords: {
-        page: examMeta.floorPlanPage || 15,
-        pageDir: examMeta.pageDir,
-        x: 200,
-        y: 100,
-        w: 1300,
-        h: 1400,
-        label: `${examMeta.badge} 配線図: 平面図`
+    // 配線図2種を追加（常に画像が必要）
+    if (selectedExamId === 'r8_1') {
+      if (DEFAULT_CROPS['floor_plan']) {
+        list.push({
+          key: 'floor_plan',
+          label: DEFAULT_CROPS['floor_plan'].label || '配線図: 平面図',
+          page: DEFAULT_CROPS['floor_plan'].page || 15,
+          defaultCoords: DEFAULT_CROPS['floor_plan']
+        });
       }
-    });
-    list.push({
-      key: `${selectedExamId}_panel_schedule`,
-      label: '配線図: 分電盤結線図',
-      page: examMeta.floorPlanPage || 15,
-      defaultCoords: {
-        page: examMeta.floorPlanPage || 15,
-        pageDir: examMeta.pageDir,
-        x: 200,
-        y: 1500,
-        w: 1300,
-        h: 700,
-        label: `${examMeta.badge} 配線図: 分電盤結線図`
+      if (DEFAULT_CROPS['panel_schedule']) {
+        list.push({
+          key: 'panel_schedule',
+          label: DEFAULT_CROPS['panel_schedule'].label || '配線図: 分電盤結線図',
+          page: DEFAULT_CROPS['panel_schedule'].page || 15,
+          defaultCoords: DEFAULT_CROPS['panel_schedule']
+        });
       }
-    });
+    } else {
+      list.push({
+        key: `${selectedExamId}_floor_plan`,
+        label: '配線図: 平面図',
+        page: examMeta.floorPlanPage || 15,
+        defaultCoords: {
+          page: examMeta.floorPlanPage || 15,
+          pageDir: examMeta.pageDir,
+          x: 200,
+          y: 100,
+          w: 1300,
+          h: 1400,
+          label: `${examMeta.badge} 配線図: 平面図`
+        }
+      });
+      list.push({
+        key: `${selectedExamId}_panel_schedule`,
+        label: '配線図: 分電盤結線図',
+        page: examMeta.floorPlanPage || 15,
+        defaultCoords: {
+          page: examMeta.floorPlanPage || 15,
+          pageDir: examMeta.pageDir,
+          x: 200,
+          y: 1500,
+          w: 1300,
+          h: 700,
+          label: `${examMeta.badge} 配線図: 分電盤結線図`
+        }
+      });
+    }
 
     return list;
-  }, [selectedExamId, examMeta]);
+  }, [selectedExamId, examMeta, overridesVersion]);
 
   const cropKeys = cropItems.map(item => item.key);
 
@@ -178,31 +216,24 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     if (!targetQuestionNumber) return null;
     const questions = getExamQuestions(selectedExamId);
     return questions.find(q => q.id === targetQuestionNumber) || null;
-  }, [selectedExamId, targetQuestionNumber]);
+  }, [selectedExamId, targetQuestionNumber, overridesVersion]);
 
-  // この問がテキスト問題化（diagram: null）されているかどうか
-  const isTextOnlyQuestion = Boolean(targetQuestionObj && targetQuestionObj.diagram === null);
-
-  // テキスト問題化 ⇄ 画像出題のトグル切り替え
-  const handleToggleTextOnly = () => {
+  // テキスト問題化（画像不要として一覧からスキップ・除外＆高速出題化）
+  const handleConvertToTextOnly = () => {
     if (!targetQuestionObj || !targetQuestionNumber) return;
     playClick();
 
-    if (isTextOnlyQuestion) {
-      // 画像出題に戻す
-      const defaultDiag = `/crops/q${targetQuestionNumber}_diagram.png`;
-      saveQuestionOverride(selectedExamId, targetQuestionNumber, {
-        ...targetQuestionObj,
-        diagram: defaultDiag
-      });
-      showMessage(`🖼️ 問${targetQuestionNumber} を「画像付き問題」に戻しました`);
-    } else {
-      // テキスト問題化（diagram: null）
-      saveQuestionOverride(selectedExamId, targetQuestionNumber, {
-        ...targetQuestionObj,
-        diagram: null
-      });
-      showMessage(`📝 問${targetQuestionNumber} を「テキスト問題」に変更しました（画像を非表示・高速出題化）`);
+    const nextCandidate = nextKey || prevKey;
+
+    saveQuestionOverride(selectedExamId, targetQuestionNumber, {
+      ...targetQuestionObj,
+      diagram: null
+    });
+
+    showMessage(`📝 問${targetQuestionNumber} を「テキスト問題（画像不要）」に変更しました。トリミング一覧からスキップされます。（※再度画像が必要な場合は「②問題文エディタ」から設定できます）`, 5000);
+
+    if (nextCandidate) {
+      setSelectedKey(nextCandidate);
     }
   };
 
@@ -632,15 +663,11 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
         <div className="flex items-center gap-2">
           {targetQuestionNumber && (
             <button
-              onClick={handleToggleTextOnly}
-              className={`py-1.5 px-3 rounded-xl font-black text-xs flex items-center gap-1.5 border transition active:scale-95 shadow-sm ${
-                isTextOnlyQuestion
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 hover:bg-amber-500/30'
-                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-              }`}
-              title={isTextOnlyQuestion ? "タップして画像表示に戻す" : "画像を表示せずテキスト問題として出題する"}
+              onClick={handleConvertToTextOnly}
+              className="py-1.5 px-3 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-sm"
+              title="この問の画像を不要にし、テキスト問題として出題します（トリミング一覧から除外されます）"
             >
-              <span>{isTextOnlyQuestion ? '🖼️ 画像出題に戻す' : '📝 テキスト問題化（画像不要）'}</span>
+              <span>📝 テキスト問題化（画像不要）</span>
             </button>
           )}
 
@@ -799,28 +826,10 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
             </div>
           </div>
 
-          {/* テキスト問題化状態の案内バナー */}
-          {isTextOnlyQuestion && (
-            <div className="mb-3 p-3 bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs rounded-xl flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-base flex-shrink-0">📝</span>
-                <span className="font-bold leading-relaxed">
-                  問{targetQuestionNumber} は現在「テキスト問題（画像不要）」として出題されています（アプリ上で画像非表示・高速出題中）。
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleToggleTextOnly}
-                className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-sky-300 border border-slate-700 rounded-lg text-[11px] font-bold flex-shrink-0 transition"
-              >
-                画像出題に戻す
-              </button>
-            </div>
-          )}
-
-          <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
-            💡 赤枠の中をつかんでドラッグ移動、四隅の丸いハンドルをつかんで拡大・縮小できます。
-          </p>
+          <div className="flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-400 mb-2 leading-relaxed">
+            <span>💡 赤枠の中をつかんでドラッグ移動、四隅の丸いハンドルをつかんで拡大・縮小できます。</span>
+            <span className="text-slate-500 text-[10px]">（※画像不要の問題はスキップ中 / 画像が必要な場合は「②問題文エディタ」で設定可能）</span>
+          </div>
 
           <div
             ref={containerRef}

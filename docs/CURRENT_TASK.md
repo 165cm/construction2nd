@@ -7,10 +7,12 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| - | - | 待機中（ユーザーからの次回指示待ち） | - |
+| Antigravity | feat/skip-text-only-in-crop-admin | 画像不要の問題をトリミング一覧でスキップ（除外）＆画像が必要な場合は問題文エディタから追加・設定する連動の最適化 | `src/components/AdminCropEditor.jsx`, `src/components/QuestionEditor.jsx`, `src/utils/customCrops.js` |
 
 ## 次のタスク（上から優先）
-1. ユーザーからのフィードバック確認および次の要望対応
+1. AdminCropEditor で `diagram: null`（画像不要）の問題を cropItems からスキップ・除外
+2. QuestionEditor で画像あり設定時にトリミング一覧へ即座に追加・反映される連動の整理
+3. 動作確認およびPR作成、ユーザーへの本番公開確認
 
 ## 最近終わったこと（新しい順）
 - PR #18 マージ＆本番デプロイ完了（画像問題のテキスト問題化トグル機能：QuestionEditorとAdminCropEditorの両方に配備、diagram: null上書きとQuizCardでのテキスト高速出題化）

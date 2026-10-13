@@ -2,8 +2,10 @@
 import { updateSpacedRepetitionRecord } from './spacedRepetition';
 
 const STORAGE_KEY = 'denkou2_mastery_state_v1';
-// 記録の形式の版。2 = 年度ごとに記録を分ける形式（records のキーが "r8_1_12" のような年度付き）
-const STATE_SCHEMA_VERSION = 2;
+// 記録の形式の版。
+// 2 = 年度ごとに記録を分ける形式（records のキーが "r8_1_12" のような年度付き）
+// 3 = マスター判定を「2回連続正解」にそろえた（旧判定のマスターを補正済み）
+const STATE_SCHEMA_VERSION = 3;
 const CURRENT_EXAM_STORAGE_KEY = 'denkou2_current_exam_id';
 const FALLBACK_EXAM_ID = 'r8_1';
 
@@ -63,6 +65,14 @@ const readCurrentExamId = () => {
   } catch (e) {
     return FALLBACK_EXAM_ID;
   }
+};
+
+// 旧判定では「正解→不正解→正解」のような連続していない2回正解でもマスターになっていた。
+// 新しい判定（2回連続正解＝Box 3 以上）に合わない記録は「定着中」に戻す。
+const normalizeLegacyRecord = (rec) => {
+  if (!rec || rec.status !== 'mastered') return rec;
+  if ((rec.box || 1) >= 3 || (rec.consecutiveCorrect || 0) >= 2) return rec;
+  return { ...rec, status: 'correct' };
 };
 
 // 旧形式（問題番号だけのキー）の記録を、年度付きキーへ引き継ぐ。
@@ -131,10 +141,18 @@ export const loadState = () => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getInitialState();
     let parsed = JSON.parse(raw);
-    const needsMigration = (parsed.schemaVersion || 1) < STATE_SCHEMA_VERSION;
-    if (needsMigration) {
+    const version = parsed.schemaVersion || 1;
+    const needsMigration = version < STATE_SCHEMA_VERSION;
+    if (version < 2) {
       parsed = migrateLegacyState(parsed);
     }
+    if (version < 3) {
+      parsed = {
+        ...parsed,
+        records: Object.fromEntries(Object.entries(parsed.records || {}).map(([k, v]) => [k, normalizeLegacyRecord(v)]))
+      };
+    }
+    parsed.schemaVersion = STATE_SCHEMA_VERSION;
     const initial = getInitialState();
     const state = { ...initial, ...parsed };
     state.records = state.records || {};

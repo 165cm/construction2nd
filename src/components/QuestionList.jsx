@@ -7,7 +7,9 @@ export default function QuestionList({
   state,
   onSelectQuestion,
   onToggleBookmark,
-  onOpenAttribution
+  onOpenAttribution,
+  currentExamMeta,
+  onOpenExamSelect
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
@@ -56,7 +58,27 @@ export default function QuestionList({
   return (
     <div className="pb-24">
       {/* Search and Filter Section */}
-      <div className="sticky top-[74px] z-20 bg-slate-900/95 backdrop-blur-md pt-2 pb-3 border-b border-slate-800 -mx-3 px-3 shadow-md">
+      <div className="sticky top-[48px] z-20 bg-slate-900/95 backdrop-blur-md pt-2 pb-2.5 border-b border-slate-800 -mx-3 px-3 shadow-md">
+        {/* Exam Title + Change Pill */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-1.5">
+            <span className="text-xs font-bold text-slate-200">
+              {currentExamMeta?.name || '令和8年度 上期'}
+            </span>
+            <span className="text-[10px] text-slate-400">
+              （全{allQuestions.length}問）
+            </span>
+          </div>
+          {onOpenExamSelect && (
+            <button
+              onClick={() => { playClick(); onOpenExamSelect(); }}
+              className="text-[10px] font-bold text-sky-400 hover:text-sky-300 bg-sky-950/40 hover:bg-sky-900/50 border border-sky-400/30 px-2 py-0.5 rounded-lg active:scale-95 transition"
+            >
+              年度切替 ▾
+            </button>
+          )}
+        </div>
+
         {/* Search Input */}
         <div className="relative mb-2.5">
           <Search size={16} className="absolute left-3 top-3 text-slate-400" />

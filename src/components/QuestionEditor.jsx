@@ -870,6 +870,22 @@ export default function QuestionEditor({ onOpenCropEditor, initialTarget = null 
           <p className="text-[10px] text-slate-500 text-center">
             ※ 赤枠をドラッグして移動・リサイズ、または原本画像をドラッグして新しいトリム枠を描画できます。
           </p>
+
+          {/* 解答の原本（試験センターの解答PDFの解答表。scripts/build_answer_pages.py で作成） */}
+          <div className="bg-slate-950 border border-slate-800 rounded-xl p-2 space-y-1.5">
+            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+              <span className="font-bold text-slate-300">解答の原本（全50問）</span>
+              <span>問{questionId} の解答と、上の「公式正解【{currentQuestion?.answer}】」を見比べてください</span>
+            </div>
+            <img
+              key={examMeta.pageDir}
+              src={getAssetUrl(`${examMeta.pageDir || '/pages'}/answer.webp`)}
+              alt={`${examMeta.name || ''} 解答の原本`}
+              className="w-full rounded bg-white select-none"
+              draggable="false"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          </div>
         </div>
 
         {/* 右側：出題・正解プレビュー ＆ テキスト編集フォーム */}

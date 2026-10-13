@@ -38,15 +38,22 @@ const corsHeaders = (origin, env) => {
 const json = (status, body, headers) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...headers } });
 
-// 利用者の文字を issue に安全に載せる（@メンション・#番号リンク・Markdown の見出し等を無効化）
+// 利用者の文字を issue に安全に載せる。
+// @メンション・#番号リンクを無効化し、Markdown の記号（リンク・画像・見出し・強調・HTML など）はすべてエスケープする
 const sanitize = (value, max) =>
   String(value ?? '')
     .slice(0, max)
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
     .replace(/@/g, '＠')
     .replace(/#/g, '＃')
-    .replace(/`/g, '｀');
+    .replace(/`/g, '｀')
+    .replace(/[\\*_[\]()<>!|~{}+\-=.:&]/g, (c) => `\\${c}`);
 
+// 1行で載せる値（改行を空白にする）
+const oneLine = (value, max) => sanitize(value, max).replace(/\n+/g, ' ');
+
+// 引用ブロックとして載せる（各行の先頭に > を付け、引用の外に出られないようにする）
 const quote = (text) => (text ? text.split('\n').map((l) => `> ${l}`).join('\n') : '> （コメントなし）');
 
 const verifyTurnstile = async (token, ip, env) => {
@@ -61,14 +68,14 @@ const verifyTurnstile = async (token, ip, env) => {
 };
 
 const buildIssue = (r) => {
-  const examName = sanitize(r.examName, 40);
-  const examId = sanitize(r.examId, 20).replace(/[^a-z0-9_]/g, '');
+  const examName = oneLine(r.examName, 40);
+  const examId = String(r.examId ?? '').slice(0, 20).replace(/[^a-z0-9_]/g, '');
   const number = Number.parseInt(r.questionNumber, 10);
   const categoryLabel = CATEGORY_LABELS[r.category] || 'その他';
   const comment = sanitize(r.comment, MAX_COMMENT).trim();
   const snap = r.questionSnapshot || {};
   const choices = Array.isArray(snap.choices)
-    ? snap.choices.slice(0, 4).map((c) => `- ${sanitize(c?.id, 2)}：${sanitize(c?.text, 200)}`).join('\n')
+    ? snap.choices.slice(0, 4).map((c) => `> ${oneLine(c?.id, 2)}：${oneLine(c?.text, 200)}`).join('\n')
     : '';
 
   const title = `【異議あり】${examName} 問${Number.isFinite(number) ? number : '?'}：${categoryLabel}`;
@@ -87,13 +94,34 @@ const buildIssue = (r) => {
     '',
     choices,
     '',
-    `- アプリ上の正解：${sanitize(snap.answer, 2) || '不明'}`,
+    `- アプリ上の正解：${oneLine(snap.answer, 2) || '不明'}`,
     '',
     '---',
     '原本（電気技術者試験センターの公表問題）と照らし合わせて確認してください。直す場合は、管理画面で修正 → 反映用データ → PR の流れで反映します。'
   ].join('\n');
 
   return { title, body, labels: ['異議あり', examId].filter(Boolean) };
+};
+
+const githubHeaders = (env) => ({
+  Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+  Accept: 'application/vnd.github+json',
+  'User-Agent': 'denkou2-objection-receiver',
+  'X-GitHub-Api-Version': '2022-11-28',
+  'Content-Type': 'application/json'
+});
+
+const LABEL_COLORS = { 異議あり: 'f59e0b' };
+
+// 使うラベルが無ければ作る（「既にある」エラーは無視）
+const ensureLabels = async (labels, env) => {
+  await Promise.all(labels.map((name) =>
+    fetch(`https://api.github.com/repos/${env.GITHUB_REPO}/labels`, {
+      method: 'POST',
+      headers: githubHeaders(env),
+      body: JSON.stringify({ name, color: LABEL_COLORS[name] || '64748b' })
+    }).catch(() => null)
+  ));
 };
 
 export default {
@@ -120,15 +148,11 @@ export default {
     if (!human) return json(403, { ok: false, error: 'turnstile failed' }, cors);
 
     const issue = buildIssue(report);
+    // ラベルが無いと issue に付かないため、先に作っておく（既にあればそのまま）
+    await ensureLabels(issue.labels, env);
     const res = await fetch(`https://api.github.com/repos/${env.GITHUB_REPO}/issues`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'denkou2-objection-receiver',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'Content-Type': 'application/json'
-      },
+      headers: githubHeaders(env),
       body: JSON.stringify(issue)
     });
     if (!res.ok) {

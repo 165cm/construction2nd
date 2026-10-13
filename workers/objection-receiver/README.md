@@ -38,7 +38,7 @@
 1. Cloudflare の管理画面の左メニューから **Workers & Pages** → 「作成（Create）」→ 「Worker を作成」
 2. 名前：`objection-receiver` → 「デプロイ（Deploy）」
 3. 「コードを編集（Edit code）」を押し、中身をすべて消して、このフォルダの `worker.js` の中身を貼り付け → 「デプロイ」
-4. Worker の **設定（Settings）→ 変数とシークレット（Variables and Secrets）** で、次の4つを追加します
+4. Worker の **Settings → Variables and Secrets** の「Add」で、次の4つを追加します（秘密の2つは Value 欄の右の **Secret にチェック**）
 
    | 名前 | 種類 | 値 |
    |---|---|---|
@@ -63,5 +63,6 @@
 ## メモ
 
 - 報告は、リポジトリが公開のあいだは誰でも見られます（アプリ側に「個人情報は書かないで」と表示しています）。リポジトリを非公開にすると issue も非公開になります。非公開にしても、トークンの設定はそのままで動きます
-- `worker.js` を直したときは、手順4-3と同じように貼り付け直してデプロイします
+- `worker.js` を直したときは、Cloudflare の Worker の画面で「Edit code」を押し、中身を新しい `worker.js` に貼り替えて「Deploy」します（設定した4つの値はそのまま残ります）
+- ラベル「異議あり」と年度ID（`r8_1` など）は、無ければ Worker が自動で作ります
 - 無料枠：Workers は1日10万回まで。Turnstile は無料

@@ -45,6 +45,8 @@ export default function QuestionEditor() {
 
   // フォーム編集用のローカルステート
   const [formData, setFormData] = useState({
+    hasDiagram: false,
+    diagram: null,
     question: '',
     choices: [
       { id: 'イ', text: '' },
@@ -66,6 +68,8 @@ export default function QuestionEditor() {
     const source = currentOverride || currentQuestion;
 
     setFormData({
+      hasDiagram: Boolean(source.diagram),
+      diagram: source.diagram || null,
       question: source.question || '',
       choices: source.choices ? JSON.parse(JSON.stringify(source.choices)) : [
         { id: 'イ', text: '' },
@@ -107,6 +111,7 @@ export default function QuestionEditor() {
   const handleSave = () => {
     const updated = {
       ...currentQuestion,
+      diagram: formData.hasDiagram ? (formData.diagram || currentQuestion.diagram || `/crops/q${questionId}_diagram.png`) : null,
       question: formData.question,
       choices: formData.choices,
       answer: formData.answer,
@@ -444,6 +449,42 @@ export default function QuestionEditor() {
               >
                 <Save size={13} />
                 <span>{saveSuccessNotice ? '保存完了！' : 'この問を保存'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 出題形式トグル（テキスト問題化 ⇄ 画像問題化） */}
+          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-black text-slate-300">出題形式:</span>
+              <span className="text-[10px] text-slate-400">
+                {formData.hasDiagram ? '🖼️ 図・写真を表示' : '📝 テキストのみ（高速出題）'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-slate-700/60">
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, hasDiagram: false }))}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-black transition flex items-center gap-1 ${
+                  !formData.hasDiagram
+                    ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+                title="図面画像を表示せず、テキストと選択肢ボタンのみで出題"
+              >
+                <span>📝 テキストのみ</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, hasDiagram: true }))}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-black transition flex items-center gap-1 ${
+                  formData.hasDiagram
+                    ? 'bg-sky-500 text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+                title="問題図・器具写真を表示して出題"
+              >
+                <span>🖼️ 図面・写真あり</span>
               </button>
             </div>
           </div>

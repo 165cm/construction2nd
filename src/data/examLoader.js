@@ -15,6 +15,23 @@ const EXAM_DATA_MAP = {
 
 import { applyOverridesToQuestions } from '../utils/objections';
 import sharedCropOverrides from './cropOverrides.json';
+import sharedQuestionOverrides from './questionOverrides.json';
+
+// 全端末に反映する問題文の修正（questionOverrides.json）で書き換えてよい項目
+export const QUESTION_TEXT_FIELDS = ['question', 'choices', 'answer', 'explanation', 'keyPoint', 'category', 'categoryTag'];
+
+// 共有ファイル（questionOverrides.json）の問題文の修正を合成する
+const applySharedQuestionOverride = (examId, q) => {
+  const fix = sharedQuestionOverrides?.[examId]?.[String(q.id)];
+  if (!fix) return q;
+  const next = { ...q };
+  QUESTION_TEXT_FIELDS.forEach((f) => {
+    if (fix[f] !== undefined) next[f] = fix[f];
+  });
+  return next;
+};
+
+export const getSharedQuestionOverrides = () => sharedQuestionOverrides || {};
 
 // 共有ファイル（cropOverrides.json）の showImage で、問題の「画像あり／テキスト問題」を全端末にそろえる
 const applySharedImageSetting = (examId, q) => {
@@ -56,7 +73,8 @@ export function getExamMeta(examId) {
   return EXAM_LIST.find(e => e.id === examId) || EXAM_LIST[0];
 }
 
-export function getExamQuestions(examId) {
+// 公開サイトの全端末で同じになる問題データ（元データ＋共有ファイルの修正。管理者のブラウザ内の修正は含まない）
+export function getSharedExamQuestions(examId) {
   const meta = getExamMeta(examId);
   const rawList = EXAM_DATA_MAP[examId] || EXAM_DATA_MAP[DEFAULT_EXAM_ID];
   
@@ -66,11 +84,13 @@ export function getExamQuestions(examId) {
     // 31問以降は配線図問題のため、原本配線図ページ（P15）を紐付け
     const isWiring = q.id >= 31;
     const floorPlanPageNum = meta.floorPlanPage || 15;
+    // 共有ファイルの「画像あり／なし」と問題文の修正を反映
+    const base = applySharedQuestionOverride(meta.id, applySharedImageSetting(meta.id, q));
     return {
       // 問題文が載っている原本ページ（配線図問題でも、問題文側の図や写真を切り抜くときに使う）
       questionPage: getQuestionTextPage(q, floorPlanPageNum),
-      ...applySharedImageSetting(meta.id, q),
-      category: normalizeCategory(q.category),
+      ...base,
+      category: normalizeCategory(base.category),
       examId: meta.id,
       examName: meta.name,
       globalId,
@@ -80,8 +100,13 @@ export function getExamQuestions(examId) {
     };
   });
 
-  // 管理者画面等で保存されたローカルオーバーライド（手動修正/AI承認済みデータ）を合成反映
-  return applyOverridesToQuestions(meta.id, formattedList);
+  return formattedList;
+}
+
+export function getExamQuestions(examId) {
+  const meta = getExamMeta(examId);
+  // 管理者画面等で保存されたローカルオーバーライド（この端末だけの手動修正）を合成反映
+  return applyOverridesToQuestions(meta.id, getSharedExamQuestions(examId));
 }
 
 const STORAGE_EXAM_KEY = 'denkou2_current_exam_id';

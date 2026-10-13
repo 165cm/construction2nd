@@ -31,6 +31,8 @@ import {
   CAN_WRITE_SHARED,
   writeSharedOverrides
 } from '../utils/customCrops';
+import { buildPublishBundle } from '../utils/publishSync';
+import { setUnsavedChanges, confirmDiscardUnsaved } from '../utils/unsavedGuard';
 import { getAssetUrl } from '../utils/asset';
 import { playClick, triggerHaptic } from '../utils/sound';
 
@@ -170,6 +172,8 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
   };
 
   const [coords, setCoords] = useState(currentItem.defaultCoords);
+  // 開いた時（または保存した時）の枠。今の枠と違えば「未保存」
+  const [loadedCoords, setLoadedCoords] = useState(currentItem.defaultCoords);
   const [pageNumber, setPageNumber] = useState(currentItem.page);
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
@@ -299,6 +303,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     };
 
     setCoords(normalizedCoords);
+    setLoadedCoords(normalizedCoords);
     setPageNumber(resolvedPage);
     setIsImageLoading(true);
   }, [selectedKey, selectedExamId, currentItem, examMeta, targetQuestionNumber]);
@@ -333,18 +338,32 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     updatePreview();
   }, [coords, pageNumber]);
 
+  // 保存していない変更があるか（枠の位置・大きさ・ページ）
+  const isDirty = ['page', 'x', 'y', 'w', 'h'].some(f => Math.round(coords?.[f] ?? 0) !== Math.round(loadedCoords?.[f] ?? 0));
+  useEffect(() => {
+    setUnsavedChanges(isDirty);
+  }, [isDirty]);
+  useEffect(() => () => setUnsavedChanges(false), []);
+
+  // 別の画像・年度へ移る（保存していない変更があれば確認）
+  const selectKey = (key) => {
+    if (!key || key === selectedKey) return;
+    if (isDirty && !confirmDiscardUnsaved()) return;
+    setSelectedKey(key);
+  };
+
   // Navigation handlers
   const handlePrev = () => {
     if (prevKey) {
       playClick();
-      setSelectedKey(prevKey);
+      selectKey(prevKey);
     }
   };
 
   const handleNext = () => {
     if (nextKey) {
       playClick();
-      setSelectedKey(nextKey);
+      selectKey(nextKey);
     }
   };
 
@@ -398,6 +417,9 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       }
 
       triggerHaptic('success');
+      // 保存した枠を「開いた時の枠」にする（未保存の表示を消す）
+      setCoords(savedCoords);
+      setLoadedCoords(savedCoords);
       refreshSavedCount();
       const label = coords.label || `問${selectedKey}`;
 
@@ -456,21 +478,17 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     e.target.value = '';
   };
 
-  // この端末で保存した座標（共有ファイルの内容と合わせたもの）
-  const collectShareData = () => {
-    return exportAllCropsData();
-  };
 
   // 全端末へ反映するデータ（座標のJSON）をコピー
   const handleCopyShareData = async () => {
     playClick();
-    // exportAllCropsData() は既にJSON文字列なので、そのまま使う（二重にJSON化しない）
-    const text = collectShareData();
+    // 切り抜き位置・画像あり／なし・問題文の修正をまとめた「反映用データ」
+    const text = JSON.stringify(buildPublishBundle(), null, 2);
     try {
       await navigator.clipboard.writeText(text);
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 3000);
-      showMessage('📋 コピーしました。AIとのチャットに貼り付けて「トリミングを反映して」と伝えてください', 6000);
+      showMessage('📋 コピーしました。AIとのチャットに貼り付けて「反映して」と伝えてください', 6000);
     } catch (e) {
       window.prompt('自動コピーできませんでした。下の文字をすべて選択してコピーしてください', text);
     }
@@ -510,6 +528,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       : ((!CAN_WRITE_SHARED && getSharedOverrides()[selectedKey]) || DEFAULT_CROPS[selectedKey] || currentItem.defaultCoords);
     if (def) {
       setCoords(def);
+      setLoadedCoords(def);
       setPageNumber(def.page);
     }
     refreshSavedCount();
@@ -531,6 +550,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       const def = isWiring ? currentItem.defaultCoords : (DEFAULT_CROPS[selectedKey] || currentItem.defaultCoords);
       if (def) {
         setCoords(def);
+        setLoadedCoords(def);
         setPageNumber(def.page);
       }
       refreshSavedCount();
@@ -703,9 +723,16 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
             </button>
           )}
 
+          {isDirty && (
+            <span className="px-2 py-1 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-[11px] font-black animate-pulse">
+              ● 未保存
+            </span>
+          )}
           <button
             onClick={handleSave}
-            className="py-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition"
+            className={`min-h-[44px] py-1.5 px-3 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition ${
+              isDirty ? 'bg-amber-500 hover:bg-amber-400 ring-2 ring-amber-300' : 'bg-emerald-600 hover:bg-emerald-500'
+            }`}
           >
             <Save size={14} />
             <span>保存・反映</span>
@@ -720,7 +747,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
         </div>
       ) : (
         <div className="bg-amber-950/60 border-b border-amber-700/40 text-amber-200 px-4 py-2 text-[11px] leading-relaxed">
-          ⚠️ <strong>公開サイトでの保存は、この端末のこのブラウザだけに反映されます。</strong>スマホなど他の端末にも反映するには、ページ下部の「全端末へ反映するデータをコピー」を押して、AIとのチャットに貼り付けてください。
+          ⚠️ <strong>公開サイトでの保存は、この端末のこのブラウザだけに反映されます。</strong>スマホなど他の端末にも反映するには、画面上部（またはページ下部）の「反映用データをコピー」を押して、AIとのチャットに貼り付けてください。
         </div>
       )}
 
@@ -741,6 +768,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
             <select
               value={selectedExamId}
               onChange={(e) => {
+                if (isDirty && !confirmDiscardUnsaved()) return;
                 setSelectedExamId(e.target.value);
               }}
               className="bg-slate-900 border border-slate-700 text-sky-300 font-black text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-sky-500"
@@ -770,7 +798,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
 
             <select
               value={selectedKey}
-              onChange={(e) => setSelectedKey(e.target.value)}
+              onChange={(e) => selectKey(e.target.value)}
               className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-sky-500 max-w-[200px] truncate"
             >
               {cropKeys.map((k, idx) => {
@@ -1137,7 +1165,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
                 className="flex-1 py-2.5 px-3 rounded-xl bg-sky-700 hover:bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition"
               >
                 {shareCopied ? <Check size={14} /> : <Copy size={14} />}
-                <span>{shareCopied ? 'コピーしました' : '全端末へ反映するデータをコピー'}</span>
+                <span>{shareCopied ? 'コピーしました' : '反映用データをコピー'}</span>
               </button>
             </div>
 

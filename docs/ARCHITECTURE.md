@@ -102,7 +102,8 @@
 - `public/pages/**/page_N.webp` … 利用者の画面に出す高画質版（高さ約 2250px、WebP 品質85。1ページ約100KB）。`scripts/build_hd_pages.py` で、画像を縮める前の版（git の `df9e7d8^`）から作る
 - `public/pages/**/page_N.png` … 縮めた版（高さ 1200px）。**管理画面の表示と、切り抜き位置（x, y, w, h）の基準**。消さない
 - 切り抜きは `src/utils/customCrops.js` の `renderCropFromPage` が WebP を読み、位置を「WebP の高さ / 1200」倍して切り抜く（WebP が読めなければ PNG で等倍）
-- 配線図ビューアは `page_15.webp`・`floor_plan.webp`・`panel_schedule.webp` を表示（読めない時は同じ名前の `.png` に1回だけ切り替える）
+- 配線図ページ（15ページ目）の `page_15.webp`・`floor_plan.webp`・`panel_schedule.webp` は、問題PDFから 288dpi で作った高解像度版（高さ約 4500px、1枚 200〜290KB）。`scripts/build_pdf_pages.py <問題PDF>` で作る。枠の取り方は他のページと同じなので、切り抜き位置はそのまま使える
+- 配線図ビューアは `page_15.webp`・`floor_plan.webp`・`panel_schedule.webp` を表示。拡大は CSS の transform だが、`will-change`・`translate3d` は付けない（付けると拡大前の絵を引き伸ばしてぼやける）（読めない時は同じ名前の `.png` に1回だけ切り替える）
 - 先読み：問25以降で配線図ページを、次の問題に図があればその図のページを、裏で先に読み込む（`App.jsx`、`prefetchHdPage`）。一度読んだ画像は Service Worker が保存する
 - `public/pages/**/answer.webp` … 試験センターの「解答」PDF の解答表（全50問）を切り抜いた画像。②問題文エディタの原本プレビューの下に表示する。`scripts/build_answer_pages.py <解答PDF>` で作る（ファイル名の試験日から年度を決める）
 - 新しい年度を足す時は、高画質の PNG（PDF を2倍で書き出したもの）から WebP を作り、高さ 1200px に縮めた PNG も置く

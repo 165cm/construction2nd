@@ -215,9 +215,11 @@ export default function WiringDiagramModal({ isOpen, onClose, highlightMarker, c
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="transition-transform duration-75 origin-center will-change-transform max-w-none flex items-center justify-center"
+          // will-change や translate3d を付けると、拡大前の大きさで描いた絵を引き伸ばすため文字がぼやける。
+          // 付けずにおくと、拡大した大きさで描き直されて、高解像度の画像がくっきり見える
+          className="transition-transform duration-75 origin-center max-w-none flex items-center justify-center"
           style={{
-            transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`
           }}
         >
           <img

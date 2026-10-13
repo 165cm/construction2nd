@@ -44,6 +44,19 @@ export const downloadLearningBackup = () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
+const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+
+// 学習記録として使える形か（読み込んだあとアプリが止まらないよう、使う項目の型を確かめる）
+const isValidMasteryState = (m) => {
+  if (!isPlainObject(m)) return false;
+  if (m.records !== undefined && (!isPlainObject(m.records) || !Object.values(m.records).every(isPlainObject))) return false;
+  if (['badges', 'bookmarks', 'responseTimes', 'recentHistory'].some(k => m[k] !== undefined && !Array.isArray(m[k]))) return false;
+  if (['examProgress', 'dailyLog'].some(k => m[k] !== undefined && !isPlainObject(m[k]))) return false;
+  const numberKeys = ['exp', 'level', 'streak', 'maxStreak', 'totalAnswered', 'totalCorrect', 'totalTimeSpentSec', 'schemaVersion'];
+  if (numberKeys.some(k => m[k] !== undefined && !Number.isFinite(m[k]))) return false;
+  return true;
+};
+
 // バックアップの中身を確かめる。問題なければ { ok: true, summary }、だめなら { ok: false, error }
 export const inspectLearningBackup = (text) => {
   let parsed;
@@ -60,7 +73,7 @@ export const inspectLearningBackup = (text) => {
   if (masteryRaw) {
     try {
       const mastery = JSON.parse(masteryRaw);
-      if (!mastery || typeof mastery !== 'object' || typeof (mastery.records || {}) !== 'object') {
+      if (!isValidMasteryState(mastery)) {
         return { ok: false, error: '学習記録の中身が壊れています' };
       }
       answered = mastery.totalAnswered || 0;

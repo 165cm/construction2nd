@@ -16,11 +16,11 @@
 
 ## 2. Turnstile（ロボット確認）のキーを作る
 
-1. Cloudflare の管理画面の左メニューから **Turnstile** を開き、「サイトを追加（Add widget）」を押します
-2. 名前：`denkou2-objection`（なんでもよい）
-3. ホスト名：`165cm.github.io`
-4. ウィジェットモード：**管理（Managed）** または **非表示（Invisible）**
-5. 作成すると **サイトキー** と **シークレットキー** が出ます
+1. Cloudflare の管理画面の左メニューから **Application security → Turnstile** を開き、右上の **「Add widget manually」** を押します（「Set up with Spin」でも作れますが、手動のほうが方式を選べて分かりやすい）
+2. Widget name：`denkou2-objection`（なんでもよい）
+3. Domains：`165cm.github.io` と入力して Enter（ホスト名のこと）
+4. Widget Mode：**Managed**（ほとんどの人は操作不要で、怪しい時だけ確認が出る）
+5. 作成すると **Site Key（サイトキー）** と **Secret Key（シークレットキー）** が出ます
    - サイトキー … 公開してよい値。あとでチャットで教えてください
    - シークレットキー … 秘密。手順4で Cloudflare に入力します（チャットには貼らない）
 

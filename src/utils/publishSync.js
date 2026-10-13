@@ -7,7 +7,7 @@
 import { exportAllCropsData, getSharedOverrides } from './customCrops';
 import { getQuestionOverrides } from './objections';
 import { EXAM_LIST } from '../data/examList';
-import { getSharedExamQuestions, getSharedQuestionOverrides, QUESTION_TEXT_FIELDS, normalizeCategory } from '../data/examLoader';
+import { getSharedExamQuestions, getSharedQuestionOverrides, QUESTION_TEXT_FIELDS, normalizeCategory, isOutdatedLocalValue } from '../data/examLoader';
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -29,6 +29,8 @@ export const buildSharedQuestionOverrides = () => {
       const diff = {};
       QUESTION_TEXT_FIELDS.forEach((f) => {
         if (override[f] === undefined) return;
+        // 元データのままの古い値（あとから共有ファイルで直された項目）は反映用データに入れない
+        if (isOutdatedLocalValue(exam.id, qid, f, override[f])) return;
         // 分野名は読み込み時に共通の5分野へそろえるので、そろえた後で比べる（古い書き方の分野名だけの差は反映しない）
         const value = f === 'category' ? normalizeCategory(override[f]) : override[f];
         if (!same(value, base[f])) diff[f] = value;

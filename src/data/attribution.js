@@ -2,11 +2,11 @@
 // 一般財団法人 電気技術者試験センター ガイドライン準拠
 
 // 試験センターの留意点にある書き方にそろえる（年度、期、試験区分等）
-// 例：「出典：令和5年度上期第二種電気工事士試験（午前）」。午前・午後は分かっている年度だけ付ける
+// 例：「出典：令和7年度下期第二種電気工事士試験」
+// （午前・午後の区分は2023年度までの試験のもの。収録している令和6年度以降の試験には無いので付けない）
 const formatSourceName = (examMeta) => {
   const name = (examMeta?.name || '令和8年度 上期').replace(/\s+/g, '');
-  const session = examMeta?.session ? `（${examMeta.session}）` : '';
-  return `${name}第二種電気工事士試験${session}`;
+  return `${name}第二種電気工事士試験`;
 };
 
 export function getAttributionConfig(examMeta) {
@@ -37,4 +37,4 @@ export function getShortSourceLabel(examMeta) {
 }
 
 // 互換性のためのデフォルト
-export const ATTRIBUTION_CONFIG = getAttributionConfig({ name: '令和8年度 上期', session: '午前' });
+export const ATTRIBUTION_CONFIG = getAttributionConfig({ name: '令和8年度 上期' });

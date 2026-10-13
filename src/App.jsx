@@ -244,7 +244,8 @@ export default function App() {
     resetScrollToTop();
   };
 
-  const currentQuestion = quizStep.question || questionsData[0];
+  // 管理画面で問題を修正した時も、表示中の問題に最新の内容を使う
+  const currentQuestion = questionsData.find(q => q.id === quizStep.question?.id) || quizStep.question || questionsData[0];
   const reviewQuestionsCount = questionsData.filter(q => examState.records[q.id]?.status === 'review' || (examState.records[q.id]?.wrong > 0 && examState.records[q.id]?.status !== 'mastered')).length;
 
   if (currentMode === 'admin') {

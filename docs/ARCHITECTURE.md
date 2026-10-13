@@ -41,7 +41,7 @@
 | `public/sw.js` | Service Worker（オフライン動作・問題画像キャッシュ制御） |
 
 ## データ
-- LocalStorage キー: `denkou2_mastery_state_v1`（`schemaVersion: 2`）
+- LocalStorage キー: `denkou2_mastery_state_v1`（`schemaVersion: 3`。2＝年度付きキー、3＝旧判定のマスターを「2回連続正解」基準に補正）
   - `records`: 各問題の挑戦回数、正解数、不正解数、連続正解数、ステータス（unattempted / review / correct / mastered）、Leitner Box（1〜4）、出題間隔（interval）。**キーは年度付き**（例: `r7_2_12` ＝令和7年度下期の問12）
   - `bookmarks`: クリップした問題（年度付きキーの配列）
   - `examProgress`: 年度ごとの進み具合 `{ [examId]: { round, currentQuestionId, currentQuizIndex } }`

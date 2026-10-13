@@ -18,6 +18,7 @@ import {
 import { DEFAULT_CROPS } from '../data/cropsConfig';
 import { EXAM_LIST } from '../data/examList';
 import { getExamQuestions } from '../data/examLoader';
+import { saveQuestionOverride, getQuestionOverrides } from '../utils/objections';
 import {
   getCustomCrops,
   getSharedOverrides,
@@ -162,6 +163,48 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
   const nextItem = cropItems.find(i => i.key === nextKey);
   const prevLabel = prevItem ? prevItem.label : '';
   const nextLabel = nextItem ? nextItem.label : '';
+
+  // 選択中のキーから対象問題の番号（1〜50）を特定（配線図以外）
+  const targetQuestionNumber = React.useMemo(() => {
+    if (selectedKey.includes('floor_plan') || selectedKey.includes('panel_schedule')) return null;
+    const parts = selectedKey.split('_');
+    const last = parts[parts.length - 1];
+    const n = parseInt(last, 10);
+    return isNaN(n) ? null : n;
+  }, [selectedKey]);
+
+  // 現在の問題オブジェクト
+  const targetQuestionObj = React.useMemo(() => {
+    if (!targetQuestionNumber) return null;
+    const questions = getExamQuestions(selectedExamId);
+    return questions.find(q => q.id === targetQuestionNumber) || null;
+  }, [selectedExamId, targetQuestionNumber]);
+
+  // この問がテキスト問題化（diagram: null）されているかどうか
+  const isTextOnlyQuestion = Boolean(targetQuestionObj && targetQuestionObj.diagram === null);
+
+  // テキスト問題化 ⇄ 画像出題のトグル切り替え
+  const handleToggleTextOnly = () => {
+    if (!targetQuestionObj || !targetQuestionNumber) return;
+    playClick();
+
+    if (isTextOnlyQuestion) {
+      // 画像出題に戻す
+      const defaultDiag = `/crops/q${targetQuestionNumber}_diagram.png`;
+      saveQuestionOverride(selectedExamId, targetQuestionNumber, {
+        ...targetQuestionObj,
+        diagram: defaultDiag
+      });
+      showMessage(`🖼️ 問${targetQuestionNumber} を「画像付き問題」に戻しました`);
+    } else {
+      // テキスト問題化（diagram: null）
+      saveQuestionOverride(selectedExamId, targetQuestionNumber, {
+        ...targetQuestionObj,
+        diagram: null
+      });
+      showMessage(`📝 問${targetQuestionNumber} を「テキスト問題」に変更しました（画像を非表示・高速出題化）`);
+    }
+  };
 
   const showMessage = (msg, ms = 4000) => {
     setSavedMessage(msg);
@@ -586,13 +629,29 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          className="py-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition"
-        >
-          <Save size={14} />
-          <span>保存・反映</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {targetQuestionNumber && (
+            <button
+              onClick={handleToggleTextOnly}
+              className={`py-1.5 px-3 rounded-xl font-black text-xs flex items-center gap-1.5 border transition active:scale-95 shadow-sm ${
+                isTextOnlyQuestion
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 hover:bg-amber-500/30'
+                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+              }`}
+              title={isTextOnlyQuestion ? "タップして画像表示に戻す" : "画像を表示せずテキスト問題として出題する"}
+            >
+              <span>{isTextOnlyQuestion ? '🖼️ 画像出題に戻す' : '📝 テキスト問題化（画像不要）'}</span>
+            </button>
+          )}
+
+          <button
+            onClick={handleSave}
+            className="py-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition"
+          >
+            <Save size={14} />
+            <span>保存・反映</span>
+          </button>
+        </div>
       </div>
 
       {/* Save-destination notice */}
@@ -739,6 +798,25 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
               </span>
             </div>
           </div>
+
+          {/* テキスト問題化状態の案内バナー */}
+          {isTextOnlyQuestion && (
+            <div className="mb-3 p-3 bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs rounded-xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-base flex-shrink-0">📝</span>
+                <span className="font-bold leading-relaxed">
+                  問{targetQuestionNumber} は現在「テキスト問題（画像不要）」として出題されています（アプリ上で画像非表示・高速出題中）。
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleTextOnly}
+                className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-sky-300 border border-slate-700 rounded-lg text-[11px] font-bold flex-shrink-0 transition"
+              >
+                画像出題に戻す
+              </button>
+            </div>
+          )}
 
           <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
             💡 赤枠の中をつかんでドラッグ移動、四隅の丸いハンドルをつかんで拡大・縮小できます。

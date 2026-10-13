@@ -7,10 +7,11 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| なし | main | 全タスク完了・本番公開完了 | - |
+| Antigravity | feat/text-only-question-toggle | 画像問題のテキスト問題化トグル（QuestionEditor & AdminCropEditorの両方でワンクリック切り替え・画像非表示高速出題対応） | `src/components/AdminCropEditor.jsx`, `src/components/QuestionEditor.jsx` |
 
 ## 次のタスク（上から優先）
-1. ユーザーからの追加要望・フィードバック待ち
+1. PR #18 の作成とユーザーへの本番公開確認
+2. ユーザー確認後にPRマージおよびGitHub Pagesへの自動反映
 
 ## 最近終わったこと（新しい順）
 - PR #17 マージ＆本番デプロイ完了（過去問選択の最新R8最上位化、全年度トリミング＆問題修正対応、異議あり・バックアップのアプリ全体統合、一般画面からのadmin導線非表示化の本番公開）

@@ -249,7 +249,30 @@ export const getDisplayImageUrl = (key, defaultPath) => {
 const renderedCache = new Map(); // signature -> objectURL
 const pendingRenders = new Map(); // signature -> Promise
 
-export const cropSignature = (c) => `${c.pageDir || ''}:${c.page}:${c.x}:${c.y}:${c.w}:${c.h}`;
+export const cropSignature = (c) => `hd:${c.pageDir || ''}:${c.page}:${c.x}:${c.y}:${c.w}:${c.h}`;
+
+// 切り抜き位置（x, y, w, h）は、管理画面で使う縮めたページ画像（高さ 1200px の PNG）が基準。
+// 利用者の画面では高画質の WebP（高さ約 2250px）から、位置を「WebP の高さ / 1200」倍して切り抜く。
+export const CROP_BASE_PAGE_HEIGHT = 1200;
+const pagePngPath = (c) => `${c.pageDir || '/pages'}/page_${c.page}.png`;
+export const hdPagePath = (pageDir, page) => `${pageDir || '/pages'}/page_${page}.webp`;
+
+const loadImage = (path) => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.decoding = 'async';
+  img.onload = () => resolve(img);
+  img.onerror = () => reject(new Error(`元ページ画像を読み込めません (${path})`));
+  img.src = getAssetUrl(path);
+});
+
+// 高画質の WebP を先に読み込んでおく（配線図の問題に近づいた時など。表示を速くするため）
+const prefetched = new Set();
+export const prefetchHdPage = (pageDir, page) => {
+  const path = hdPagePath(pageDir, page);
+  if (prefetched.has(path)) return;
+  prefetched.add(path);
+  loadImage(path).catch(() => prefetched.delete(path));
+};
 
 export const getCachedCropUrl = (coords) => renderedCache.get(cropSignature(coords)) || null;
 
@@ -258,47 +281,39 @@ export const renderCropFromPage = (coords) => {
   if (renderedCache.has(sig)) return Promise.resolve(renderedCache.get(sig));
   if (pendingRenders.has(sig)) return pendingRenders.get(sig);
 
-  const promise = new Promise((resolve, reject) => {
-    const img = new Image();
-    img.decoding = 'async';
-    img.onload = () => {
-      try {
-        const naturalW = img.naturalWidth;
-        const naturalH = img.naturalHeight;
-        const x = Math.max(0, Math.min(coords.x, naturalW - 10));
-        const y = Math.max(0, Math.min(coords.y, naturalH - 10));
-        const w = Math.max(20, Math.min(coords.w, naturalW - x));
-        const h = Math.max(20, Math.min(coords.h, naturalH - y));
+  // 高画質の WebP を使う。読めなければ縮めた PNG（等倍）で切り抜く
+  const promise = loadImage(hdPagePath(coords.pageDir, coords.page))
+    .catch(() => loadImage(pagePngPath(coords)))
+    .then((img) => new Promise((resolve, reject) => {
+      const naturalW = img.naturalWidth;
+      const naturalH = img.naturalHeight;
+      const scale = naturalH / CROP_BASE_PAGE_HEIGHT;
+      const x = Math.max(0, Math.min(Math.round(coords.x * scale), naturalW - 10));
+      const y = Math.max(0, Math.min(Math.round(coords.y * scale), naturalH - 10));
+      const w = Math.max(20, Math.min(Math.round(coords.w * scale), naturalW - x));
+      const h = Math.max(20, Math.min(Math.round(coords.h * scale), naturalH - y));
 
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
 
-        canvas.toBlob((blob) => {
-          if (!blob) {
-            reject(new Error('切り抜き画像の生成に失敗しました'));
-            return;
-          }
-          const url = URL.createObjectURL(blob);
-          renderedCache.set(sig, url);
-          resolve(url);
-        }, 'image/png');
-      } catch (err) {
-        reject(err);
-      }
-    };
-    img.onerror = () => reject(new Error(`元ページ画像を読み込めません (page ${coords.page})`));
-    const pagePath = coords.pageDir 
-      ? `${coords.pageDir}/page_${coords.page}.png` 
-      : `/pages/page_${coords.page}.png`;
-    img.src = getAssetUrl(pagePath);
-  }).finally(() => {
-    pendingRenders.delete(sig);
-  });
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('切り抜き画像の生成に失敗しました'));
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        renderedCache.set(sig, url);
+        resolve(url);
+      }, 'image/png');
+    }))
+    .finally(() => {
+      pendingRenders.delete(sig);
+    });
 
   pendingRenders.set(sig, promise);
   return promise;

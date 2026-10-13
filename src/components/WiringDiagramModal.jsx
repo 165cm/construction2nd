@@ -30,9 +30,10 @@ export default function WiringDiagramModal({ isOpen, onClose, highlightMarker, c
 
   const examPageDir = currentExamMeta?.pageDir || '/pages';
   const getTabSrc = () => {
-    if (activeTab === 'floor') return `${examPageDir}/floor_plan.png`;
-    if (activeTab === 'panel') return `${examPageDir}/panel_schedule.png`;
-    return `${examPageDir}/page_15.png`;
+    // 高画質の WebP（scripts/build_hd_pages.py で作成）
+    if (activeTab === 'floor') return `${examPageDir}/floor_plan.webp`;
+    if (activeTab === 'panel') return `${examPageDir}/panel_schedule.webp`;
+    return `${examPageDir}/page_${currentExamMeta?.floorPlanPage || 15}.webp`;
   };
 
   // Mouse drag handlers

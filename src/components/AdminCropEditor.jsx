@@ -38,8 +38,11 @@ import { playClick, triggerHaptic } from '../utils/sound';
 
 const SELECTED_KEY_STORAGE = 'denkou_admin_selected_key';
 
-export default function AdminCropEditor({ onBack, isEmbedded = false }) {
-  const [selectedExamId, setSelectedExamId] = useState('r8_1');
+// initialExamId / initialKey … ②エディタの「①で微調整」から、その年度・その画像を開く時に渡す
+export default function AdminCropEditor({ onBack, isEmbedded = false, initialExamId = null, initialKey = null }) {
+  const [selectedExamId, setSelectedExamId] = useState(
+    () => (initialExamId && EXAM_LIST.some(e => e.id === initialExamId) ? initialExamId : 'r8_1')
+  );
   const examMeta = EXAM_LIST.find(e => e.id === selectedExamId) || EXAM_LIST[0];
   const [overridesVersion, setOverridesVersion] = useState(0);
 
@@ -128,10 +131,10 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
         defaultCoords: {
           page: examMeta.floorPlanPage || 15,
           pageDir: examMeta.pageDir,
-          x: 200,
-          y: 100,
-          w: 1300,
-          h: 1400,
+          x: 100,
+          y: 140,
+          w: 680,
+          h: 650,
           label: `${examMeta.badge} 配線図: 平面図`
         }
       });
@@ -142,10 +145,10 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
         defaultCoords: {
           page: examMeta.floorPlanPage || 15,
           pageDir: examMeta.pageDir,
-          x: 200,
-          y: 1500,
-          w: 1300,
-          h: 700,
+          x: 100,
+          y: 800,
+          w: 680,
+          h: 300,
           label: `${examMeta.badge} 配線図: 分電盤結線図`
         }
       });
@@ -156,9 +159,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
 
   const cropKeys = cropItems.map(item => item.key);
 
-  const [selectedKey, setSelectedKey] = useState(() => {
-    return '1';
-  });
+  const [selectedKey, setSelectedKey] = useState(() => initialKey || '1');
 
   // 試験が切り替わったら選択キーを更新
   useEffect(() => {

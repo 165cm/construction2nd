@@ -1,9 +1,16 @@
 // 過去問の著作権・出典・利用ガイドラインに関する表記データ
 // 一般財団法人 電気技術者試験センター ガイドライン準拠
 
+// 試験センターの留意点にある書き方にそろえる（年度、期、試験区分等）
+// 例：「出典：令和5年度上期第二種電気工事士試験（午前）」。午前・午後は分かっている年度だけ付ける
+const formatSourceName = (examMeta) => {
+  const name = (examMeta?.name || '令和8年度 上期').replace(/\s+/g, '');
+  const session = examMeta?.session ? `（${examMeta.session}）` : '';
+  return `${name}第二種電気工事士試験${session}`;
+};
+
 export function getAttributionConfig(examMeta) {
-  const examName = examMeta ? examMeta.name : '令和8年度上期';
-  const fullSourceName = `${examName}第二種電気工事士筆記試験`;
+  const fullSourceName = formatSourceName(examMeta);
 
   return {
     organization: '一般財団法人 電気技術者試験センター',
@@ -11,7 +18,7 @@ export function getAttributionConfig(examMeta) {
     officialUrl: 'https://www.shiken.or.jp/construction/second/qa/',
     
     // 標準出典表示テキスト
-    sourceCredit: `出典：一般財団法人 電気技術者試験センター「${fullSourceName}」`,
+    sourceCredit: `出典：${fullSourceName}（一般財団法人 電気技術者試験センター）`,
     
     // 改変に関する明記
     modificationNotice: '本アプリでは、モバイル端末での学習効率向上のため、問題文・選択肢の表示レイアウト最適化、独自作成の詳細解説・要点一覧表・暗記チートシートの付加を行っています。',
@@ -24,12 +31,10 @@ export function getAttributionConfig(examMeta) {
   };
 }
 
-// 画面下に出す短い出典表記（年度に合わせる）。session（午前・午後）は分かっている年度だけ付ける
+// 画面下に出す出典表記（試験センターの例の書き方）
 export function getShortSourceLabel(examMeta) {
-  const name = examMeta?.name || '令和8年度 上期';
-  const session = examMeta?.session ? `（${examMeta.session}）` : '';
-  return `出典: 一般財団法人 電気技術者試験センター ${name}${session}`;
+  return `出典：${formatSourceName(examMeta)}`;
 }
 
 // 互換性のためのデフォルト
-export const ATTRIBUTION_CONFIG = getAttributionConfig({ name: '令和8年度上期' });
+export const ATTRIBUTION_CONFIG = getAttributionConfig({ name: '令和8年度 上期', session: '午前' });

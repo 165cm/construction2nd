@@ -42,8 +42,8 @@ export const updateSpacedRepetitionRecord = (prevRecord = {}, isCorrect, current
     current.box = nextBox;
     current.interval = BOX_LEVELS[nextBox].interval;
 
-    // Mastery criteria: Reached Box 3 (2 consecutive correct) or Box 4 (3 consecutive correct)
-    if (nextBox >= 3 || current.consecutiveCorrect >= 2 || current.correct >= 2) {
+    // Mastery criteria: 2回連続正解（Box 3 以上）。間違えた後の1回正解ではマスターにしない
+    if (nextBox >= 3 || current.consecutiveCorrect >= 2) {
       current.status = 'mastered';
     } else {
       current.status = 'correct';

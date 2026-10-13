@@ -2,7 +2,7 @@ import React from 'react';
 import { Sparkles, Brain, CheckCircle2, ArrowRight } from 'lucide-react';
 import { playClick } from '../utils/sound';
 
-export default function Round1CompleteModal({ isOpen, onClose, reviewCount = 0 }) {
+export default function Round1CompleteModal({ isOpen, onClose, reviewCount = 0, examName = '', totalQuestions = 50 }) {
   if (!isOpen) return null;
 
   return (
@@ -16,7 +16,7 @@ export default function Round1CompleteModal({ isOpen, onClose, reviewCount = 0 }
         </div>
 
         <span className="text-xs font-black px-2.5 py-1 rounded-full bg-sky-500/20 border border-sky-400/40 text-sky-300">
-          全50問 第1巡 走破完了！
+          全{totalQuestions}問 第1巡 走破完了！
         </span>
 
         <h3 className="text-lg font-black text-white mt-2.5 mb-1.5">
@@ -24,7 +24,7 @@ export default function Round1CompleteModal({ isOpen, onClose, reviewCount = 0 }
         </h3>
 
         <p className="text-xs text-slate-300 leading-relaxed mb-4">
-          令和8年度上期の全50問へのファーストアタックが完了しました。
+          {examName ? `${examName}の` : ''}全{totalQuestions}問へのファーストアタックが完了しました。
         </p>
 
         {/* Scientific Explanation Box */}

@@ -23,7 +23,7 @@ export default function StatsModal({
 
   const levelTitle = getTitleForLevel(state.level);
   const expRequired = calculateExpForLevel(state.level);
-  const timeEstimate = computeRemainingPlayTime(state, 50);
+  const timeEstimate = computeRemainingPlayTime(state, allQuestions.length);
   const boxCounts = getLeitnerBoxCounts(allQuestions, state);
 
   const accuracy = state.totalAnswered > 0
@@ -152,7 +152,7 @@ export default function StatsModal({
                   <div>
                     <span className="text-[10px] text-slate-400">マスター済</span>
                     <div className="font-black text-emerald-400 text-sm">
-                      {timeEstimate.masteredCount} / 50問
+                      {timeEstimate.masteredCount} / {allQuestions.length}問
                     </div>
                   </div>
                   <div>

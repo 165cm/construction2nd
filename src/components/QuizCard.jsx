@@ -9,6 +9,7 @@ import ExplanationRenderer from './ExplanationRenderer';
 import CheatsheetAccordion from './CheatsheetAccordion';
 import ObjectionModal from './ObjectionModal';
 import { getCheatsheetsForQuestion } from '../data/cheatsheets';
+import { getShortSourceLabel } from '../data/attribution';
 
 const AUTO_ADVANCE_TIME_MS = 3000;
 
@@ -28,6 +29,8 @@ export default function QuizCard({
 }) {
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  // 「もう一度」で解き直し中（学習記録・EXPには数えない）
+  const [isRetry, setIsRetry] = useState(false);
   const [startTime, setStartTime] = useState(Date.now());
   const [showImageZoom, setShowImageZoom] = useState(false);
   const [isObjectionOpen, setIsObjectionOpen] = useState(false);
@@ -78,6 +81,7 @@ export default function QuizCard({
   useEffect(() => {
     setSelectedChoice(null);
     setIsAnswered(false);
+    setIsRetry(false);
     setShowPopup(false);
     setTimeLeftMs(AUTO_ADVANCE_TIME_MS);
     setStartTime(Date.now());
@@ -194,6 +198,9 @@ export default function QuizCard({
       playWrong();
       triggerHaptic('error');
     }
+
+    // 解き直しは記録しない（回答回数・EXPの二重加算やマスター判定のずれを防ぐ）
+    if (isRetry) return;
 
     onAnswer({
       questionId: question.id,
@@ -371,6 +378,12 @@ export default function QuizCard({
         )}
       </div>
 
+      {isRetry && (
+        <div className="mb-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 text-[11px] text-slate-300">
+          🔁 解き直し中（この回答は学習記録・EXPには数えません）
+        </div>
+      )}
+
       {/* Choices Grid */}
       <div className={`${areChoicesShort ? 'grid grid-cols-2 gap-2' : 'space-y-2'} mb-4`}>
         {displayedChoices.map((choice) => {
@@ -500,7 +513,7 @@ export default function QuizCard({
 
             {/* Deep-dive memorization cheatsheets */}
             <CheatsheetAccordion
-              cheatsheets={getCheatsheetsForQuestion(question.number || question.id)}
+              cheatsheets={getCheatsheetsForQuestion(question)}
             />
           </div>
 
@@ -511,6 +524,7 @@ export default function QuizCard({
                 playClick();
                 setSelectedChoice(null);
                 setIsAnswered(false);
+                setIsRetry(true);
                 setShowPopup(false);
                 setStartTime(Date.now());
               }}
@@ -617,7 +631,7 @@ export default function QuizCard({
           onClick={() => { playClick(); onOpenAttribution?.(); }}
           className="text-[10px] text-slate-500 hover:text-sky-400 inline-flex items-center gap-1 transition"
         >
-          <span>出典: 一般財団法人 電気技術者試験センター 令和8年度上期（午前）</span>
+          <span>{getShortSourceLabel(currentExamMeta)}</span>
           <span className="underline ml-0.5 text-sky-500/80">著作権・留意事項</span>
         </button>
         <p 
@@ -640,7 +654,7 @@ export default function QuizCard({
         isOpen={isObjectionOpen}
         onClose={() => setIsObjectionOpen(false)}
         question={question}
-        examMeta={currentExamMeta}
+        currentExamMeta={currentExamMeta}
       />
     </div>
   );

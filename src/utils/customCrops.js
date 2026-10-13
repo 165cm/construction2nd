@@ -8,6 +8,26 @@
 import { getAssetUrl } from './asset';
 import sharedOverrides from '../data/cropOverrides.json';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
+import { EXAM_LIST } from '../data/examList';
+
+// トリミングキー（例: "r7_2_12", "r7_2_floor_plan", "12"）から、元ページ画像のフォルダを求める。
+// 年度が付いていないキーは令和8年度上期（/pages）
+export const pageDirForCropKey = (key) => {
+  const k = String(key);
+  const exam = EXAM_LIST.find(e => e.id !== 'r8_1' && k.startsWith(`${e.id}_`));
+  return exam ? exam.pageDir : '/pages';
+};
+
+// 座標を保存用の形にそろえる（pageDir を必ず残す。抜けると令和8年のページから切り抜かれてしまう）
+const normalizeCoords = (key, coords) => ({
+  page: coords.page,
+  pageDir: coords.pageDir || pageDirForCropKey(key),
+  x: Math.round(coords.x),
+  y: Math.round(coords.y),
+  w: Math.round(coords.w),
+  h: Math.round(coords.h),
+  label: coords.label || `問${key}`
+});
 
 // 問題の画像パス（例: /crops/floor_plan.png）から、管理画面のトリミング設定キーを求める
 export const cropKeyForDiagram = (questionId, diagramPath, examId) => {
@@ -79,16 +99,7 @@ export const saveCustomCrop = (key, cropData) => {
     if (!coords) return false;
 
     // dataUrlは保存せず座標のみ保持（1問あたり50バイト・250問で12KBの超軽量）
-    crops[String(key)] = {
-      coords: {
-        page: coords.page,
-        x: Math.round(coords.x),
-        y: Math.round(coords.y),
-        w: Math.round(coords.w),
-        h: Math.round(coords.h),
-        label: coords.label || `問${key}`
-      }
-    };
+    crops[String(key)] = { coords: normalizeCoords(key, coords) };
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(crops));
     window.dispatchEvent(new Event('custom-crops-updated'));
@@ -102,27 +113,28 @@ export const saveCustomCrop = (key, cropData) => {
 // JSONバックアップをインポート（復元）
 export const importCustomCrops = (jsonData) => {
   try {
-    const target = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+    let target = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+    // 以前の「コピー」機能は二重にJSON化した文字列を出していたため、その形式も読めるようにする
+    if (typeof target === 'string') target = JSON.parse(target);
+    if (!target || typeof target !== 'object' || Array.isArray(target)) {
+      throw new Error('トリミング設定の形式ではありません');
+    }
     const current = getCustomCrops();
+    let imported = 0;
     Object.keys(target).forEach((k) => {
       const item = target[k];
-      const coords = item.coords || item;
-      if (coords?.page !== undefined) {
-        current[String(k)] = {
-          coords: {
-            page: coords.page,
-            x: Math.round(coords.x),
-            y: Math.round(coords.y),
-            w: Math.round(coords.w),
-            h: Math.round(coords.h),
-            label: coords.label || `問${k}`
-          }
-        };
+      const coords = item?.coords || item;
+      if (coords && typeof coords.page === 'number') {
+        current[String(k)] = { coords: normalizeCoords(k, coords) };
+        imported += 1;
       }
     });
+    if (imported === 0) {
+      throw new Error('読み込めるトリミング設定が見つかりませんでした');
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
     window.dispatchEvent(new Event('custom-crops-updated'));
-    return { success: true, count: Object.keys(target).length };
+    return { success: true, count: imported };
   } catch (e) {
     console.error('Failed to import custom crops:', e);
     return { success: false, error: e.message };
@@ -185,7 +197,7 @@ export const getSharedCropCoords = (key) => {
   if (!entry) return null;
   const { page, x, y, w, h } = entry;
   if ([page, x, y, w, h].some((v) => typeof v !== 'number' || Number.isNaN(v))) return null;
-  return entry;
+  return { ...entry, pageDir: entry.pageDir || pageDirForCropKey(key) };
 };
 
 // 端末ローカルの保存座標を優先し、無ければ共有ファイル座標を返す
@@ -194,7 +206,7 @@ export const getActiveCropCoords = (key) => {
     const custom = getCustomCrops();
     const localEntry = custom[String(key)];
     if (localEntry?.coords && typeof localEntry.coords.page === 'number') {
-      return localEntry.coords;
+      return { ...localEntry.coords, pageDir: localEntry.coords.pageDir || pageDirForCropKey(key) };
     }
   } catch (e) {
     console.error(e);

@@ -7,20 +7,32 @@ import {
   getObjections, 
   updateObjection, 
   deleteObjection, 
-  saveQuestionOverride,
-  getQuestionOverrides
 } from '../utils/objections';
 import { getExamQuestions } from '../data/examLoader';
 import { EXAM_LIST } from '../data/examList';
 
+// 以前の不具合で、報告の年度がほぼ「令和7年度 下期」として保存されていた。
+// 報告時の問題文（questionSnapshot）と各年度の問題文を照らし合わせ、正しい年度に読み替える。
+const resolveObjectionExams = (list) => {
+  const examQuestions = Object.fromEntries(EXAM_LIST.map(e => [e.id, getExamQuestions(e.id)]));
+  return list.map(item => {
+    const snapText = item.questionSnapshot?.question;
+    if (!snapText) return item;
+    const sameAsRecorded = examQuestions[item.examId]?.find(q => q.id === item.questionId)?.question === snapText;
+    if (sameAsRecorded) return item;
+    const matched = EXAM_LIST.find(e => examQuestions[e.id].find(q => q.id === item.questionId)?.question === snapText);
+    return matched ? { ...item, examId: matched.id, examName: matched.name } : item;
+  });
+};
+
 export default function ObjectionReviewer({ onOpenEditorWithQuestion }) {
-  const [objections, setObjections] = useState(getObjections);
+  const [objections, setObjections] = useState(() => resolveObjectionExams(getObjections()));
   const [filterTab, setFilterTab] = useState('pending'); // 'pending' | 'approved' | 'all'
   const [examFilter, setExamFilter] = useState('all'); // 'all' | 'r8_1' | 'r7_2' | 'r7_1' | 'r6_2' | 'r6_1'
   const [actionNotice, setActionNotice] = useState(null);
 
   const refreshList = () => {
-    setObjections(getObjections());
+    setObjections(resolveObjectionExams(getObjections()));
   };
 
   useEffect(() => {
@@ -33,40 +45,17 @@ export default function ObjectionReviewer({ onOpenEditorWithQuestion }) {
     setTimeout(() => setActionNotice(null), 2500);
   };
 
-  // AI修正案を承認して即座に問題データへ反映
+  // 確認済みにする。
+  // 以前は解説の末尾に「照合確認済み」などの定型文や利用者のコメントを自動で書き足していたが、
+  // 実際には照合していない内容が利用者に表示されてしまうため、問題データは自動では書き換えない。
+  // 内容の修正は「エディタで確認・調整」から行う。
   const handleApproveAndApply = (objection) => {
-    const { id, examId = 'r8_1', questionId, category, userComment, aiSuggestedFix } = objection;
-    
-    // 対象問題の現在のデータを取得
-    const allQuestions = getExamQuestions(examId);
-    const targetQ = allQuestions.find(q => q.id === questionId);
-
-    if (!targetQ) {
-      alert(`対象問題（問${questionId}）が見つかりませんでした。`);
-      return;
-    }
-
-    // AI提案内容に基づく自動パッチの作成
-    let updatedQuestion = { ...targetQ };
-
-    if (category === 'choice_text' && userComment) {
-      // ユーザーコメントに選択肢の修正指示がある場合、解説や注記に即座に反映
-      updatedQuestion.explanation = `${updatedQuestion.explanation}\n\n> 💡 **修正反映（原本照合済）**: ${userComment}`;
-    } else if (category === 'wrong_answer') {
-      updatedQuestion.explanation = `${updatedQuestion.explanation}\n\n> 🎯 **解答検証済**: 公式解答との照合確認済みです。`;
-    }
-
-    // ローカルオーバーライドに保存
-    saveQuestionOverride(examId, questionId, updatedQuestion);
-
-    // 異議申し立てステータスを承認済みに更新
-    updateObjection(id, { 
+    updateObjection(objection.id, {
       status: 'approved',
       resolvedAt: new Date().toISOString(),
-      adminResolutionNote: `AI提案「${aiSuggestedFix?.title || '自動修正'}」を承認・即時反映しました。`
+      adminResolutionNote: '確認済み（内容の修正は問題文エディタで行います）'
     });
-
-    showNotification(`問${questionId} のAI修正案を承認し、アプリへ即時反映しました！⚡️`);
+    showNotification(`問${objection.questionNumber || objection.questionId} の報告を確認済みにしました。`);
   };
 
   // 却下
@@ -267,7 +256,7 @@ export default function ObjectionReviewer({ onOpenEditorWithQuestion }) {
                         <span>AI自動提案: {item.aiSuggestedFix.title}</span>
                       </div>
                       <span className="text-[10px] bg-sky-950 border border-sky-500/40 text-sky-300 px-2 py-0.5 rounded font-mono">
-                        自動照合済
+                        参考
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-300 leading-relaxed">
@@ -301,7 +290,7 @@ export default function ObjectionReviewer({ onOpenEditorWithQuestion }) {
                       className="px-4 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 active:scale-95 transition"
                     >
                       <Check size={14} />
-                      <span>{item.aiSuggestedFix?.actionLabel || 'AI修正案を承認して即時反映'}</span>
+                      <span>確認済みにする</span>
                     </button>
                   </div>
                 )}

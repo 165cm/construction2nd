@@ -9,25 +9,42 @@ export default function ReviewMode({
   onToggleBookmark,
   onOpenWiringDiagram,
   onSwitchToQuick,
-  onOpenAttribution
+  onOpenAttribution,
+  currentExamMeta
 }) {
   const [filterType, setFilterType] = useState('review'); // 'review' | 'bookmark' | 'unmastered'
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Filter targeted questions based on user state
-  const targetQuestions = useMemo(() => {
-    return allQuestions.filter((q) => {
-      const rec = state.records[q.id];
-      if (filterType === 'bookmark') {
-        return (state.bookmarks || []).includes(q.id);
-      }
-      if (filterType === 'unmastered') {
-        return !rec || rec.status !== 'mastered';
-      }
-      // default 'review': wrong count > 0 or status === 'review'
-      return rec && (rec.status === 'review' || rec.wrong > 0 && rec.status !== 'mastered');
-    });
-  }, [allQuestions, state, filterType]);
+  const matchesFilter = (q, filter) => {
+    const rec = state.records[q.id];
+    if (filter === 'bookmark') {
+      return (state.bookmarks || []).includes(q.id);
+    }
+    if (filter === 'unmastered') {
+      return !rec || rec.status !== 'mastered';
+    }
+    // default 'review': wrong count > 0 or status === 'review'
+    return !!rec && (rec.status === 'review' || (rec.wrong > 0 && rec.status !== 'mastered'));
+  };
+  const computeIds = (filter) => allQuestions.filter(q => matchesFilter(q, filter)).map(q => q.id);
+
+  // 出題リストは「始めた時点」で固定する。
+  // 解いた直後にマスター等で条件から外れても、解説を読んでいる途中で問題が入れ替わらないようにする。
+  // リストを最後まで解いたら、その時点の条件で作り直す。
+  const [sessionIds, setSessionIds] = useState(() => computeIds('review'));
+  const [loopCount, setLoopCount] = useState(0);
+
+  const targetQuestions = useMemo(
+    () => sessionIds.map(id => allQuestions.find(q => q.id === id)).filter(Boolean),
+    [sessionIds, allQuestions]
+  );
+
+  const selectFilter = (filter) => {
+    setFilterType(filter);
+    setSessionIds(computeIds(filter));
+    setCurrentIndex(0);
+    setLoopCount(c => c + 1);
+  };
 
   const activeQuestion = targetQuestions[currentIndex] || targetQuestions[0];
 
@@ -43,7 +60,10 @@ export default function ReviewMode({
     if (currentIndex < targetQuestions.length - 1) {
       setCurrentIndex(i => i + 1);
     } else {
-      setCurrentIndex(0); // loop or finish
+      // 1周終わったら、最新の状態で対象を選び直す（マスターした問題は外れる）
+      setSessionIds(computeIds(filterType));
+      setCurrentIndex(0);
+      setLoopCount(c => c + 1);
     }
   };
 
@@ -75,7 +95,7 @@ export default function ReviewMode({
         {/* Sub filter buttons */}
         <div className="flex gap-1.5 text-xs">
           <button
-            onClick={() => { setFilterType('review'); setCurrentIndex(0); }}
+            onClick={() => selectFilter('review')}
             className={`flex-1 py-1.5 px-2 rounded-lg font-bold transition flex items-center justify-center gap-1 ${
               filterType === 'review'
                 ? 'bg-rose-500 text-white shadow-md shadow-rose-900/30'
@@ -87,7 +107,7 @@ export default function ReviewMode({
           </button>
           
           <button
-            onClick={() => { setFilterType('bookmark'); setCurrentIndex(0); }}
+            onClick={() => selectFilter('bookmark')}
             className={`flex-1 py-1.5 px-2 rounded-lg font-bold transition flex items-center justify-center gap-1 ${
               filterType === 'bookmark'
                 ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-900/30'
@@ -99,7 +119,7 @@ export default function ReviewMode({
           </button>
 
           <button
-            onClick={() => { setFilterType('unmastered'); setCurrentIndex(0); }}
+            onClick={() => selectFilter('unmastered')}
             className={`flex-1 py-1.5 px-2 rounded-lg font-bold transition flex items-center justify-center gap-1 ${
               filterType === 'unmastered'
                 ? 'bg-sky-500 text-white shadow-md shadow-sky-900/30'
@@ -126,7 +146,7 @@ export default function ReviewMode({
               ? '素晴らしい！現在、間違えたままの問題はありません。通常モードでさらに問題を解くか、本番模擬試験で腕試しをしましょう！'
               : filterType === 'bookmark'
               ? 'ブックマークされた問題はありません。解いている途中で気になった問題に★をつけてみましょう。'
-              : '全50問がすべて完全マスター状態です！本番試験でも合格間違いなしです！'}
+              : `全${allQuestions.length}問がすべて完全マスター状態です！本番試験でも合格間違いなしです！`}
           </p>
 
           <button
@@ -142,7 +162,7 @@ export default function ReviewMode({
           {/* Progress tracker within current review set */}
           <div className="flex items-center justify-between text-xs text-slate-400 px-1 mb-2">
             <span>復習中: {currentIndex + 1} / {targetQuestions.length} 問</span>
-            <div className="flex gap-1">
+            <div className="flex flex-wrap justify-end gap-1 max-w-[65%]">
               {targetQuestions.map((q, idx) => (
                 <div
                   key={q.id}
@@ -160,7 +180,7 @@ export default function ReviewMode({
           </div>
 
           <QuizCard
-            key={activeQuestion.id}
+            key={`${activeQuestion.id}_${loopCount}`}
             question={activeQuestion}
             record={state.records[activeQuestion.id]}
             isBookmarked={(state.bookmarks || []).includes(activeQuestion.id)}
@@ -171,6 +191,7 @@ export default function ReviewMode({
             totalQuestions={targetQuestions.length}
             currentIndex={currentIndex}
             onOpenAttribution={onOpenAttribution}
+            currentExamMeta={currentExamMeta}
           />
         </div>
       )}

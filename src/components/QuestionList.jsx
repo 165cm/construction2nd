@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Star, CheckCircle, Flame, Sparkles, Filter, ChevronRight } from 'lucide-react';
 import { playClick } from '../utils/sound';
+import { getShortSourceLabel } from '../data/attribution';
 
 export default function QuestionList({
   allQuestions,
@@ -226,7 +227,7 @@ export default function QuestionList({
           onClick={() => { playClick(); onOpenAttribution?.(); }}
           className="text-[10px] text-slate-500 hover:text-sky-400 inline-flex items-center gap-1 transition"
         >
-          <span>出典: 一般財団法人 電気技術者試験センター 令和8年度上期（午前）</span>
+          <span>{getShortSourceLabel(currentExamMeta)}</span>
           <span className="underline ml-0.5 text-sky-500/80">著作権・留意事項</span>
         </button>
         <p className="text-[9px] text-slate-600 mt-0.5">

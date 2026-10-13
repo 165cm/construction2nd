@@ -23,8 +23,9 @@ export default function ObjectionModal({
     const catObj = OBJECTION_CATEGORIES.find(c => c.id === selectedCategory);
 
     saveObjection({
-      examId: currentExamMeta?.id || 'r7_2',
-      examName: currentExamMeta?.name || '令和7年度 下期',
+      // 問題データ自身が持つ年度を最優先（画面から渡される年度情報が無くても取り違えない）
+      examId: question.examId || currentExamMeta?.id || 'r8_1',
+      examName: question.examName || currentExamMeta?.name || '令和8年度 上期',
       questionId: question.id,
       questionNumber: question.number,
       category: selectedCategory,
@@ -64,7 +65,7 @@ export default function ObjectionModal({
                 <span>この問題に異議あり！</span>
               </h3>
               <p className="text-[10px] text-slate-400">
-                第 {question.number} 問（{currentExamMeta?.name || ''}）
+                第 {question.number} 問（{question.examName || currentExamMeta?.name || ''}）
               </p>
             </div>
           </div>

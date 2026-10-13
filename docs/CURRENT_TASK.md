@@ -7,7 +7,7 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| なし | - | - | - |
+| Claude | claude/keen-einstein-0i4ebd | 異議ありの送信先（Worker の URL・Turnstile サイトキー）を設定して有効化（PR作成・本番公開の確認待ち） | src/config/objectionReport.js |
 
 ## 次のタスク（上から優先）
 1. ✅ 利用者側の改善を3つのPRに分けて進める（完了）
@@ -16,7 +16,7 @@
    - ✅ PR C（#29 公開済み）：全年度まとめての弱点特訓＋本番に近い模擬試験（選択肢を並べ替えない・マークシート風）
 2. 管理者側の改善を順番に進める
    - ✅ PR D（#31 公開済み）：保存していない変更・公開サイトに未反映の変更のお知らせ＋問題文の修正も全端末へ反映
-   - ✅ PR E（#32 公開済み。受付窓口の準備待ち：ユーザーが Cloudflare で Worker を作成 → Worker の URL と Turnstile サイトキーを src/config/objectionReport.js に設定）：「異議あり」の報告を管理者に届ける（方式A：アプリ → Cloudflare Workers ＋ Turnstile → GitHub の issue に自動登録 → AIが修正PR。ユーザー決定済み）
+   - ✅ PR E（#32 公開済み。ユーザーが Cloudflare で Worker・Turnstile・GitHub トークンを準備済み。送信先を src/config/objectionReport.js に設定）：「異議あり」の報告を管理者に届ける（方式A：アプリ → Cloudflare Workers ＋ Turnstile → GitHub の issue に自動登録 → AIが修正PR。ユーザー決定済み）
 3. 有料化の公式リリース時の検討（ユーザー予定）
    - リポジトリを非公開にする（GitHub Pages は無料プランだと非公開リポジトリから公開できないため、公開先を Cloudflare Pages に移すか GitHub の有料プランにする）
    - 非公開にしても公開サイトのデータ（問題・解説）は見えるため、コピー対策にはログイン＋支払い確認つきの配信が必要

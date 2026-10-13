@@ -65,42 +65,50 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     const examQuestions = getExamQuestions(selectedExamId);
     // 画像が必要な問題のみを抽出（diagram が null または空のものはスキップ）
     const imageQuestions = examQuestions.filter(q => Boolean(q.diagram));
+    const floorPlanPageNum = examMeta.floorPlanPage || 15;
 
     const list = imageQuestions.map(q => {
+      const isWiringQuestion = q.id >= 31;
       const pageMatch = q.fullPage?.match(/page_(\d+)\.png/);
-      const pageNum = pageMatch ? parseInt(pageMatch[1], 10) : 5;
+      const pageNum = isWiringQuestion ? floorPlanPageNum : (pageMatch ? parseInt(pageMatch[1], 10) : 5);
 
       if (selectedExamId === 'r8_1') {
         const defCrop = DEFAULT_CROPS[String(q.id)];
+        const itemPage = isWiringQuestion ? floorPlanPageNum : (defCrop?.page || pageNum);
         return {
           key: String(q.id),
-          label: defCrop?.label || `問${q.id} ${q.categoryTag || q.category || ''}`,
-          page: defCrop?.page || pageNum,
-          defaultCoords: defCrop || {
-            page: pageNum,
+          label: isWiringQuestion
+            ? `問${q.id} ${q.wiringMark ? `【${q.wiringMark}】` : ''}${q.categoryTag || q.category || ''}（配線図P${floorPlanPageNum}）`
+            : (defCrop?.label || `問${q.id} ${q.categoryTag || q.category || ''}`),
+          page: itemPage,
+          defaultCoords: (defCrop && !isWiringQuestion) ? defCrop : {
+            page: itemPage,
             pageDir: examMeta.pageDir,
             x: 200,
             y: 350,
             w: 500,
             h: 320,
-            label: `${examMeta.badge} 問${q.id}`
+            label: `${examMeta.badge} 問${q.id} ${q.wiringMark || ''}`
           }
         };
       }
 
       // 他年度の場合
+      const itemPage = isWiringQuestion ? floorPlanPageNum : pageNum;
       return {
         key: `${selectedExamId}_${q.id}`,
-        label: `問${q.id} ${q.categoryTag || q.category || ''}`,
-        page: pageNum,
+        label: isWiringQuestion
+          ? `問${q.id} ${q.wiringMark ? `【${q.wiringMark}】` : ''}${q.categoryTag || q.category || ''}（配線図P${floorPlanPageNum}）`
+          : `問${q.id} ${q.categoryTag || q.category || ''}`,
+        page: itemPage,
         defaultCoords: {
-          page: pageNum,
+          page: itemPage,
           pageDir: examMeta.pageDir,
           x: 200,
           y: 350,
           w: 500,
           h: 320,
-          label: `${examMeta.badge} 問${q.id}`
+          label: `${examMeta.badge} 問${q.id} ${q.wiringMark || ''}`
         }
       };
     });
@@ -254,9 +262,12 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     const custom = getCustomCrops();
     const shared = getSharedOverrides();
     refreshSavedCount();
+
+    const isWiringQuestion = targetQuestionNumber && targetQuestionNumber >= 31;
+    const floorPlanPageNum = examMeta.floorPlanPage || 15;
     
     const active = custom[selectedKey]?.coords || shared[selectedKey] || currentItem.defaultCoords || {
-      page: currentItem.page || 5, 
+      page: currentItem.page || (isWiringQuestion ? floorPlanPageNum : 5), 
       pageDir: examMeta.pageDir, 
       x: 200, 
       y: 200, 
@@ -265,16 +276,22 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
       label: currentItem.label
     };
     
-    // pageDir がなければ補完
+    // 31問以降は配線図ページ（P15）からトリミング（過去の保存データが問題文ページP11〜13ならP15へ自動補正）
+    const resolvedPage = isWiringQuestion 
+      ? floorPlanPageNum 
+      : (active.page || currentItem.page || 5);
+
+    // pageDir と page を正規化
     const normalizedCoords = {
       ...active,
+      page: resolvedPage,
       pageDir: active.pageDir || examMeta.pageDir
     };
 
     setCoords(normalizedCoords);
-    setPageNumber(normalizedCoords.page || currentItem.page || 5);
+    setPageNumber(resolvedPage);
     setIsImageLoading(true);
-  }, [selectedKey, selectedExamId, currentItem, examMeta]);
+  }, [selectedKey, selectedExamId, currentItem, examMeta, targetQuestionNumber]);
 
   // Update live preview canvas whenever image loads or coords change
   const updatePreview = () => {
@@ -476,7 +493,10 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     playClick();
     triggerHaptic('light');
     resetCustomCrop(selectedKey);
-    const def = (!CAN_WRITE_SHARED && getSharedOverrides()[selectedKey]) || DEFAULT_CROPS[selectedKey];
+    const isWiring = targetQuestionNumber && targetQuestionNumber >= 31;
+    const def = isWiring
+      ? currentItem.defaultCoords
+      : ((!CAN_WRITE_SHARED && getSharedOverrides()[selectedKey]) || DEFAULT_CROPS[selectedKey] || currentItem.defaultCoords);
     if (def) {
       setCoords(def);
       setPageNumber(def.page);
@@ -496,7 +516,8 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
     if (window.confirm('⚠️ すべてのカスタムトリミングを破棄して初期画像に戻しますか？\n（スマホで画像が白くなったり表示されない場合に有効です）')) {
       playClick();
       clearAllCustomCrops();
-      const def = DEFAULT_CROPS[selectedKey];
+      const isWiring = targetQuestionNumber && targetQuestionNumber >= 31;
+      const def = isWiring ? currentItem.defaultCoords : (DEFAULT_CROPS[selectedKey] || currentItem.defaultCoords);
       if (def) {
         setCoords(def);
         setPageNumber(def.page);
@@ -773,12 +794,16 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
             <span className="text-[11px] text-slate-400">元頁:</span>
             <select
               value={pageNumber}
-              onChange={(e) => setPageNumber(Number(e.target.value))}
+              onChange={(e) => {
+                const newP = Number(e.target.value);
+                setPageNumber(newP);
+                setCoords(prev => ({ ...prev, page: newP }));
+              }}
               className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white font-bold focus:outline-none focus:border-sky-500"
             >
               {Array.from({ length: 16 }, (_, i) => i + 1).map(p => (
                 <option key={p} value={p}>
-                  {p} 頁
+                  {p} 頁{p === (examMeta.floorPlanPage || 15) ? ' (配線図)' : ''}
                 </option>
               ))}
             </select>
@@ -820,11 +845,43 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
                   読込中...
                 </span>
               )}
-              <span className="text-[11px] text-amber-300 font-bold bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                第 {pageNumber} 頁
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                pageNumber === (examMeta.floorPlanPage || 15)
+                  ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300'
+                  : 'bg-slate-800 border border-slate-700 text-slate-300'
+              }`}>
+                第 {pageNumber} 頁{pageNumber === (examMeta.floorPlanPage || 15) ? '（配線図）' : ''}
               </span>
             </div>
           </div>
+
+          {/* 31問以降：配線図ページからのトリミング案内バナー */}
+          {targetQuestionNumber && targetQuestionNumber >= 31 && (
+            <div className="mb-2.5 p-2.5 bg-amber-950/60 border border-amber-500/40 rounded-xl flex items-center justify-between gap-2 text-xs text-amber-200">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-bold text-amber-300">📐 問{targetQuestionNumber} は配線図問題です。</span>
+                <span>問題文ではなく「配線図（第 {examMeta.floorPlanPage || 15} 頁）」から該当箇所をトリミングしてください。</span>
+                {targetQuestionObj?.wiringMark && (
+                  <span className="bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md font-black text-[11px] shadow-sm">
+                    🎯 対象: {targetQuestionObj.wiringMark} 周辺
+                  </span>
+                )}
+              </div>
+              {pageNumber !== (examMeta.floorPlanPage || 15) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = examMeta.floorPlanPage || 15;
+                    setPageNumber(p);
+                    setCoords(prev => ({ ...prev, page: p }));
+                  }}
+                  className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-lg text-[11px] flex-shrink-0 transition active:scale-95 shadow-sm"
+                >
+                  配線図(P{examMeta.floorPlanPage || 15})に戻す
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-400 mb-2 leading-relaxed">
             <span>💡 赤枠の中をつかんでドラッグ移動、四隅の丸いハンドルをつかんで拡大・縮小できます。</span>

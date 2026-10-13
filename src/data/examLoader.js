@@ -1,12 +1,16 @@
 import { EXAM_LIST, DEFAULT_EXAM_ID } from './examList';
-import r8_1 from './exams/r8_1.json';
+import r7_2 from './exams/r7_2.json';
+import r7_1 from './exams/r7_1.json';
 import r6_2 from './exams/r6_2.json';
 import r6_1 from './exams/r6_1.json';
+import r8_1 from './exams/r8_1.json';
 
 const EXAM_DATA_MAP = {
-  r8_1,
+  r7_2,
+  r7_1,
   r6_2,
-  r6_1
+  r6_1,
+  r8_1
 };
 
 export function getExamMeta(examId) {

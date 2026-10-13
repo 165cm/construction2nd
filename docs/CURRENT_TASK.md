@@ -7,7 +7,7 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| Claude | claude/keen-einstein-0i4ebd | 異議ありの受付窓口の改善（Markdown の無害化・ラベルの自動作成。自動レビューの指摘）。公開後、ユーザーが Cloudflare の Worker にコードを貼り直す | workers/objection-receiver/ |
+| Claude | claude/keen-einstein-0i4ebd | 管理者側改善 PR F（全問題チェック一覧）＋異議ありの失敗理由表示 | src/components/QuestionChecklist.jsx, src/components/AdminHub.jsx, src/components/QuestionEditor.jsx, src/components/ObjectionModal.jsx, workers/objection-receiver/ |
 
 ## 次のタスク（上から優先）
 1. ✅ 利用者側の改善を3つのPRに分けて進める（完了）
@@ -25,6 +25,8 @@
    - PR G：管理画面を開いた時だけ読み込む（一般の利用者の読み込みを軽く）
 
 ## 最近終わったこと（新しい順）
+- 異議ありの受付窓口の本番稼働を確認（テスト報告が issue #35 として届いた。テスト用のため閉じた）。原因：TURNSTILE_SECRET に Secret Key 以外の値が入っていた
+- PR #34 マージ＆本番デプロイ：異議ありの受付窓口で報告内容の Markdown を無害化、ラベルの自動作成（ユーザーが Cloudflare の Worker のコードを貼り替えて反映）
 - PR #33 マージ＆本番デプロイ：「異議あり」の送信先（Worker の URL・Turnstile サイトキー）を設定し、GitHub の issue への送信を有効化
 - PR #32 マージ＆本番デプロイ：「異議あり」の受付窓口（Cloudflare Workers ＋ Turnstile → GitHub の issue）とアプリ側の送信、準備手順書、出典表記を「出典：令和◯年度◯期第二種電気工事士試験」に統一
 - PR #31 マージ＆本番デプロイ：管理画面の「● 未保存」表示と移動前の確認、公開サイトに未反映の変更の件数バー＆反映用データのコピー、問題文の修正を questionOverrides.json から全端末へ反映、バックアップ読み込み前の型チェック

@@ -18,6 +18,8 @@ export default function ObjectionModal({
   const [sendStatus, setSendStatus] = useState('idle');
   const [turnstileToken, setTurnstileToken] = useState(null);
   const [turnstileError, setTurnstileError] = useState(false);
+  // 送信に失敗した理由（例: turnstile failed: invalid-input-secret）。原因を探すために画面に小さく出す
+  const [sendError, setSendError] = useState('');
   const turnstileRef = useRef(null);
   const sendingEnabled = isObjectionSendingEnabled();
 
@@ -85,6 +87,7 @@ export default function ObjectionModal({
         status = 'sent';
       } catch (err) {
         console.error('Failed to send objection:', err);
+        setSendError(String(err?.message || err));
         status = 'error';
       }
     }
@@ -93,9 +96,10 @@ export default function ObjectionModal({
     setTimeout(() => {
       setIsSubmitted(false);
       setSendStatus('idle');
+      setSendError('');
       setComment('');
       onClose();
-    }, status === 'error' ? 4000 : 2200);
+    }, status === 'error' ? 6000 : 2200);
   };
 
   const handleClose = () => {
@@ -145,6 +149,9 @@ export default function ObjectionModal({
               {sendStatus === 'sent' && (<>ツッコミありがとうございます！<br />原本と照らし合わせて確認し、必要があれば修正します⚡️</>)}
               {sendStatus === 'local' && (<>ツッコミありがとうございます！<br />この端末に記録しました。</>)}
               {sendStatus === 'error' && (<>通信がうまくいきませんでした。時間をおいてもう一度お試しください。<br />（内容はこの端末に記録しました）</>)}
+              {sendStatus === 'error' && sendError && (
+                <span className="block mt-2 text-[10px] text-slate-500 font-mono break-all">理由: {sendError}</span>
+              )}
             </p>
           </div>
         ) : (

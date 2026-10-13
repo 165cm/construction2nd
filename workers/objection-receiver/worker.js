@@ -53,18 +53,20 @@ const sanitize = (value, max) =>
 // 1行で載せる値（改行を空白にする）
 const oneLine = (value, max) => sanitize(value, max).replace(/\n+/g, ' ');
 
-// 引用ブロックとして載せる（各行の先頭に > を付け、引用の外に出られないようにする）
-const quote = (text) => (text ? text.split('\n').map((l) => `> ${l}`).join('\n') : '> （コメントなし）');
+// 引用ブロックとして載せる（各行の先頭に > を付け、引用の外に出られないようにする）。
+// 行と行の間に空の引用行をはさみ、GitHub でも1行ずつ表示されるようにする
+const quote = (text) => (text ? text.split('\n').map((l) => `> ${l}`).join('\n>\n') : '> （コメントなし）');
 
+// ロボット確認の結果。失敗した時は Cloudflare が返す理由（例: invalid-input-secret）も返す
 const verifyTurnstile = async (token, ip, env) => {
-  if (!token) return false;
+  if (!token) return { ok: false, codes: ['missing-input-response'] };
   const form = new FormData();
   form.append('secret', env.TURNSTILE_SECRET);
   form.append('response', token);
   if (ip) form.append('remoteip', ip);
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form });
   const data = await res.json().catch(() => ({}));
-  return data.success === true;
+  return { ok: data.success === true, codes: data['error-codes'] || [] };
 };
 
 const buildIssue = (r) => {
@@ -75,7 +77,7 @@ const buildIssue = (r) => {
   const comment = sanitize(r.comment, MAX_COMMENT).trim();
   const snap = r.questionSnapshot || {};
   const choices = Array.isArray(snap.choices)
-    ? snap.choices.slice(0, 4).map((c) => `> ${oneLine(c?.id, 2)}：${oneLine(c?.text, 200)}`).join('\n')
+    ? snap.choices.slice(0, 4).map((c) => `> - ${oneLine(c?.id, 2)}：${oneLine(c?.text, 200)}`).join('\n')
     : '';
 
   const title = `【異議あり】${examName} 問${Number.isFinite(number) ? number : '?'}：${categoryLabel}`;
@@ -145,7 +147,11 @@ export default {
 
     const ip = request.headers.get('CF-Connecting-IP') || '';
     const human = await verifyTurnstile(report.turnstileToken, ip, env);
-    if (!human) return json(403, { ok: false, error: 'turnstile failed' }, cors);
+    if (!human.ok) {
+      // invalid-input-secret なら TURNSTILE_SECRET の値が違う（Site Key と取り違えやすい）
+      console.log('turnstile failed:', human.codes.join(','));
+      return json(403, { ok: false, error: `turnstile failed: ${human.codes.join(',') || 'unknown'}` }, cors);
+    }
 
     const issue = buildIssue(report);
     // ラベルが無いと issue に付かないため、先に作っておく（既にあればそのまま）
@@ -156,6 +162,8 @@ export default {
       body: JSON.stringify(issue)
     });
     if (!res.ok) {
+      // 401 ならトークンが違う／期限切れ、403・404 なら権限やリポジトリ名（GITHUB_REPO）を確認
+      console.log('github error:', res.status, (await res.text().catch(() => '')).slice(0, 300));
       return json(502, { ok: false, error: `github error ${res.status}` }, cors);
     }
     const created = await res.json().catch(() => ({}));

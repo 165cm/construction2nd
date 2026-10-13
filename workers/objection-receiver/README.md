@@ -23,6 +23,7 @@
 5. 作成すると **Site Key（サイトキー）** と **Secret Key（シークレットキー）** が出ます
    - サイトキー … 公開してよい値。あとでチャットで教えてください
    - シークレットキー … 秘密。手順4で Cloudflare に入力します（チャットには貼らない）
+   - ⚠️ **2つを取り違えやすい**ので注意。`TURNSTILE_SECRET` に入れるのは Secret Key のほう。コピーボタンでコピーすると前後に空白が入らない
 
 ## 3. GitHub のトークン（issue を作る権限だけ）を作る
 
@@ -59,6 +60,18 @@
 公開されると、アプリの「異議あり」から送った報告が GitHub の issue に「異議あり」ラベル付きで届きます。
 
 ---
+
+## うまく届かない時
+
+アプリの「送信できませんでした」の下に「理由」が出ます。Cloudflare の Worker の **Observability → Invocations** で POST の行を開くと、同じ理由がログに残っています。
+
+| 理由 | 原因と直し方 |
+|---|---|
+| `turnstile failed: invalid-input-secret` | `TURNSTILE_SECRET` の値が違う。Turnstile の画面で Secret Key をコピーし直して上書き |
+| `turnstile failed: timeout-or-duplicate` | ロボット確認の期限切れ。画面を開き直してもう一度送る |
+| `origin not allowed` | `ALLOWED_ORIGIN` が `https://165cm.github.io` と完全に同じか（最後に `/` を付けない） |
+| `github error 401` | `GITHUB_TOKEN` が違う・期限切れ。トークンを作り直して上書き |
+| `github error 403` / `404` | トークンの権限（Issues: Read and write、対象リポジトリ）か `GITHUB_REPO` の値を確認 |
 
 ## メモ
 

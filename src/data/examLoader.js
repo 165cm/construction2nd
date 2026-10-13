@@ -13,7 +13,7 @@ const EXAM_DATA_MAP = {
   r8_1
 };
 
-import { applyOverridesToQuestions } from '../utils/objections';
+import { applyOverridesToQuestions, getQuestionOverrides } from '../utils/objections';
 import sharedCropOverrides from './cropOverrides.json';
 import sharedQuestionOverrides from './questionOverrides.json';
 
@@ -32,6 +32,18 @@ const applySharedQuestionOverride = (examId, q) => {
 };
 
 export const getSharedQuestionOverrides = () => sharedQuestionOverrides || {};
+
+const sameValue = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+// 管理者のブラウザ内の修正のうち「元データのままの値」で、その後に共有ファイルで直された項目か。
+// 管理画面で別の項目を直して保存すると、触っていない項目も元データのまま一緒に保存される。
+// その古い値で、あとから公開した修正（questionOverrides.json）を上書きしないために使う
+export const isOutdatedLocalValue = (examId, questionId, field, value) => {
+  const sharedValue = sharedQuestionOverrides?.[examId]?.[String(questionId)]?.[field];
+  if (sharedValue === undefined || sameValue(value, sharedValue)) return false;
+  const raw = (EXAM_DATA_MAP[examId] || []).find((q) => String(q.id) === String(questionId));
+  return Boolean(raw) && sameValue(value, raw[field]);
+};
 
 // 共有ファイル（cropOverrides.json）の showImage で、問題の「画像あり／テキスト問題」を全端末にそろえる
 const applySharedImageSetting = (examId, q) => {
@@ -106,7 +118,18 @@ export function getSharedExamQuestions(examId) {
 export function getExamQuestions(examId) {
   const meta = getExamMeta(examId);
   // 管理者画面等で保存されたローカルオーバーライド（この端末だけの手動修正）を合成反映
-  return applyOverridesToQuestions(meta.id, getSharedExamQuestions(examId));
+  const shared = getSharedExamQuestions(examId);
+  const localFixes = getQuestionOverrides()[meta.id] || {};
+  return applyOverridesToQuestions(meta.id, shared).map((q, i) => {
+    const local = localFixes[q.id];
+    if (!local) return q;
+    // 元データのままの古い値は、共有ファイルの修正を優先する
+    const next = { ...q };
+    QUESTION_TEXT_FIELDS.forEach((f) => {
+      if (local[f] !== undefined && isOutdatedLocalValue(meta.id, q.id, f, local[f])) next[f] = shared[i][f];
+    });
+    return next;
+  });
 }
 
 const STORAGE_EXAM_KEY = 'denkou2_current_exam_id';

@@ -247,6 +247,30 @@ export default function AdminHub({ onBack }) {
                 </p>
               </div>
 
+              {/* アプリ全体のデータ内訳サマリー */}
+              <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 space-y-2">
+                <h4 className="text-xs font-bold text-slate-200 flex items-center gap-2">
+                  <span>🌐 アプリ全体（全年度）の現在データ保全状況</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                  <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg">
+                    <span className="text-[10px] text-slate-400 block">画像トリミング設定</span>
+                    <span className="font-mono font-black text-sky-400 text-sm">{cropsCount} 件</span>
+                    <span className="text-[10px] text-slate-500 block">（全年度統合）</span>
+                  </div>
+                  <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg">
+                    <span className="text-[10px] text-slate-400 block">問題・解説手動修正</span>
+                    <span className="font-mono font-black text-emerald-400 text-sm">{overridesCount} 件</span>
+                    <span className="text-[10px] text-slate-500 block">（全年度ストック）</span>
+                  </div>
+                  <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg">
+                    <span className="text-[10px] text-slate-400 block">異議申し立て報告</span>
+                    <span className="font-mono font-black text-amber-400 text-sm">{getObjections().length} 件</span>
+                    <span className="text-[10px] text-slate-500 block">（未対応 {pendingObjectionsCount}件）</span>
+                  </div>
+                </div>
+              </div>
+
               {/* まるごとバックアップと復元 */}
               <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-3">

@@ -1,5 +1,17 @@
-// 収録年度・過去問マスターリスト
+// 収録年度・過去問マスターリスト（最新順：令和8年上期が最上位）
 export const EXAM_LIST = [
+  {
+    id: 'r8_1',
+    name: '令和8年度 上期',
+    badge: '令8上',
+    year: '令和8年',
+    season: '上期',
+    examDate: '2026年5月24日実施',
+    questionCount: 50,
+    isFree: true,
+    pageDir: '/pages',
+    floorPlanPage: 15
+  },
   {
     id: 'r7_2',
     name: '令和7年度 下期',
@@ -47,19 +59,8 @@ export const EXAM_LIST = [
     isFree: true,
     pageDir: '/pages/r6_1',
     floorPlanPage: 15
-  },
-  {
-    id: 'r8_1',
-    name: '令和8年度 上期',
-    badge: '令8上',
-    year: '令和8年',
-    season: '上期',
-    examDate: '2026年5月24日実施',
-    questionCount: 50,
-    isFree: true,
-    pageDir: '/pages',
-    floorPlanPage: 15
   }
 ];
 
-export const DEFAULT_EXAM_ID = 'r7_2';
+export const DEFAULT_EXAM_ID = 'r8_1';
+

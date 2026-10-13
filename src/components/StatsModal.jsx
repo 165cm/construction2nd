@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2, Brain, BookOpen, Table } from 'lucide-react';
-import { BADGES_DEF, getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime } from '../utils/storage';
+import { BADGES_DEF, getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime, getTodayCount, getStudyStreakDays } from '../utils/storage';
+import { downloadLearningBackup, inspectLearningBackup, restoreLearningBackup } from '../utils/backup';
 import { getLeitnerBoxCounts } from '../utils/spacedRepetition';
 import { playClick } from '../utils/sound';
 import { getShuffleChoicesSetting, setShuffleChoicesSetting, getAutoAdvanceMode, setAutoAdvanceMode, AUTO_ADVANCE_MODES } from '../utils/settings';
@@ -190,22 +191,22 @@ export default function StatsModal({
                 <div className="grid grid-cols-4 gap-1.5 text-center">
                   <div className="p-2 rounded-xl bg-slate-900/80 border border-rose-500/30">
                     <div className="text-[10px] text-rose-400 font-bold leading-tight">要復習🔥</div>
-                    <div className="text-base font-black text-white mt-1">{boxCounts.box1}</div>
+                    <div className="text-base font-black text-white mt-1">{boxCounts[1] || 0}</div>
                     <div className="text-[9px] text-slate-400 mt-0.5">3問以内</div>
                   </div>
                   <div className="p-2 rounded-xl bg-slate-900/80 border border-sky-500/30">
                     <div className="text-[10px] text-sky-400 font-bold leading-tight">定着中🌱</div>
-                    <div className="text-base font-black text-white mt-1">{boxCounts.box2}</div>
+                    <div className="text-base font-black text-white mt-1">{boxCounts[2] || 0}</div>
                     <div className="text-[9px] text-slate-400 mt-0.5">約8問後</div>
                   </div>
                   <div className="p-2 rounded-xl bg-slate-900/80 border border-teal-500/30">
                     <div className="text-[10px] text-teal-300 font-bold leading-tight">安定🌿</div>
-                    <div className="text-base font-black text-white mt-1">{boxCounts.box3}</div>
+                    <div className="text-base font-black text-white mt-1">{boxCounts[3] || 0}</div>
                     <div className="text-[9px] text-slate-400 mt-0.5">約20問後</div>
                   </div>
                   <div className="p-2 rounded-xl bg-slate-900/80 border border-emerald-500/40 bg-emerald-950/20">
                     <div className="text-[10px] text-emerald-300 font-bold leading-tight">マスター👑</div>
-                    <div className="text-base font-black text-emerald-400 mt-1">{boxCounts.box4}</div>
+                    <div className="text-base font-black text-emerald-400 mt-1">{boxCounts[4] || 0}</div>
                     <div className="text-[9px] text-emerald-300/70 mt-0.5">完了</div>
                   </div>
                 </div>
@@ -213,6 +214,20 @@ export default function StatsModal({
 
               {/* Overall Summary Stats */}
               <div className="grid grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-sky-500/40">
+                  <div className="text-xs text-slate-400">📅 今日解いた数</div>
+                  <div className="text-xl font-black text-sky-300 mt-1">
+                    {getTodayCount(state)} <span className="text-xs font-normal text-slate-400">問</span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-amber-500/40">
+                  <div className="text-xs text-slate-400">🗓️ 連続学習日数</div>
+                  <div className="text-xl font-black text-amber-300 mt-1">
+                    {getStudyStreakDays(state)} <span className="text-xs font-normal text-slate-400">日</span>
+                  </div>
+                </div>
+
                 <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/70">
                   <div className="text-xs text-slate-400">総解答数</div>
                   <div className="text-xl font-black text-white mt-1">
@@ -353,7 +368,7 @@ export default function StatsModal({
                           setAutoAdvance(m.id);
                           setAutoAdvanceMode(m.id);
                         }}
-                        className={`py-1.5 rounded-lg text-[11px] font-bold border transition active:scale-95 ${
+                        className={`min-h-[44px] rounded-lg text-[11px] font-bold border transition active:scale-95 ${
                           autoAdvance === m.id
                             ? 'bg-sky-500 text-white border-sky-400 shadow-md shadow-sky-500/30'
                             : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-700'
@@ -366,6 +381,51 @@ export default function StatsModal({
                   <p className="text-[10px] text-slate-400 mt-1.5">
                     {AUTO_ADVANCE_MODES.find(m => m.id === autoAdvance)?.desc}
                   </p>
+                </div>
+
+                {/* 学習記録のバックアップ */}
+                <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80">
+                  <div className="text-xs font-bold text-white">💾 学習記録のバックアップ</div>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    機種変更やブラウザのデータ削除に備えて、ファイルに保存できます。
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5 mt-2">
+                    <button
+                      onClick={() => { playClick(); downloadLearningBackup(); }}
+                      className="min-h-[44px] rounded-lg text-xs font-bold border bg-slate-900 text-sky-300 border-slate-700 hover:bg-slate-700 active:scale-95 transition"
+                    >
+                      ⬇️ 書き出す
+                    </button>
+                    <label className="min-h-[44px] rounded-lg text-xs font-bold border bg-slate-900 text-emerald-300 border-slate-700 hover:bg-slate-700 active:scale-95 transition flex items-center justify-center cursor-pointer">
+                      ⬆️ 読み込む
+                      <input
+                        type="file"
+                        accept="application/json,.json"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          e.target.value = '';
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            const result = inspectLearningBackup(String(ev.target.result || ''));
+                            if (!result.ok) {
+                              alert(`⚠️ 読み込めませんでした：${result.error}`);
+                              return;
+                            }
+                            const date = result.summary.exportedAt ? new Date(result.summary.exportedAt).toLocaleString('ja-JP') : '不明';
+                            const ok = window.confirm(
+                              `${date} に保存した学習記録（解答 ${result.summary.answered} 問）を読み込みます。\n今この端末にある学習記録は置き換わります。よろしいですか？`
+                            );
+                            if (!ok) return;
+                            restoreLearningBackup(result.backup);
+                            window.location.reload();
+                          };
+                          reader.readAsText(file);
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 {onOpenAttribution && (

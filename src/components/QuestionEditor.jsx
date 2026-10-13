@@ -37,6 +37,8 @@ export default function QuestionEditor({ onOpenCropEditor }) {
 
   // 簡易トリミング操作用ステート
   const [cropCoords, setCropCoords] = useState(null);
+  // 開いた時（または保存した時）のトリム枠。今の枠と違えば「未保存」
+  const [loadedCropCoords, setLoadedCropCoords] = useState(null);
   const [isCropActive, setIsCropActive] = useState(true);
   const [cropSavedNotice, setCropSavedNotice] = useState(false);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(true);
@@ -131,10 +133,13 @@ export default function QuestionEditor({ onOpenCropEditor }) {
     if (!currentQuestion) return false;
     const source = overrides[selectedExamId]?.[questionId] || currentQuestion;
     if (formData.hasDiagram !== Boolean(source.diagram)) return true;
+    // 簡易トリムの枠だけを動かした場合も未保存
+    if (formData.hasDiagram && isCropActive && cropCoords && loadedCropCoords &&
+      ['page', 'x', 'y', 'w', 'h'].some(f => Math.round(cropCoords[f] ?? 0) !== Math.round(loadedCropCoords[f] ?? 0))) return true;
     const textFields = ['question', 'answer', 'explanation', 'keyPoint', 'category', 'categoryTag'];
     if (textFields.some(f => (formData[f] || '') !== (source[f] || ''))) return true;
     return JSON.stringify(formData.choices || []) !== JSON.stringify(source.choices || []);
-  }, [formData, overrides, selectedExamId, questionId, currentQuestion]);
+  }, [formData, overrides, selectedExamId, questionId, currentQuestion, isCropActive, cropCoords, loadedCropCoords]);
 
   // 管理画面全体（タブ切り替え・アプリに戻る・ページを閉じる）にも知らせる
   useEffect(() => {
@@ -171,8 +176,8 @@ export default function QuestionEditor({ onOpenCropEditor }) {
   useEffect(() => {
     if (!currentQuestion) return;
     const active = getActiveCropCoords(cropKey);
-    if (active && active.page === activePageNum) {
-      setCropCoords({
+    const initial = active && active.page === activePageNum
+      ? {
         page: activePageNum,
         pageDir: examMeta.pageDir,
         x: active.x,
@@ -180,10 +185,9 @@ export default function QuestionEditor({ onOpenCropEditor }) {
         w: active.w,
         h: active.h,
         label: active.label || `${examMeta.badge} 問${questionId}`
-      });
-    } else {
-      // 既定の初期枠（配線図または問題図）
-      setCropCoords({
+      }
+      : {
+        // 既定の初期枠（配線図または問題図）
         page: activePageNum,
         pageDir: examMeta.pageDir,
         x: 250,
@@ -191,8 +195,9 @@ export default function QuestionEditor({ onOpenCropEditor }) {
         w: 380,
         h: 240,
         label: `${examMeta.badge} 問${questionId}`
-      });
-    }
+      };
+    setCropCoords(initial);
+    setLoadedCropCoords(initial);
   }, [cropKey, activePageNum, questionId, selectedExamId, isWiringQuestion, examMeta]);
 
   // キャンバスプレビューのリアルタイム描画
@@ -382,6 +387,9 @@ export default function QuestionEditor({ onOpenCropEditor }) {
     }
 
     triggerHaptic('success');
+    // 保存した枠を「開いた時の枠」にする（未保存の表示を消す）
+    setCropCoords(savedCoords);
+    setLoadedCropCoords(savedCoords);
     // フォーム側も「図面・写真あり」に自動連動
     setFormData(prev => ({
       ...prev,

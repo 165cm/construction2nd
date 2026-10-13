@@ -872,7 +872,7 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
             const qPage = targetQuestionObj?.questionPage || 11;
             const isFloor = pageNumber === floorP;
             const isQuestion = pageNumber === qPage;
-            const btn = (active) => `px-3 py-1.5 rounded-lg text-[11px] font-black border transition active:scale-95 ${
+            const btn = (active) => `min-h-[44px] px-3 py-1.5 rounded-lg text-[11px] font-black border transition active:scale-95 ${
               active
                 ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
                 : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'

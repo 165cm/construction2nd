@@ -55,6 +55,8 @@ export const getInitialState = () => {
     recentHistory: [], // last 20 answers
     // 年度ごとの進み具合: examId -> { round, currentQuestionId, currentQuizIndex }
     examProgress: {},
+    // 日ごとの解答数: 'YYYY-MM-DD'（端末の日付）-> 解いた問題数（直近120日分）
+    dailyLog: {},
     schemaVersion: STATE_SCHEMA_VERSION
   };
 };
@@ -332,6 +334,12 @@ export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpe
   progress.currentQuestionId = questionId;
   state.examProgress[examId] = progress;
 
+  // 日ごとの解答数（今日解いた数・連続学習日数に使う）
+  const today = toDateKey(new Date());
+  const dailyLog = { ...(state.dailyLog || {}) };
+  dailyLog[today] = (dailyLog[today] || 0) + 1;
+  state.dailyLog = Object.fromEntries(Object.entries(dailyLog).sort(([a], [b]) => a.localeCompare(b)).slice(-120));
+
   // Recent History
   state.recentHistory = [
     { questionId: key, isCorrect, timestamp: Date.now() },
@@ -350,6 +358,30 @@ export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpe
     currentRecord,
     didCompleteRound1
   };
+};
+
+// 端末の日付で 'YYYY-MM-DD'
+export const toDateKey = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+// 今日解いた問題数
+export const getTodayCount = (state, now = new Date()) => (state.dailyLog || {})[toDateKey(now)] || 0;
+
+// 連続学習日数（今日まだ解いていなくても、昨日まで続いていれば途切れていない扱い）
+export const getStudyStreakDays = (state, now = new Date()) => {
+  const log = state.dailyLog || {};
+  const day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (!log[toDateKey(day)]) day.setDate(day.getDate() - 1);
+  let count = 0;
+  while (log[toDateKey(day)] > 0) {
+    count += 1;
+    day.setDate(day.getDate() - 1);
+  }
+  return count;
 };
 
 export const toggleBookmark = (prevState, questionId) => {

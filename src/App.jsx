@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
 import { EXAM_LIST } from './data/examList';
 import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition, getExamView, recordKey } from './utils/storage';
@@ -18,7 +18,8 @@ import Round1CompleteModal from './components/Round1CompleteModal';
 import AttributionModal from './components/AttributionModal';
 import ExamSelectModal from './components/ExamSelectModal';
 import BottomNav from './components/BottomNav';
-import AdminHub from './components/AdminHub';
+// 管理画面は管理者しか使わないので、開いた時だけ読み込む（一般の利用者の最初の読み込みを軽くする）
+const AdminHub = lazy(() => import('./components/AdminHub'));
 
 export default function App() {
   const [currentExamId, setCurrentExamId] = useState(() => loadCurrentExamId());
@@ -263,14 +264,20 @@ export default function App() {
 
   if (currentMode === 'admin') {
     return (
-      <AdminHub 
-        onBack={() => {
-          setCurrentMode('quiz');
-          if (typeof window !== 'undefined' && window.location.hash === '#admin') {
-            window.history.pushState('', document.title, window.location.pathname + window.location.search);
-          }
-        }} 
-      />
+      <Suspense fallback={
+        <div className="min-h-screen bg-slate-950 text-slate-300 flex items-center justify-center text-sm">
+          管理画面を読み込み中…
+        </div>
+      }>
+        <AdminHub
+          onBack={() => {
+            setCurrentMode('quiz');
+            if (typeof window !== 'undefined' && window.location.hash === '#admin') {
+              window.history.pushState('', document.title, window.location.pathname + window.location.search);
+            }
+          }}
+        />
+      </Suspense>
     );
   }
 

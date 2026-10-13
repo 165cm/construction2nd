@@ -7,7 +7,7 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| Claude | claude/keen-einstein-0i4ebd | 管理者側改善 PR F（全問題チェック一覧）＋異議ありの失敗理由表示 | src/components/QuestionChecklist.jsx, src/components/AdminHub.jsx, src/components/QuestionEditor.jsx, src/components/ObjectionModal.jsx, workers/objection-receiver/ |
+| Claude | claude/keen-einstein-0i4ebd | 管理者側改善 PR G（管理画面を開いた時だけ読み込む） | src/App.jsx |
 
 ## 次のタスク（上から優先）
 1. ✅ 利用者側の改善を3つのPRに分けて進める（完了）
@@ -21,10 +21,12 @@
    - リポジトリを非公開にする（GitHub Pages は無料プランだと非公開リポジトリから公開できないため、公開先を Cloudflare Pages に移すか GitHub の有料プランにする）
    - 非公開にしても公開サイトのデータ（問題・解説）は見えるため、コピー対策にはログイン＋支払い確認つきの配信が必要
    - 過去問の利用：試験センターの留意点（許諾・使用料不要。著作権は放棄されていない。出典「令和◯年度◯期第二種電気工事士試験」と改変の旨を明記）をユーザーが確認済み。有料化しても問題ないとユーザー判断
-   - PR F：全問題チェック一覧
+   - ✅ PR F（#36 公開済み）：全問題チェック一覧
    - PR G：管理画面を開いた時だけ読み込む（一般の利用者の読み込みを軽く）
 
 ## 最近終わったこと（新しい順）
+- Cloudflare の Worker を PR #36 版に貼り替え、異議ありの送信を再確認（テスト報告 issue #37 を確認して閉じた）
+- PR #36 マージ＆本番デプロイ：⑤全問チェック、②エディタを指定の問題で開く、異議ありの送信失敗の理由表示、受付窓口のログと issue の選択肢表示の改善（ユーザーが Cloudflare の Worker のコードを貼り替えて反映）
 - 異議ありの受付窓口の本番稼働を確認（テスト報告が issue #35 として届いた。テスト用のため閉じた）。原因：TURNSTILE_SECRET に Secret Key 以外の値が入っていた
 - PR #34 マージ＆本番デプロイ：異議ありの受付窓口で報告内容の Markdown を無害化、ラベルの自動作成（ユーザーが Cloudflare の Worker のコードを貼り替えて反映）
 - PR #33 マージ＆本番デプロイ：「異議あり」の送信先（Worker の URL・Turnstile サイトキー）を設定し、GitHub の issue への送信を有効化

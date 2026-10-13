@@ -4,6 +4,7 @@ import { EXAM_LIST } from './data/examList';
 import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition, getExamView, recordKey } from './utils/storage';
 import { getInitialResumeQuestion, determineNextQuizQuestion } from './utils/spacedRepetition';
 import { isSoundEnabled, setSoundEnabled, playClick } from './utils/sound';
+import { prefetchHdPage, getActiveCropCoords, cropKeyForDiagram } from './utils/customCrops';
 import confetti from 'canvas-confetti';
 
 import Header from './components/Header';
@@ -260,6 +261,23 @@ export default function App() {
 
   // 管理画面で問題を修正した時も、表示中の問題に最新の内容を使う
   const currentQuestion = questionsData.find(q => q.id === quizStep.question?.id) || quizStep.question || questionsData[0];
+  // 高画質のページ画像を先に読み込んでおき、表示を速くする
+  // - 配線図の問題（問31〜）に近づいたら配線図のページ
+  // - 次の問題に図があれば、その図のページ
+  useEffect(() => {
+    if (!currentQuestion) return undefined;
+    const timer = setTimeout(() => {
+      const pageDir = currentExamMeta?.pageDir || '/pages';
+      if (currentQuestion.id >= 25) prefetchHdPage(pageDir, currentExamMeta?.floorPlanPage || 15);
+      const next = questionsData[(quizStep.index ?? 0) + 1];
+      if (next?.diagram) {
+        const coords = getActiveCropCoords(cropKeyForDiagram(next.id, next.diagram, currentExamId));
+        if (coords) prefetchHdPage(coords.pageDir || pageDir, coords.page);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [currentQuestion, currentExamMeta, currentExamId, questionsData, quizStep.index]);
+
   const reviewQuestionsCount = questionsData.filter(q => examState.records[q.id]?.status === 'review' || (examState.records[q.id]?.wrong > 0 && examState.records[q.id]?.status !== 'mastered')).length;
 
   if (currentMode === 'admin') {

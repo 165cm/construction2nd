@@ -96,3 +96,15 @@
 
 - 管理画面（`AdminHub` 以下）は `React.lazy` で別ファイルに分け、`#admin` を開いた時だけ読み込む（一般の利用者の最初の読み込みを約100KB軽くする）
 - 残りの大部分は全5年度の問題データ。さらに軽くするなら、年度ごとに必要な時だけ読み込む形に変える（未対応）
+<<<<<<< HEAD
+
+## 問題ページ画像（高画質 WebP と管理用 PNG）
+
+- `public/pages/**/page_N.webp` … 利用者の画面に出す高画質版（高さ約 2250px、WebP 品質85。1ページ約100KB）。`scripts/build_hd_pages.py` で、画像を縮める前の版（git の `df9e7d8^`）から作る
+- `public/pages/**/page_N.png` … 縮めた版（高さ 1200px）。**管理画面の表示と、切り抜き位置（x, y, w, h）の基準**。消さない
+- 切り抜きは `src/utils/customCrops.js` の `renderCropFromPage` が WebP を読み、位置を「WebP の高さ / 1200」倍して切り抜く（WebP が読めなければ PNG で等倍）
+- 配線図ビューアは `page_15.webp`・`floor_plan.webp`・`panel_schedule.webp` を表示
+- 先読み：問25以降で配線図ページを、次の問題に図があればその図のページを、裏で先に読み込む（`App.jsx`、`prefetchHdPage`）。一度読んだ画像は Service Worker が保存する
+- 新しい年度を足す時は、高画質の PNG（PDF を2倍で書き出したもの）から WebP を作り、高さ 1200px に縮めた PNG も置く
+=======
+>>>>>>> origin/main

@@ -37,6 +37,22 @@ const saveExamSession = (examId, session) => {
   }
 };
 
+// 「本番と同じ並び（選択肢をシャッフルしない）」の設定。初期値は ON（本番どおり）
+const FIXED_ORDER_STORAGE_KEY = 'denkou2_exam_fixed_order_v1';
+const loadFixedOrderSetting = () => {
+  try {
+    const v = localStorage.getItem(FIXED_ORDER_STORAGE_KEY);
+    return v === null ? true : v === 'true';
+  } catch (e) {
+    return true;
+  }
+};
+const saveFixedOrderSetting = (value) => {
+  try { localStorage.setItem(FIXED_ORDER_STORAGE_KEY, String(value)); } catch (e) { /* ignore */ }
+};
+
+const CHOICE_IDS = ['イ', 'ロ', 'ハ', 'ニ'];
+
 const secondsUntil = (deadline) => Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
 
 export default function ExamMode({
@@ -58,14 +74,18 @@ export default function ExamMode({
   const [isFinished, setIsFinished] = useState(false);
   const [resultData, setResultData] = useState(null);
   const [expandedResultIdx, setExpandedResultIdx] = useState(null);
+  // 本番と同じ並び（受験中は開始時の設定で固定）
+  const [fixedOrder, setFixedOrder] = useState(() => savedSession?.fixedOrder ?? loadFixedOrderSetting());
+  // マークシート（全問の解答欄）を開いているか
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const finishedRef = useRef(false);
 
   // 受験中は解答・現在位置を自動保存
   useEffect(() => {
     if (examStarted && !isFinished && deadline) {
-      saveExamSession(examId, { answers, currentIdx, deadline });
+      saveExamSession(examId, { answers, currentIdx, deadline, fixedOrder });
     }
-  }, [examStarted, isFinished, answers, currentIdx, deadline, examId]);
+  }, [examStarted, isFinished, answers, currentIdx, deadline, examId, fixedOrder]);
 
   // Timer countdown（終了時刻から残り時間を計算）
   useEffect(() => {
@@ -101,7 +121,13 @@ export default function ExamMode({
   const handleSelectChoice = (questionId, choiceId) => {
     playClick();
     triggerHaptic('light');
-    setAnswers(prev => ({ ...prev, [questionId]: choiceId }));
+    setAnswers(prev => {
+      const next = { ...prev };
+      // undefined はマークを消す（マークシートで同じ◯をもう一度タップした時）
+      if (choiceId === undefined) delete next[questionId];
+      else next[questionId] = choiceId;
+      return next;
+    });
   };
 
   const handleFinishExam = ({ auto = false } = {}) => {
@@ -193,6 +219,25 @@ export default function ExamMode({
             <strong className="text-sm text-sky-400">120 分</strong>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            playClick();
+            const next = !fixedOrder;
+            setFixedOrder(next);
+            saveFixedOrderSetting(next);
+          }}
+          className="w-full max-w-xs min-h-[44px] mb-4 px-3 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-between text-xs text-slate-200"
+        >
+          <span className="text-left">
+            <span className="font-bold">📋 本番と同じ並びで出題</span>
+            <span className="block text-[10px] text-slate-400">選択肢をシャッフルせず、イ・ロ・ハ・ニの順に表示</span>
+          </span>
+          <span className={`w-11 h-6 rounded-full relative shrink-0 ml-2 transition ${fixedOrder ? 'bg-sky-500' : 'bg-slate-700'}`}>
+            <span className={`w-4 h-4 rounded-full bg-white absolute top-1 transition ${fixedOrder ? 'left-6' : 'left-1'}`} />
+          </span>
+        </button>
 
         <button
           onClick={handleStartExam}
@@ -358,8 +403,16 @@ export default function ExamMode({
         </div>
 
         <button
+          onClick={() => { playClick(); setIsSheetOpen(true); }}
+          className="min-h-[36px] py-1 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 font-bold text-xs active:scale-95 transition"
+          title="全問の解答欄（マークシート）を開く"
+        >
+          📝 マーク
+        </button>
+
+        <button
           onClick={() => handleFinishExam()}
-          className="py-1 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md active:scale-95 transition"
+          className="min-h-[36px] py-1 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md active:scale-95 transition"
         >
           採点する
         </button>
@@ -442,7 +495,7 @@ export default function ExamMode({
 
       {/* Choice Buttons (2 columns if short, 1 column if long) */}
       {(() => {
-        const isShuffle = getShuffleChoicesSetting();
+        const isShuffle = !fixedOrder && getShuffleChoicesSetting();
         let displayedChoices = activeQ.choices;
         if (isShuffle) {
           // Stable pseudo-random shuffle seeded by question ID for consistency during test session
@@ -483,6 +536,50 @@ export default function ExamMode({
           </div>
         );
       })()}
+
+      {/* マークシート（全問の解答欄）：本番の解答用紙のように、問題番号ごとにイ・ロ・ハ・ニを塗る */}
+      {isSheetOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-end sm:items-center justify-center p-2" onClick={() => setIsSheetOpen(false)}>
+          <div className="bg-white text-slate-900 w-full max-w-md max-h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-200 bg-rose-50">
+              <div>
+                <div className="text-sm font-black text-rose-700">解答用紙（マークシート）</div>
+                <div className="text-[10px] text-slate-500">◯をタップでマーク／番号をタップでその問題へ移動</div>
+              </div>
+              <button onClick={() => setIsSheetOpen(false)} className="min-h-[44px] px-3 rounded-lg bg-slate-900 text-white text-xs font-bold">閉じる</button>
+            </div>
+            <div className="overflow-y-auto px-3 py-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+              {allQuestions.map((q, idx) => (
+                <div key={q.id} className={`flex items-center gap-2 py-1 border-b border-rose-100 ${idx === currentIdx ? 'bg-sky-50' : ''}`}>
+                  <button
+                    onClick={() => { setCurrentIdx(idx); setIsSheetOpen(false); window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }}
+                    className="w-10 min-h-[40px] text-xs font-black text-rose-700 text-right pr-1"
+                  >
+                    {q.number}
+                  </button>
+                  <div className="flex gap-2">
+                    {CHOICE_IDS.map(cid => {
+                      const marked = answers[q.id] === cid;
+                      return (
+                        <button
+                          key={cid}
+                          onClick={() => handleSelectChoice(q.id, marked ? undefined : cid)}
+                          className={`w-10 h-10 rounded-full border-2 text-xs font-bold flex items-center justify-center transition active:scale-90 ${
+                            marked ? 'bg-slate-900 border-slate-900 text-white' : 'border-rose-400 text-rose-500 bg-white'
+                          }`}
+                          aria-label={`問${q.number} ${cid}`}
+                        >
+                          {cid}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Prev / Next Buttons */}
       <div className="flex gap-2">

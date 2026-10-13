@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2, Brain, BookOpen, Table } from 'lucide-react';
 import { BADGES_DEF, getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime, getTodayCount, getStudyStreakDays } from '../utils/storage';
 import { downloadLearningBackup, inspectLearningBackup, restoreLearningBackup } from '../utils/backup';
@@ -20,6 +20,12 @@ export default function StatsModal({
   const [activeTab, setActiveTab] = useState('stats'); // 'stats' | 'cheatsheets'
   const [isShuffle, setIsShuffle] = useState(getShuffleChoicesSetting);
   const [autoAdvance, setAutoAdvance] = useState(getAutoAdvanceMode);
+  // 解答後ポップアップなど、ほかの場所で変えた自動送り設定にも表示を合わせる
+  useEffect(() => {
+    const sync = () => setAutoAdvance(getAutoAdvanceMode());
+    window.addEventListener('auto-advance-setting-changed', sync);
+    return () => window.removeEventListener('auto-advance-setting-changed', sync);
+  }, []);
 
   if (!isOpen) return null;
 

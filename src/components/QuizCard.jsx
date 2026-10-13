@@ -227,6 +227,7 @@ export default function QuizCard({
     if (isRetry) return;
 
     onAnswer({
+      examId: question.examId,
       questionId: question.id,
       isCorrect,
       timeSpentSec: timeSpent,
@@ -317,7 +318,7 @@ export default function QuizCard({
           <button
             onClick={() => {
               playClick();
-              onToggleBookmark(question.id);
+              onToggleBookmark(question.id, question.examId);
             }}
             className={`p-1.5 rounded-lg border transition ${
               isBookmarked
@@ -348,7 +349,7 @@ export default function QuizCard({
         <button
           onClick={() => {
             playClick();
-            onOpenWiringDiagram(question.wiringMark);
+            onOpenWiringDiagram(question.wiringMark, question.examId);
           }}
           className="mb-3 py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-between shadow-lg shadow-sky-900/40 active:scale-[0.98] transition border border-sky-400/40 animate-pulseGlow"
         >

@@ -3,6 +3,7 @@ import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, Rota
 import confetti from 'canvas-confetti';
 import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sound';
 import { cropKeyForDiagram } from '../utils/customCrops';
+import { getShuffleChoicesSetting } from '../utils/settings';
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
 
@@ -11,7 +12,8 @@ export default function ExamMode({
   onOpenWiringDiagram,
   onRecordExamResults,
   onGoToReview,
-  onOpenAttribution
+  onOpenAttribution,
+  currentExamMeta
 }) {
   const [examStarted, setExamStarted] = useState(false);
   const [answers, setAnswers] = useState({}); // { [questionId]: choiceId }
@@ -114,7 +116,7 @@ export default function ExamMode({
           ⏱️
         </div>
         <h2 className="text-xl font-black text-white mb-2">
-          令和8年度上期 学科試験 本番模試
+          {currentExamMeta?.name || '第二種電気工事士'} 学科試験 模擬試験
         </h2>
         <p className="text-xs text-slate-300 max-w-sm leading-relaxed mb-6">
           試験時間120分、全50問（配点各2点／100点満点）。<br />
@@ -362,7 +364,13 @@ export default function ExamMode({
         </h3>
 
         {activeQ.diagram && (
-          <div className="bg-white rounded-xl p-2 my-2 flex items-center justify-center max-h-52 overflow-hidden border border-slate-600">
+          <div className="bg-white rounded-xl p-2 my-2 relative flex items-center justify-center max-h-52 overflow-hidden border border-slate-600">
+            {activeQ.wiringMark && (
+              <div className="absolute top-2 left-2 z-10 bg-slate-900/90 backdrop-blur border border-amber-500/50 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-md">
+                <span>🎯 対象箇所:</span>
+                <span className="text-amber-400 font-black">{activeQ.wiringMark} 周辺拡大</span>
+              </div>
+            )}
             <CropImage
               cropKey={cropKeyForDiagram(activeQ.id, activeQ.diagram)}
               defaultPath={activeQ.diagram}
@@ -375,10 +383,20 @@ export default function ExamMode({
 
       {/* Choice Buttons (2 columns if short, 1 column if long) */}
       {(() => {
-        const areChoicesShort = activeQ.choices.every((c) => (c.text || '').length <= 13);
+        const isShuffle = getShuffleChoicesSetting();
+        let displayedChoices = activeQ.choices;
+        if (isShuffle) {
+          // Stable pseudo-random shuffle seeded by question ID for consistency during test session
+          displayedChoices = [...activeQ.choices].sort((a, b) => {
+            const hA = (activeQ.id * 31 + a.id.charCodeAt(0)) % 100;
+            const hB = (activeQ.id * 31 + b.id.charCodeAt(0)) % 100;
+            return hA - hB;
+          });
+        }
+        const areChoicesShort = displayedChoices.every((c) => (c.text || '').length <= 13);
         return (
           <div className={`${areChoicesShort ? 'grid grid-cols-2 gap-2' : 'space-y-2'} mb-6`}>
-            {activeQ.choices.map((c) => {
+            {displayedChoices.map((c) => {
               const isSelected = answers[activeQ.id] === c.id;
               return (
                 <button

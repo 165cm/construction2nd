@@ -936,7 +936,7 @@
     "categoryTag": "心線数",
     "point": 2,
     "question": "配線図①で示す部分の最少電線本数(心線数)は。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q31_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "①",
     "choices": [
@@ -968,7 +968,7 @@
     "categoryTag": "引込口開閉器",
     "point": 2,
     "question": "配線図②で示す引込口開閉器が省略できる場合の，工場と倉庫との間の電路の長さの最大値［m］は。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q32_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "②",
     "choices": [
@@ -1000,7 +1000,7 @@
     "categoryTag": "押しボタン",
     "point": 2,
     "question": "配線図③で示す図記号の名称は。（○の中にPB）",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q33_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "③",
     "choices": [
@@ -1032,7 +1032,7 @@
     "categoryTag": "ケーブル種類",
     "point": 2,
     "question": "配線図④で示す電線の種類は。（EM-CE 5.5）",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q34_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "④",
     "choices": [
@@ -1064,7 +1064,7 @@
     "categoryTag": "自動点滅器",
     "point": 2,
     "question": "配線図⑤で示す図記号の器具の名称は。（黒丸の中にA）",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q35_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "⑤",
     "choices": [
@@ -1096,7 +1096,7 @@
     "categoryTag": "過電流遮断器",
     "point": 2,
     "question": "配線図⑥で示す単相3線式回路の中性線部分に施設してはならない過電流遮断装置は。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q36_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "⑥",
     "choices": [
@@ -1128,7 +1128,7 @@
     "categoryTag": "接地工事",
     "point": 2,
     "question": "配線図⑦で示す部分の接地工事の電線最小太さと，接地抵抗の最大値の組合せで，正しいものは。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q37_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "⑦",
     "choices": [
@@ -1160,7 +1160,7 @@
     "categoryTag": "絶縁抵抗",
     "point": 2,
     "question": "配線図⑧で示す部分の電路と大地間の絶縁抵抗として，許容される最小値［MΩ］は。（単相3線式100/200V回路）",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q38_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "⑧",
     "choices": [
@@ -1192,7 +1192,7 @@
     "categoryTag": "刃受形状",
     "point": 2,
     "question": "配線図⑨で示す部分に使用するコンセントの極配置(刃受)は。（単相200V 20A 接地極付）",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q39_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "⑨",
     "choices": [
@@ -1224,7 +1224,7 @@
     "categoryTag": "モータブレーカ",
     "point": 2,
     "question": "配線図⑩で示す部分に取り付けるモータブレーカの図記号は。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q40_focus.png",
     "fullPage": "/pages/r6_2/page_15.png",
     "wiringMark": "⑩",
     "choices": [
@@ -1256,7 +1256,7 @@
     "categoryTag": "接地抵抗計",
     "point": 2,
     "question": "配線図⑪で示す部分の接地抵抗を測定する測定器は。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q41_focus.png",
     "fullPage": "/pages/r6_2/page_12.png",
     "wiringMark": "⑪",
     "choices": [
@@ -1288,7 +1288,7 @@
     "categoryTag": "リングスリーブ個数",
     "point": 2,
     "question": "配線図⑫で示すジョイントボックス内の接続をすべて圧着接続とする場合，使用するリングスリーブの種類と最少個数の組合せで，正しいものは。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q42_focus.png",
     "fullPage": "/pages/r6_2/page_12.png",
     "wiringMark": "⑫",
     "choices": [
@@ -1320,7 +1320,7 @@
     "categoryTag": "差込コネクタ",
     "point": 2,
     "question": "配線図⑬で示すVVF用ジョイントボックス内の接続を差込形コネクタとする場合，使用するコネクタの種類と最少個数は。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q43_focus.png",
     "fullPage": "/pages/r6_2/page_12.png",
     "wiringMark": "⑬",
     "choices": [
@@ -1352,7 +1352,7 @@
     "categoryTag": "材料鑑別",
     "point": 2,
     "question": "配線図⑭で示す点滅器の取付け工事に使用されることのない材料は。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q44_focus.png",
     "fullPage": "/pages/r6_2/page_12.png",
     "wiringMark": "⑭",
     "choices": [
@@ -1384,7 +1384,7 @@
     "categoryTag": "コンセント鑑別",
     "point": 2,
     "question": "配線図⑮で示す図記号のコンセントは。（接地極付・接地端子付コンセント）",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q45_focus.png",
     "fullPage": "/pages/r6_2/page_12.png",
     "wiringMark": "⑮",
     "choices": [
@@ -1416,7 +1416,7 @@
     "categoryTag": "配線ケーブル",
     "point": 2,
     "question": "配線図⑯で示す部分の配線工事に必要なケーブルは。ただし心線数は最少とする。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q46_focus.png",
     "fullPage": "/pages/r6_2/page_13.png",
     "wiringMark": "⑯",
     "choices": [
@@ -1448,7 +1448,7 @@
     "categoryTag": "トラフ鑑別",
     "point": 2,
     "question": "配線図⑰で示す地中埋設部分に使用するトラフ（防護材）は。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q47_focus.png",
     "fullPage": "/pages/r6_2/page_13.png",
     "wiringMark": "⑰",
     "choices": [
@@ -1480,7 +1480,7 @@
     "categoryTag": "機器鑑別",
     "point": 2,
     "question": "配線図⑱で示す図記号の機器は。（タイムスイッチ TS）",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q48_focus.png",
     "fullPage": "/pages/r6_2/page_13.png",
     "wiringMark": "⑱",
     "choices": [
@@ -1512,7 +1512,7 @@
     "categoryTag": "工具鑑別",
     "point": 2,
     "question": "配線図⑲で示すジョイントボックス内の電線相互の接続作業に使用されることのないものは。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q49_focus.png",
     "fullPage": "/pages/r6_2/page_13.png",
     "wiringMark": "⑲",
     "choices": [
@@ -1544,7 +1544,7 @@
     "categoryTag": "カップリング鑑別",
     "point": 2,
     "question": "配線図⑳で示す図記号の電線管（金属製可とう電線管）をモーターに接続するために使用されるものは。",
-    "diagram": null,
+    "diagram": "/crops/r6_2/q50_focus.png",
     "fullPage": "/pages/r6_2/page_13.png",
     "wiringMark": "⑳",
     "choices": [

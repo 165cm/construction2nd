@@ -936,7 +936,7 @@
     "categoryTag": "スイッチ鑑別",
     "point": 2,
     "question": "配線図①で示す図記号の名称は。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q31_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "①",
     "choices": [
@@ -968,7 +968,7 @@
     "categoryTag": "器具取付場所",
     "point": 2,
     "question": "配線図②で示す図記号の器具の取り付け場所は。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q32_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "②",
     "choices": [
@@ -1000,7 +1000,7 @@
     "categoryTag": "コンセント極配置",
     "point": 2,
     "question": "配線図③で示す部分に使用するコンセントの極配置（刃受）は。（接地極付接地端子付コンセント E ET）",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q33_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "③",
     "choices": [
@@ -1032,7 +1032,7 @@
     "categoryTag": "誘導灯鑑別",
     "point": 2,
     "question": "配線図④で示す図記号の名称は。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q34_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "④",
     "choices": [
@@ -1064,7 +1064,7 @@
     "categoryTag": "電線管記号",
     "point": 2,
     "question": "配線図⑤で示す部分の配線で（VE28）とあるのは。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q35_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "⑤",
     "choices": [
@@ -1096,7 +1096,7 @@
     "categoryTag": "接地工事抵抗",
     "point": 2,
     "question": "配線図⑥で示す部分の接地工事の種類及びその接地抵抗の許容される最大値［Ω］の組合せとして，正しいものは。なお，引込線の電源側には地絡遮断装置は設置されていない。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q36_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "⑥",
     "choices": [
@@ -1128,7 +1128,7 @@
     "categoryTag": "リモコントランス記号",
     "point": 2,
     "question": "配線図⑦で示す箇所に設置する機器の図記号は。（リモコントランス）",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q37_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "⑦",
     "choices": [
@@ -1160,7 +1160,7 @@
     "categoryTag": "電路の絶縁抵抗基準",
     "point": 2,
     "question": "配線図⑧で示す部分の電路と大地間の絶縁抵抗として，許容される最小値［MΩ］は。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q38_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "⑧",
     "choices": [
@@ -1192,7 +1192,7 @@
     "categoryTag": "配線用遮断器の機能",
     "point": 2,
     "question": "配線図⑨で示す図記号（配線用遮断器 B）の器具を用いる目的は。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q39_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "⑨",
     "choices": [
@@ -1224,7 +1224,7 @@
     "categoryTag": "最少電線本数",
     "point": 2,
     "question": "配線図⑩の部分の最少電線本数（心線数）は。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q40_focus.png",
     "fullPage": "/pages/r6_1/page_11.png",
     "wiringMark": "⑩",
     "choices": [
@@ -1256,7 +1256,7 @@
     "categoryTag": "差込形コネクタ選定",
     "point": 2,
     "question": "配線図⑪で示すボックス内の接続をすべて差込形コネクタとする場合，使用する差込形コネクタの種類と最少個数の組合せで，正しいものは。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q41_focus.png",
     "fullPage": "/pages/r6_1/page_12.png",
     "wiringMark": "⑪",
     "choices": [
@@ -1288,7 +1288,7 @@
     "categoryTag": "塩ビ管継手鑑別",
     "point": 2,
     "question": "配線図⑫で示す電線管相互（硬質ビニル管 VE）を接続するために使用されるものは。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q42_focus.png",
     "fullPage": "/pages/r6_1/page_12.png",
     "wiringMark": "⑫",
     "choices": [
@@ -1320,7 +1320,7 @@
     "categoryTag": "不要工具鑑別",
     "point": 2,
     "question": "配線図⑬で示す部分の配線工事で一般的に使用されることのない工具は。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q43_focus.png",
     "fullPage": "/pages/r6_1/page_12.png",
     "wiringMark": "⑬",
     "choices": [
@@ -1352,7 +1352,7 @@
     "categoryTag": "漏れ電流測定器",
     "point": 2,
     "question": "配線図⑭で示す回路の漏れ電流（地絡電流）を測定できるものは。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q44_focus.png",
     "fullPage": "/pages/r6_1/page_12.png",
     "wiringMark": "⑭",
     "choices": [
@@ -1384,7 +1384,7 @@
     "categoryTag": "電磁開閉器鑑別",
     "point": 2,
     "question": "配線図⑮で示す図記号の部分に使用される機器は。（電磁開閉器 MS）",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q45_focus.png",
     "fullPage": "/pages/r6_1/page_12.png",
     "wiringMark": "⑮",
     "choices": [
@@ -1416,7 +1416,7 @@
     "categoryTag": "圧着工具鑑別",
     "point": 2,
     "question": "配線図⑯の示す接地線を直線重ね合せ接続する場合の工具とスリーブの組合せとして，適切なものは。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q46_focus.png",
     "fullPage": "/pages/r6_1/page_13.png",
     "wiringMark": "⑯",
     "choices": [
@@ -1448,7 +1448,7 @@
     "categoryTag": "3路スイッチ鑑別",
     "point": 2,
     "question": "配線図⑰で示す図記号の器具は。ただし，写真下の図は接点の構成を示す。（3路スイッチ）",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q47_focus.png",
     "fullPage": "/pages/r6_1/page_13.png",
     "wiringMark": "⑰",
     "choices": [
@@ -1480,7 +1480,7 @@
     "categoryTag": "接地線圧着スリーブ",
     "point": 2,
     "question": "配線図⑱で示すボックス内の接続をすべて圧着接続とする場合，使用するリングスリーブの種類と最少個数の組合せで，正しいものは。ただし，接地線の配線も含まれるものとする。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q48_focus.png",
     "fullPage": "/pages/r6_1/page_13.png",
     "wiringMark": "⑱",
     "choices": [
@@ -1512,7 +1512,7 @@
     "categoryTag": "リングスリーブ刻印個数",
     "point": 2,
     "question": "配線図⑲で示すボックス内の接続をリングスリーブで圧着接続した場合のリングスリーブの種類，個数及び圧着接続後の刻印との組合せで，正しいものは。ただし，使用する電線はすべて VVF 1.6 mm とする。また，写真に示すリングスリーブ中央の ○ は「○刻印」を表す。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q49_focus.png",
     "fullPage": "/pages/r6_1/page_13.png",
     "wiringMark": "⑲",
     "choices": [
@@ -1544,7 +1544,7 @@
     "categoryTag": "未使用コンセント鑑別",
     "point": 2,
     "question": "この配線図で，使用されていないコンセントは。",
-    "diagram": null,
+    "diagram": "/crops/r6_1/q50_focus.png",
     "fullPage": "/pages/r6_1/page_13.png",
     "choices": [
       {

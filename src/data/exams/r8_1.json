@@ -936,7 +936,7 @@
     "categoryTag": "小勢力回路",
     "point": 2,
     "question": "①で示す部分の小勢力回路で使用できる電圧の最大値［V］は。",
-    "diagram": "/crops/floor_plan.png",
+    "diagram": "/crops/r8_1/q31_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "①",
     "choices": [
@@ -968,7 +968,7 @@
     "categoryTag": "電線本数の決定",
     "point": 2,
     "question": "②で示す部分の最少電線本数(心線数)は。",
-    "diagram": "/crops/floor_plan.png",
+    "diagram": "/crops/r8_1/q32_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "②",
     "choices": [
@@ -1000,7 +1000,7 @@
     "categoryTag": "配線図記号",
     "point": 2,
     "question": "③で示す図記号の器具の種類は。",
-    "diagram": "/crops/floor_plan.png",
+    "diagram": "/crops/r8_1/q33_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "③",
     "choices": [
@@ -1032,7 +1032,7 @@
     "categoryTag": "コンセント図記号",
     "point": 2,
     "question": "④で示す図記号の器具の種類は。",
-    "diagram": "/crops/floor_plan.png",
+    "diagram": "/crops/r8_1/q34_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "④",
     "choices": [
@@ -1064,7 +1064,7 @@
     "categoryTag": "照明器具記号",
     "point": 2,
     "question": "⑤で示す部分にペンダントを取り付けたい。図記号は。",
-    "diagram": "/crops/q35_choices.png",
+    "diagram": "/crops/r8_1/q35_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "⑤",
     "choices": [
@@ -1096,7 +1096,7 @@
     "categoryTag": "傍記表示",
     "point": 2,
     "question": "⑥で示す部分はルームエアコンの屋内ユニットである。その図記号の傍記表示は。",
-    "diagram": "/crops/floor_plan.png",
+    "diagram": "/crops/r8_1/q36_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "⑥",
     "choices": [
@@ -1128,7 +1128,7 @@
     "categoryTag": "コンセント刃受形状",
     "point": 2,
     "question": "⑦で示すコンセントの極配置(刃受)は。",
-    "diagram": "/crops/q37_choices.png",
+    "diagram": "/crops/r8_1/q37_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "⑦",
     "choices": [
@@ -1160,7 +1160,7 @@
     "categoryTag": "特殊コンセント傍記",
     "point": 2,
     "question": "⑧で示す器具は抜け止め形の防雨形コンセントである。その図記号の傍記表示は。",
-    "diagram": "/crops/floor_plan.png",
+    "diagram": "/crops/r8_1/q38_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "⑧",
     "choices": [
@@ -1192,7 +1192,7 @@
     "categoryTag": "対地電圧と絶縁抵抗",
     "point": 2,
     "question": "⑨で示す部分の電路と大地間の絶縁抵抗として，許容される最小値［MΩ］は。",
-    "diagram": "/crops/floor_plan.png",
+    "diagram": "/crops/r8_1/q39_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "⑨",
     "choices": [
@@ -1224,7 +1224,7 @@
     "categoryTag": "器具記号の識別",
     "point": 2,
     "question": "⑩で示す図記号の器具の種類は。",
-    "diagram": "/crops/floor_plan.png",
+    "diagram": "/crops/r8_1/q40_focus.png",
     "fullPage": "/pages/page_15.png",
     "wiringMark": "⑩",
     "choices": [
@@ -1256,7 +1256,7 @@
     "categoryTag": "リングスリーブ選定",
     "point": 2,
     "question": "⑪で示すボックス内の接続をすべて圧着接続とする場合，使用するリングスリーブの種類と最少個数の組合せで，正しいものは。ただし，使用する電線はすべて VVF1.6 とする。",
-    "diagram": "/crops/q41_choices.png",
+    "diagram": "/crops/r8_1/q41_focus.png",
     "fullPage": "/pages/page_12.png",
     "wiringMark": "⑪",
     "choices": [
@@ -1288,7 +1288,7 @@
     "categoryTag": "ケーブル条数選定",
     "point": 2,
     "question": "⑫で示す部分の配線工事に必要なケーブルは。ただし，使用するケーブルの心線数は最少とする。",
-    "diagram": "/crops/q42_choices.png",
+    "diagram": "/crops/r8_1/q42_focus.png",
     "fullPage": "/pages/page_12.png",
     "wiringMark": "⑫",
     "choices": [
@@ -1320,7 +1320,7 @@
     "categoryTag": "機器鑑別",
     "point": 2,
     "question": "⑬で示す部分に取り付ける機器は。",
-    "diagram": "/crops/q43_choices.png",
+    "diagram": "/crops/r8_1/q43_focus.png",
     "fullPage": "/pages/page_12.png",
     "wiringMark": "⑬",
     "choices": [
@@ -1352,7 +1352,7 @@
     "categoryTag": "測定器鑑別",
     "point": 2,
     "question": "⑭で示す回路の負荷電流を測定するものは。",
-    "diagram": "/crops/q44_choices.png",
+    "diagram": "/crops/r8_1/q44_focus.png",
     "fullPage": "/pages/page_12.png",
     "wiringMark": "⑭",
     "choices": [
@@ -1384,7 +1384,7 @@
     "categoryTag": "器具鑑別",
     "point": 2,
     "question": "⑮で示す図記号の器具は。",
-    "diagram": "/crops/q45_choices.png",
+    "diagram": "/crops/r8_1/q45_focus.png",
     "fullPage": "/pages/page_12.png",
     "wiringMark": "⑮",
     "choices": [
@@ -1416,7 +1416,7 @@
     "categoryTag": "点滅器器具鑑別",
     "point": 2,
     "question": "⑯で示す図記号の器具は。ただし，写真に示す点滅器は，「ワイド形」である。",
-    "diagram": "/crops/q46_choices.png",
+    "diagram": "/crops/r8_1/q46_focus.png",
     "fullPage": "/pages/page_13.png",
     "wiringMark": "⑯",
     "choices": [
@@ -1448,7 +1448,7 @@
     "categoryTag": "リングスリーブ刻印",
     "point": 2,
     "question": "⑰で示すボックス内の接続をリングスリーブで圧着接続した場合のリングスリーブの種類，個数及び圧着接続後の刻印との組合せで，正しいものは。ただし，使用する電線はすべて VVF1.6 とする。また，写真に示すリングスリーブ中央の〇，小，中は刻印を表す。",
-    "diagram": "/crops/q47_choices.png",
+    "diagram": "/crops/r8_1/q47_focus.png",
     "fullPage": "/pages/page_13.png",
     "wiringMark": "⑰",
     "choices": [
@@ -1480,7 +1480,7 @@
     "categoryTag": "ボックス鑑別",
     "point": 2,
     "question": "⑱で示す図記号のものは。",
-    "diagram": "/crops/q48_choices.png",
+    "diagram": "/crops/r8_1/q48_focus.png",
     "fullPage": "/pages/page_13.png",
     "wiringMark": "⑱",
     "choices": [
@@ -1512,7 +1512,7 @@
     "categoryTag": "差込形コネクタ選定",
     "point": 2,
     "question": "⑲で示すボックス内の接続をすべて差込形コネクタとする場合，使用する差込形コネクタの種類と最少個数の組合せで，正しいものは。ただし，使用する電線はすべて VVF1.6 とする。",
-    "diagram": "/crops/q49_choices.png",
+    "diagram": "/crops/r8_1/q49_focus.png",
     "fullPage": "/pages/page_13.png",
     "wiringMark": "⑲",
     "choices": [
@@ -1544,7 +1544,7 @@
     "categoryTag": "スイッチ接点構造",
     "point": 2,
     "question": "この配線図の図記号で使用されていないスイッチは。ただし，写真下の図は，接点の構成を示す。",
-    "diagram": "/crops/q50_choices.png",
+    "diagram": "/crops/r8_1/q50_focus.png",
     "fullPage": "/pages/page_13.png",
     "wiringMark": "50",
     "choices": [

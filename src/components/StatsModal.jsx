@@ -3,6 +3,7 @@ import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2
 import { BADGES_DEF, getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime } from '../utils/storage';
 import { getLeitnerBoxCounts } from '../utils/spacedRepetition';
 import { playClick } from '../utils/sound';
+import { getShuffleChoicesSetting, setShuffleChoicesSetting } from '../utils/settings';
 import { CHEATSHEETS } from '../data/cheatsheets';
 import CheatsheetAccordion from './CheatsheetAccordion';
 
@@ -16,6 +17,7 @@ export default function StatsModal({
   onOpenAttribution
 }) {
   const [activeTab, setActiveTab] = useState('stats'); // 'stats' | 'cheatsheets'
+  const [isShuffle, setIsShuffle] = useState(getShuffleChoicesSetting);
 
   if (!isOpen) return null;
 
@@ -306,8 +308,39 @@ export default function StatsModal({
                 </div>
               </div>
 
-              {/* Admin Tools & Legal Notice */}
+              {/* Learning Settings & Options */}
               <div className="pt-3 border-t border-slate-700/60 flex flex-col gap-2">
+                <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <span>🔀 選択肢シャッフル（暗記防止）</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${isShuffle ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40' : 'bg-slate-700 text-slate-400'}`}>
+                        {isShuffle ? 'ON（推奨）' : 'OFF'}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      選択肢の位置（並び順）をランダム化し、位置覚えを防いで実戦力をつけます。
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      playClick();
+                      const next = !isShuffle;
+                      setIsShuffle(next);
+                      setShuffleChoicesSetting(next);
+                    }}
+                    className={`w-11 h-6 rounded-full transition relative shrink-0 ml-2 ${
+                      isShuffle ? 'bg-sky-500 shadow-md shadow-sky-500/30' : 'bg-slate-700'
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full bg-white transition absolute top-1 ${
+                        isShuffle ? 'left-6' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+
                 {onOpenAttribution && (
                   <button
                     onClick={() => {

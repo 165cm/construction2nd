@@ -264,6 +264,7 @@ export default function App() {
             onRecordExamResults={handleRecordExamResults}
             onGoToReview={() => setCurrentMode('review')}
             onOpenAttribution={() => setIsAttributionOpen(true)}
+            currentExamMeta={currentExamMeta}
           />
         )}
 

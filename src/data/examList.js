@@ -54,7 +54,7 @@ export const EXAM_LIST = [
     badge: '令8上',
     year: '令和8年',
     season: '上期',
-    examDate: '2026年5月実施（予想模試）',
+    examDate: '2026年5月24日実施',
     questionCount: 50,
     isFree: true,
     pageDir: '/pages',

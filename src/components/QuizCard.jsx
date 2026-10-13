@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, BookOpen } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, BookOpen, Shuffle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound';
 import { cropKeyForDiagram } from '../utils/customCrops';
+import { getShuffleChoicesSetting, setShuffleChoicesSetting } from '../utils/settings';
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
 import CheatsheetAccordion from './CheatsheetAccordion';
@@ -34,6 +35,34 @@ export default function QuizCard({
   const [timeLeftMs, setTimeLeftMs] = useState(AUTO_ADVANCE_TIME_MS);
   const timerRef = useRef(null);
   const explanationRef = useRef(null);
+
+  // Choices shuffle logic (Defaults to true: randomizes choice button order while keeping choice IDs and correct answers consistent)
+  const [isShuffleEnabled, setIsShuffleEnabled] = useState(getShuffleChoicesSetting);
+
+  useEffect(() => {
+    const handleSettingChange = () => setIsShuffleEnabled(getShuffleChoicesSetting());
+    window.addEventListener('shuffle-setting-changed', handleSettingChange);
+    return () => window.removeEventListener('shuffle-setting-changed', handleSettingChange);
+  }, []);
+
+  const handleToggleShuffle = () => {
+    playClick();
+    const nextVal = !isShuffleEnabled;
+    setIsShuffleEnabled(nextVal);
+    setShuffleChoicesSetting(nextVal);
+  };
+
+  const displayedChoices = useMemo(() => {
+    if (!question?.choices) return [];
+    if (!isShuffleEnabled) return question.choices;
+    // Stable pseudo-random shuffle per question attempt
+    const arr = [...question.choices];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, [question.id, question.choices, isShuffleEnabled]);
 
   // Re-render when admin updates crop coordinates
   useEffect(() => {
@@ -237,20 +266,35 @@ export default function QuizCard({
           {getStatusBadge()}
         </div>
 
-        <button
-          onClick={() => {
-            playClick();
-            onToggleBookmark(question.id);
-          }}
-          className={`p-1.5 rounded-lg border transition ${
-            isBookmarked
-              ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-              : 'bg-slate-800/60 text-slate-400 border-slate-700 hover:text-slate-200'
-          }`}
-          title="ブックマーク"
-        >
-          <Star size={16} className={isBookmarked ? 'fill-amber-400' : ''} />
-        </button>
+        <div className="flex items-center space-x-1.5">
+          <button
+            onClick={handleToggleShuffle}
+            className={`px-2 py-1 rounded-lg border text-[11px] font-bold flex items-center gap-1 transition active:scale-95 ${
+              isShuffleEnabled
+                ? 'bg-sky-500/20 text-sky-300 border-sky-500/40 shadow-sm shadow-sky-950'
+                : 'bg-slate-800/80 text-slate-400 border-slate-700'
+            }`}
+            title={isShuffleEnabled ? '選択肢シャッフル中（タップで固定）' : '選択肢は固定順（タップでシャッフル）'}
+          >
+            <Shuffle size={12} className={isShuffleEnabled ? 'text-sky-400' : 'text-slate-400'} />
+            <span>{isShuffleEnabled ? 'シャッフル' : '固定順'}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              playClick();
+              onToggleBookmark(question.id);
+            }}
+            className={`p-1.5 rounded-lg border transition ${
+              isBookmarked
+                ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                : 'bg-slate-800/60 text-slate-400 border-slate-700 hover:text-slate-200'
+            }`}
+            title="ブックマーク"
+          >
+            <Star size={16} className={isBookmarked ? 'fill-amber-400' : ''} />
+          </button>
+        </div>
       </div>
 
       {/* Wiring Diagram Quick Button (For Q31-Q50) */}
@@ -284,6 +328,12 @@ export default function QuizCard({
         {/* Diagram Image if available */}
         {question.diagram && (
           <div className="mt-3 relative group">
+            {question.wiringMark && (
+              <div className="absolute top-2 left-2 z-10 bg-slate-900/90 backdrop-blur border border-amber-500/50 text-amber-300 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-md">
+                <span>🎯 対象箇所:</span>
+                <span className="text-amber-400 font-black">{question.wiringMark} 周辺拡大</span>
+              </div>
+            )}
             <div
               onClick={() => setShowImageZoom(true)}
               className="bg-white rounded-xl p-2 cursor-pointer flex items-center justify-center border border-slate-600 shadow-inner overflow-hidden min-h-[120px] max-h-56"
@@ -308,7 +358,7 @@ export default function QuizCard({
 
       {/* Choices Grid */}
       <div className={`${areChoicesShort ? 'grid grid-cols-2 gap-2' : 'space-y-2'} mb-4`}>
-        {question.choices.map((choice) => {
+        {displayedChoices.map((choice) => {
           const isSelected = selectedChoice === choice.id;
           const isCorrect = choice.id === question.answer;
 

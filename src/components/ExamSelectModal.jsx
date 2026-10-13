@@ -2,6 +2,26 @@ import React from 'react';
 import { X, CheckCircle2, Calendar, BookOpen, Sparkles, ChevronRight } from 'lucide-react';
 import { EXAM_LIST } from '../data/examList';
 import { playClick } from '../utils/sound';
+import { getExamView } from '../utils/storage';
+
+// 年度ごとの進み具合（解いた問題数・マスター数・正答率）
+const summarizeExam = (state, exam) => {
+  const view = getExamView(state || {}, exam.id);
+  const recs = Object.values(view.records || {});
+  const attempted = recs.filter(r => r && r.attempts > 0).length;
+  const mastered = recs.filter(r => r && r.status === 'mastered').length;
+  const tries = recs.reduce((a, r) => a + (r?.attempts || 0), 0);
+  const correct = recs.reduce((a, r) => a + (r?.correct || 0), 0);
+  const total = exam.questionCount || 50;
+  return {
+    attempted,
+    mastered,
+    total,
+    accuracy: tries > 0 ? Math.round((correct / tries) * 100) : null,
+    attemptedPct: Math.min(100, Math.round((attempted / total) * 100)),
+    masteredPct: Math.min(100, Math.round((mastered / total) * 100))
+  };
+};
 
 export default function ExamSelectModal({
   isOpen,
@@ -48,6 +68,7 @@ export default function ExamSelectModal({
 
           {EXAM_LIST.map((exam) => {
             const isSelected = exam.id === currentExamId;
+            const progress = summarizeExam(state, exam);
             return (
               <button
                 key={exam.id}
@@ -84,6 +105,24 @@ export default function ExamSelectModal({
                         <BookOpen size={11} className="text-slate-500" />
                         <span>全{exam.questionCount}問</span>
                       </span>
+                    </div>
+                    {/* 進み具合 */}
+                    <div className="mt-2 w-44 sm:w-56">
+                      <div className="h-1.5 rounded-full bg-slate-700/80 overflow-hidden relative">
+                        <div className="absolute inset-y-0 left-0 bg-sky-500/60" style={{ width: `${progress.attemptedPct}%` }} />
+                        <div className="absolute inset-y-0 left-0 bg-emerald-400" style={{ width: `${progress.masteredPct}%` }} />
+                      </div>
+                      <div className="text-[10px] text-slate-400 mt-1">
+                        {progress.attempted === 0 ? (
+                          <span>未着手</span>
+                        ) : (
+                          <span>
+                            解いた <strong className="text-sky-300">{progress.attempted}</strong>/{progress.total}問
+                            ・マスター <strong className="text-emerald-300">{progress.mastered}</strong>問
+                            {progress.accuracy !== null && <>・正答率 <strong className="text-slate-200">{progress.accuracy}%</strong></>}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

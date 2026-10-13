@@ -3,7 +3,7 @@ import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2
 import { BADGES_DEF, getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime } from '../utils/storage';
 import { getLeitnerBoxCounts } from '../utils/spacedRepetition';
 import { playClick } from '../utils/sound';
-import { getShuffleChoicesSetting, setShuffleChoicesSetting } from '../utils/settings';
+import { getShuffleChoicesSetting, setShuffleChoicesSetting, getAutoAdvanceMode, setAutoAdvanceMode, AUTO_ADVANCE_MODES } from '../utils/settings';
 import { CHEATSHEETS } from '../data/cheatsheets';
 import CheatsheetAccordion from './CheatsheetAccordion';
 
@@ -18,6 +18,7 @@ export default function StatsModal({
 }) {
   const [activeTab, setActiveTab] = useState('stats'); // 'stats' | 'cheatsheets'
   const [isShuffle, setIsShuffle] = useState(getShuffleChoicesSetting);
+  const [autoAdvance, setAutoAdvance] = useState(getAutoAdvanceMode);
 
   if (!isOpen) return null;
 
@@ -339,6 +340,32 @@ export default function StatsModal({
                       }`}
                     />
                   </button>
+                </div>
+
+                <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80">
+                  <div className="text-xs font-bold text-white">⏩ 解答後に自動で次の問題へ進む</div>
+                  <div className="grid grid-cols-3 gap-1.5 mt-2">
+                    {AUTO_ADVANCE_MODES.map(m => (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          playClick();
+                          setAutoAdvance(m.id);
+                          setAutoAdvanceMode(m.id);
+                        }}
+                        className={`py-1.5 rounded-lg text-[11px] font-bold border transition active:scale-95 ${
+                          autoAdvance === m.id
+                            ? 'bg-sky-500 text-white border-sky-400 shadow-md shadow-sky-500/30'
+                            : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-700'
+                        }`}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1.5">
+                    {AUTO_ADVANCE_MODES.find(m => m.id === autoAdvance)?.desc}
+                  </p>
                 </div>
 
                 {onOpenAttribution && (

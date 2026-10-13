@@ -3,7 +3,7 @@ import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, S
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound';
 import { cropKeyForDiagram, isCropFromFloorPlan } from '../utils/customCrops';
-import { getShuffleChoicesSetting, setShuffleChoicesSetting } from '../utils/settings';
+import { getShuffleChoicesSetting, setShuffleChoicesSetting, getAutoAdvanceMode, setAutoAdvanceMode, AUTO_ADVANCE_MODES } from '../utils/settings';
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
 import CheatsheetAccordion from './CheatsheetAccordion';
@@ -39,11 +39,33 @@ export default function QuizCard({
   // Auto-advance & floating popup state
   const [showPopup, setShowPopup] = useState(false);
   const [timeLeftMs, setTimeLeftMs] = useState(AUTO_ADVANCE_TIME_MS);
+  // 自動送りの設定（いつも／正解の時だけ／オフ）と、今回の解答でカウントダウンするか
+  const [autoAdvanceMode, setAutoAdvanceModeState] = useState(getAutoAdvanceMode);
+  const [isCountingDown, setIsCountingDown] = useState(false);
   const timerRef = useRef(null);
   const explanationRef = useRef(null);
 
   // Choices shuffle logic (Defaults to true: randomizes choice button order while keeping choice IDs and correct answers consistent)
   const [isShuffleEnabled, setIsShuffleEnabled] = useState(getShuffleChoicesSetting);
+
+  useEffect(() => {
+    const handleAutoAdvanceChange = () => setAutoAdvanceModeState(getAutoAdvanceMode());
+    window.addEventListener('auto-advance-setting-changed', handleAutoAdvanceChange);
+    return () => window.removeEventListener('auto-advance-setting-changed', handleAutoAdvanceChange);
+  }, []);
+
+  // 自動送りの設定をその場で切り替える（いつも → 正解の時だけ → オフ → …）
+  const handleCycleAutoAdvance = () => {
+    playClick();
+    const ids = ['always', 'correct_only', 'off'];
+    const next = ids[(ids.indexOf(autoAdvanceMode) + 1) % ids.length];
+    setAutoAdvanceMode(next);
+    setAutoAdvanceModeState(next);
+    const answeredCorrectly = selectedChoice === question.answer;
+    const shouldCount = next === 'always' || (next === 'correct_only' && answeredCorrectly);
+    setTimeLeftMs(AUTO_ADVANCE_TIME_MS);
+    setIsCountingDown(shouldCount);
+  };
 
   useEffect(() => {
     const handleSettingChange = () => setIsShuffleEnabled(getShuffleChoicesSetting());
@@ -83,6 +105,7 @@ export default function QuizCard({
     setIsAnswered(false);
     setIsRetry(false);
     setShowPopup(false);
+    setIsCountingDown(false);
     setTimeLeftMs(AUTO_ADVANCE_TIME_MS);
     setStartTime(Date.now());
 
@@ -112,7 +135,7 @@ export default function QuizCard({
 
   // Handle 3-second auto-advance countdown after answer
   useEffect(() => {
-    if (!showPopup) {
+    if (!showPopup || !isCountingDown) {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -140,7 +163,7 @@ export default function QuizCard({
         timerRef.current = null;
       }
     };
-  }, [showPopup]);
+  }, [showPopup, isCountingDown]);
 
   const handleAutoNext = () => {
     setShowPopup(false);
@@ -184,6 +207,7 @@ export default function QuizCard({
     setIsAnswered(true);
     setShowPopup(true);
     setTimeLeftMs(AUTO_ADVANCE_TIME_MS);
+    setIsCountingDown(autoAdvanceMode === 'always' || (autoAdvanceMode === 'correct_only' && isCorrect));
 
     if (isCorrect) {
       playCorrect();
@@ -570,9 +594,16 @@ export default function QuizCard({
                   正解: <strong className="text-emerald-400 font-black">【{question.answer}】</strong>
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400">
-                {remainingSeconds}秒後に自動で次へ
-              </span>
+              <button
+                type="button"
+                onClick={handleCycleAutoAdvance}
+                className="text-[11px] text-slate-400 hover:text-sky-300 underline decoration-dotted underline-offset-2 text-right"
+                title="タップで自動送りの設定を切り替え（いつも／正解の時だけ／オフ）"
+              >
+                {isCountingDown
+                  ? `${remainingSeconds}秒後に自動で次へ`
+                  : `自動送り: ${AUTO_ADVANCE_MODES.find(m => m.id === autoAdvanceMode)?.label || ''}`}
+              </button>
             </div>
 
             {/* Bottom row: [解説を読む] and [次に進む (3s) with time seek bar] */}
@@ -590,12 +621,14 @@ export default function QuizCard({
                 className="flex-1 relative overflow-hidden py-2.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs flex items-center justify-center gap-1 shadow-lg shadow-sky-600/30 active:scale-95 transition"
               >
                 {/* Time Seek Animation Bar (drains from left to right) */}
-                <div
-                  className="absolute top-0 bottom-0 left-0 bg-sky-400/40 pointer-events-none transition-all duration-75 ease-linear"
-                  style={{ width: `${progressPercent}%` }}
-                />
+                {isCountingDown && (
+                  <div
+                    className="absolute top-0 bottom-0 left-0 bg-sky-400/40 pointer-events-none transition-all duration-75 ease-linear"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                )}
                 <span className="relative z-10 flex items-center gap-1">
-                  <span>次に進む ({remainingSeconds}s)</span>
+                  <span>{isCountingDown ? `次に進む (${remainingSeconds}s)` : '次に進む'}</span>
                   <ArrowRight size={13} />
                 </span>
               </button>

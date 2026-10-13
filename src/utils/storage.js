@@ -2,6 +2,13 @@
 import { updateSpacedRepetitionRecord } from './spacedRepetition';
 
 const STORAGE_KEY = 'denkou2_mastery_state_v1';
+// 記録の形式の版。2 = 年度ごとに記録を分ける形式（records のキーが "r8_1_12" のような年度付き）
+const STATE_SCHEMA_VERSION = 2;
+const CURRENT_EXAM_STORAGE_KEY = 'denkou2_current_exam_id';
+const FALLBACK_EXAM_ID = 'r8_1';
+
+// 年度をまたいでも重ならない記録キー（例: r7_2 の問12 → "r7_2_12"）
+export const recordKey = (examId, questionId) => `${examId}_${questionId}`;
 
 export const LEVEL_TITLES = [
   { minLevel: 1, maxLevel: 4, title: '電工たまご 🐣', desc: '基礎を学び始めた見習い' },
@@ -22,7 +29,7 @@ export const BADGES_DEF = [
   { id: 'calc_master', icon: '🧮', name: '計算の達人', desc: '計算問題を5問以上正解した' },
   { id: 'diagram_master', icon: '📐', name: '配線図マスター', desc: '配線図問題を10問以上正解した' },
   { id: 'level_10', icon: '🎖️', name: '一人前電工', desc: 'レベル10に到達した' },
-  { id: 'all_master', icon: '👑', name: '全問完全マスター', desc: '全50問をすべてマスターした' },
+  { id: 'all_master', icon: '👑', name: '全問完全マスター', desc: 'いずれかの年度の全問をすべてマスターした' },
 ];
 
 export const getTitleForLevel = (level) => {
@@ -44,9 +51,78 @@ export const getInitialState = () => {
     responseTimes: [], // array of last 30 question response times in seconds
     badges: [],
     recentHistory: [], // last 20 answers
-    currentQuestionId: 1,
-    currentQuizIndex: 0,
-    round: 1
+    // 年度ごとの進み具合: examId -> { round, currentQuestionId, currentQuizIndex }
+    examProgress: {},
+    schemaVersion: STATE_SCHEMA_VERSION
+  };
+};
+
+const readCurrentExamId = () => {
+  try {
+    return localStorage.getItem(CURRENT_EXAM_STORAGE_KEY) || FALLBACK_EXAM_ID;
+  } catch (e) {
+    return FALLBACK_EXAM_ID;
+  }
+};
+
+// 旧形式（問題番号だけのキー）の記録を、年度付きキーへ引き継ぐ。
+// 旧形式では年度の区別が無かったため、最後に選んでいた年度の記録として扱う。
+const migrateLegacyState = (parsed) => {
+  const examId = readCurrentExamId();
+  const isLegacyKey = (k) => /^\d+$/.test(String(k));
+
+  const records = {};
+  Object.entries(parsed.records || {}).forEach(([k, v]) => {
+    records[isLegacyKey(k) ? recordKey(examId, k) : k] = v;
+  });
+
+  const bookmarks = [...new Set((parsed.bookmarks || []).map((id) => (isLegacyKey(id) ? recordKey(examId, id) : id)))];
+
+  const examProgress = { ...(parsed.examProgress || {}) };
+  if (!examProgress[examId]) {
+    const attempted = Object.values(parsed.records || {}).filter((r) => r && r.attempts > 0).length;
+    examProgress[examId] = {
+      round: parsed.round || (attempted >= 50 ? 2 : 1),
+      currentQuestionId: parsed.currentQuestionId ?? null,
+      currentQuizIndex: parsed.currentQuizIndex ?? 0
+    };
+  }
+
+  const recentHistory = (parsed.recentHistory || []).map((h) =>
+    h && isLegacyKey(h.questionId) ? { ...h, questionId: recordKey(examId, h.questionId) } : h
+  );
+
+  const next = { ...parsed, records, bookmarks, examProgress, recentHistory, schemaVersion: STATE_SCHEMA_VERSION };
+  delete next.round;
+  delete next.currentQuestionId;
+  delete next.currentQuizIndex;
+  return next;
+};
+
+/**
+ * 1つの年度だけを取り出した「年度ビュー」を返す。
+ * records / bookmarks は問題番号（q.id）で引ける形になり、round・中断位置もその年度のもの。
+ * レベル・EXP・バッジなどは全年度共通のまま。
+ */
+export const getExamView = (state, examId) => {
+  const prefix = `${examId}_`;
+  const records = {};
+  Object.entries(state.records || {}).forEach(([k, v]) => {
+    if (!k.startsWith(prefix)) return;
+    const local = k.slice(prefix.length);
+    if (/^\d+$/.test(local)) records[Number(local)] = v;
+  });
+  const bookmarks = (state.bookmarks || [])
+    .filter((id) => typeof id === 'string' && id.startsWith(prefix) && /^\d+$/.test(id.slice(prefix.length)))
+    .map((id) => Number(id.slice(prefix.length)));
+  const progress = (state.examProgress || {})[examId] || {};
+  return {
+    ...state,
+    records,
+    bookmarks,
+    round: progress.round || 1,
+    currentQuestionId: progress.currentQuestionId ?? null,
+    currentQuizIndex: progress.currentQuizIndex ?? 0
   };
 };
 
@@ -54,15 +130,16 @@ export const loadState = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getInitialState();
-    const parsed = JSON.parse(raw);
+    let parsed = JSON.parse(raw);
+    const needsMigration = (parsed.schemaVersion || 1) < STATE_SCHEMA_VERSION;
+    if (needsMigration) {
+      parsed = migrateLegacyState(parsed);
+    }
     const initial = getInitialState();
     const state = { ...initial, ...parsed };
     state.records = state.records || {};
-
-    const attemptedCount = Object.values(state.records).filter(r => r && r.attempts > 0).length;
-    if (!state.round) {
-      state.round = attemptedCount >= 50 ? 2 : 1;
-    }
+    state.examProgress = state.examProgress || {};
+    if (needsMigration) saveState(state);
 
     return state;
   } catch (e) {
@@ -79,12 +156,19 @@ export const saveState = (state) => {
   }
 };
 
-export const saveCurrentQuizPosition = (state, { questionId, index, round }) => {
+export const saveCurrentQuizPosition = (state, { examId, questionId, index, round }) => {
+  const prev = (state.examProgress || {})[examId] || {};
   const next = {
     ...state,
-    currentQuestionId: questionId,
-    currentQuizIndex: index !== undefined ? index : state.currentQuizIndex,
-    round: round !== undefined ? round : state.round
+    examProgress: {
+      ...(state.examProgress || {}),
+      [examId]: {
+        ...prev,
+        currentQuestionId: questionId,
+        currentQuizIndex: index !== undefined ? index : prev.currentQuizIndex,
+        round: round !== undefined ? Math.max(round, prev.round || 1) : prev.round || 1
+      }
+    }
   };
   saveState(next);
   return next;
@@ -96,9 +180,12 @@ export const calculateExpForLevel = (level) => {
 };
 
 // Record an answer and compute gamification updates with Leitner / SRS integration
-export const recordAnswer = (prevState, { questionId, isCorrect, timeSpentSec, category }) => {
+// examId と questionId（問題番号）から年度付きキーで記録する。totalQuestions はその年度の問題数。
+export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpentSec, category, totalQuestions = 50 }) => {
   const state = JSON.parse(JSON.stringify(prevState));
-  const prevRecord = state.records[questionId] || {};
+  const key = recordKey(examId, questionId);
+  const examPrefix = `${examId}_`;
+  const prevRecord = state.records[key] || {};
   const wasReview = prevRecord.status === 'review';
 
   state.totalAnswered += 1;
@@ -171,9 +258,12 @@ export const recordAnswer = (prevState, { questionId, isCorrect, timeSpentSec, c
     newBadges.push('diagram_master');
   }
 
-  // Check all mastered
-  const masteredCount = Object.values(state.records).filter(r => r.status === 'mastered').length;
-  if (masteredCount >= 50 && !state.badges.includes('all_master')) {
+  // Check all mastered (この年度の全問)
+  const examRecordsAfter = Object.entries({ ...state.records, [key]: currentRecord })
+    .filter(([k]) => k.startsWith(examPrefix))
+    .map(([, r]) => r);
+  const masteredCount = examRecordsAfter.filter(r => r.status === 'mastered').length;
+  if (masteredCount >= totalQuestions && !state.badges.includes('all_master')) {
     newBadges.push('all_master');
   }
 
@@ -194,21 +284,26 @@ export const recordAnswer = (prevState, { questionId, isCorrect, timeSpentSec, c
   }
 
   state.badges = [...state.badges, ...newBadges];
-  state.records[questionId] = currentRecord;
+  state.records[key] = currentRecord;
 
-  // Check Round 1 completion:
-  const prevAttemptedCount = Object.values(prevState.records || {}).filter(r => r && r.attempts > 0).length;
-  const newAttemptedCount = Object.values(state.records).filter(r => r && r.attempts > 0).length;
-  const didCompleteRound1 = prevAttemptedCount < 50 && newAttemptedCount >= 50;
-  if (newAttemptedCount >= 50 && (state.round || 1) <= 1) {
-    state.round = 2;
+  // Check Round 1 completion (この年度の全問を1回ずつ解いたか)
+  const countAttempted = (records) => Object.entries(records || {})
+    .filter(([k, r]) => k.startsWith(examPrefix) && r && r.attempts > 0).length;
+  const prevAttemptedCount = countAttempted(prevState.records);
+  const newAttemptedCount = countAttempted(state.records);
+  const didCompleteRound1 = prevAttemptedCount < totalQuestions && newAttemptedCount >= totalQuestions;
+
+  state.examProgress = state.examProgress || {};
+  const progress = { ...(state.examProgress[examId] || {}) };
+  if (newAttemptedCount >= totalQuestions && (progress.round || 1) <= 1) {
+    progress.round = 2;
   }
-
-  state.currentQuestionId = questionId;
+  progress.currentQuestionId = questionId;
+  state.examProgress[examId] = progress;
 
   // Recent History
   state.recentHistory = [
-    { questionId, isCorrect, timestamp: Date.now() },
+    { questionId: key, isCorrect, timestamp: Date.now() },
     ...(state.recentHistory || []).slice(0, 19)
   ];
 

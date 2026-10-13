@@ -9,12 +9,13 @@ export default function Header({
   onOpenStats,
   onOpenAdmin,
   currentExamMeta,
-  onOpenExamSelect
+  onOpenExamSelect,
+  totalQuestions = 50
 }) {
   const levelTitle = getTitleForLevel(state.level);
   const expRequired = calculateExpForLevel(state.level);
   const expPercent = Math.min(100, Math.round((state.exp / expRequired) * 100));
-  const timeEstimate = computeRemainingPlayTime(state, 50);
+  const timeEstimate = computeRemainingPlayTime(state, totalQuestions);
 
   return (
     <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800/80 text-white shadow-md">

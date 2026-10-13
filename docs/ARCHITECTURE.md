@@ -41,11 +41,17 @@
 | `public/sw.js` | Service Worker（オフライン動作・問題画像キャッシュ制御） |
 
 ## データ
-- LocalStorage キー: `denkou2_mastery_state_v1`
-  - `currentQuestionId`: 現在挑戦中・中断時の再開問題ID（問10中断なら問11から自動再開）
-  - `round`: 巡回フェーズ（1: 初回全問走破中、2: 科学的適応型間隔反復復習ループ）
-  - `records`: 各問題の挑戦回数、正解数、不正解数、連続正解数、ステータス（unattempted / review / correct / mastered）、Leitner Box（1〜4）、出題間隔（interval）
+- LocalStorage キー: `denkou2_mastery_state_v1`（`schemaVersion: 2`）
+  - `records`: 各問題の挑戦回数、正解数、不正解数、連続正解数、ステータス（unattempted / review / correct / mastered）、Leitner Box（1〜4）、出題間隔（interval）。**キーは年度付き**（例: `r7_2_12` ＝令和7年度下期の問12）
+  - `bookmarks`: クリップした問題（年度付きキーの配列）
+  - `examProgress`: 年度ごとの進み具合 `{ [examId]: { round, currentQuestionId, currentQuizIndex } }`
+    - `round`: 巡回フェーズ（1: 初回全問走破中、2: 適応型間隔反復復習ループ）
+    - `currentQuestionId`: 中断時の再開問題番号（問10中断なら問11から自動再開）
+  - 画面側は `getExamView(state, examId)`（`src/utils/storage.js`）で「選択中の年度だけ・問題番号で引ける形」に変換して使う
+  - 旧形式（問題番号だけのキー）のデータは、読み込み時に「最後に選んでいた年度」の記録として自動で引き継ぐ
+  - マスター判定は「2回連続正解」
   - `responseTimes`: 直近30問の回答所要時間（秒）配列（平均速度算出用）
   - `exp`, `level`, `streak`, `maxStreak`
   - `badges`: 獲得済み実績バッジID配列
-  - `bookmarks`: クリップした問題ID配列
+- LocalStorage キー: `denkou2_exam_session_v1` … 受験中の模擬試験（年度ごとの解答・現在位置・終了時刻）。採点すると消える
+- トリミング座標は `pageDir`（年度ごとの元ページ画像フォルダ。例 `/pages/r7_2`）を必ず持つ。無い場合はキーの年度から補う

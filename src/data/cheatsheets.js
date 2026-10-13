@@ -329,7 +329,42 @@ export const QUESTION_CHEATSHEET_MAP = {
   50: ['switch_symbols']
 };
 
-export const getCheatsheetsForQuestion = (questionNumber) => {
-  const ids = QUESTION_CHEATSHEET_MAP[questionNumber] || [];
+// 令和8年度上期以外の年度用：問題の分野タグ（categoryTag）のキーワードから早見表を選ぶ
+// （上の番号対応表は令和8年度上期の問題番号で作られているため、他の年度には使えない）
+const TAG_CHEATSHEET_RULES = [
+  { pattern: /許容電流/, ids: ['wire_allowable_current', 'current_reduction_factor'] },
+  { pattern: /幹線/, ids: ['mains_current'] },
+  { pattern: /分岐/, ids: ['branch_circuit', 'branch_breaker_distance'] },
+  { pattern: /リングスリーブ|スリーブ|差込コネクタ/, ids: ['ring_sleeve_crimp'] },
+  { pattern: /絶縁抵抗|漏えい電流/, ids: ['insulation_resistance'] },
+  { pattern: /接地(?!抵抗計)/, ids: ['grounding_work'] },
+  { pattern: /コンセント(?!記号)/, ids: ['receptacle_shapes'] },
+  { pattern: /スイッチ|点滅器/, ids: ['switch_symbols'] },
+  { pattern: /コンセント記号/, ids: ['outlet_symbols'] },
+  { pattern: /計器|測定|接地抵抗計|検電/, ids: ['measuring_instruments'] },
+  { pattern: /管工事|線ぴ|ケーブル工事|工事方法|配線工事/, ids: ['wiring_methods'] },
+  { pattern: /電気用品|PSE/, ids: ['pse_marks'] },
+  { pattern: /電気工事士|作業範囲|資格/, ids: ['electrician_license_scope'] },
+  { pattern: /電圧降下|電力損失|単相3線/, ids: ['voltage_drop_formulas'] }
+];
+
+const DEFAULT_MAP_EXAM_ID = 'r8_1';
+
+// question（問題オブジェクト）を渡すと、年度に合った早見表を返す。
+// 数値（問題番号）を渡した場合は、従来どおり令和8年度上期の対応表を使う。
+export const getCheatsheetsForQuestion = (question) => {
+  if (typeof question === 'number' || typeof question === 'string') {
+    const ids = QUESTION_CHEATSHEET_MAP[question] || [];
+    return ids.map(id => CHEATSHEETS[id]).filter(Boolean);
+  }
+  if (!question) return [];
+
+  let ids;
+  if (!question.examId || question.examId === DEFAULT_MAP_EXAM_ID) {
+    ids = QUESTION_CHEATSHEET_MAP[question.number || question.id] || [];
+  } else {
+    const tag = question.categoryTag || '';
+    ids = [...new Set(TAG_CHEATSHEET_RULES.filter(r => r.pattern.test(tag)).flatMap(r => r.ids))].slice(0, 2);
+  }
   return ids.map(id => CHEATSHEETS[id]).filter(Boolean);
 };

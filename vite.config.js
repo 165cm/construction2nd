@@ -41,6 +41,10 @@ function cropOverridesWriter() {
                 h: toInt(c.h),
                 label: String(c.label || '')
               }
+              // 年度ごとの元ページ画像フォルダ（例: /pages/r7_2）。抜けると令和8年のページから切り抜かれる
+              if (typeof c.pageDir === 'string' && /^\/pages(\/[a-z0-9_]+)?$/.test(c.pageDir)) {
+                entry.pageDir = c.pageDir
+              }
               const valid = [entry.page, entry.x, entry.y, entry.w, entry.h].every(Number.isFinite)
                 && entry.page >= 1 && entry.w > 0 && entry.h > 0
               if (!valid) throw new Error(`不正な座標です (key: ${key})`)

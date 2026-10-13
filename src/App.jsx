@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
-import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition } from './utils/storage';
+import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition, getExamView, recordKey } from './utils/storage';
 import { getInitialResumeQuestion, determineNextQuizQuestion } from './utils/spacedRepetition';
 import { isSoundEnabled, setSoundEnabled, playClick } from './utils/sound';
 import confetti from 'canvas-confetti';
@@ -22,9 +22,22 @@ import AdminHub from './components/AdminHub';
 export default function App() {
   const [currentExamId, setCurrentExamId] = useState(() => loadCurrentExamId());
   const currentExamMeta = useMemo(() => getExamMeta(currentExamId), [currentExamId]);
-  const questionsData = useMemo(() => getExamQuestions(currentExamId), [currentExamId]);
+  // 管理画面で問題文を修正したら、再読み込みなしで反映する
+  const [overridesVersion, setOverridesVersion] = useState(0);
+  useEffect(() => {
+    const onOverridesUpdated = () => setOverridesVersion(v => v + 1);
+    window.addEventListener('question-overrides-updated', onOverridesUpdated);
+    return () => window.removeEventListener('question-overrides-updated', onOverridesUpdated);
+  }, []);
+  const questionsData = useMemo(
+    () => getExamQuestions(currentExamId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentExamId, overridesVersion]
+  );
 
   const [state, setState] = useState(() => loadState());
+  // 選択中の年度だけの学習記録（records・bookmarks は問題番号で引ける）
+  const examState = useMemo(() => getExamView(state, currentExamId), [state, currentExamId]);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
   const [currentMode, setCurrentMode] = useState(() => {
     if (typeof window !== 'undefined' && (window.location.hash === '#admin' || window.location.search.includes('admin'))) {
@@ -48,15 +61,15 @@ export default function App() {
 
   // Quiz position state: auto-resumes where user left off
   const [quizStep, setQuizStep] = useState(() => {
-    const initialState = loadState();
-    const initialQuestions = getExamQuestions(loadCurrentExamId());
-    return getInitialResumeQuestion(initialQuestions, initialState) || {
+    const initialExamId = loadCurrentExamId();
+    const initialQuestions = getExamQuestions(initialExamId);
+    return getInitialResumeQuestion(initialQuestions, getExamView(loadState(), initialExamId)) || {
       question: initialQuestions[0],
       index: 0,
       isFirstRound: true,
       round: 1,
       modeDescription: '第1巡：全問走破中',
-      progressText: '1 / 50 問'
+      progressText: `1 / ${initialQuestions.length} 問`
     };
   });
 
@@ -85,10 +98,12 @@ export default function App() {
   // Answer handler
   const handleAnswer = ({ questionId, isCorrect, timeSpentSec, category }) => {
     const result = recordAnswer(state, {
+      examId: currentExamId,
       questionId,
       isCorrect,
       timeSpentSec,
-      category
+      category,
+      totalQuestions: questionsData.length
     });
 
     setState(result.nextState);
@@ -126,21 +141,22 @@ export default function App() {
   const handleNextQuizQuestion = () => {
     resetScrollToTop();
     const currentQId = quizStep?.question?.id || null;
-    const nextStep = determineNextQuizQuestion(questionsData, state, currentQId);
+    const nextStep = determineNextQuizQuestion(questionsData, examState, currentQId);
     if (nextStep) {
       setQuizStep(nextStep);
-      saveCurrentQuizPosition(state, {
+      setState(saveCurrentQuizPosition(state, {
+        examId: currentExamId,
         questionId: nextStep.question.id,
         index: nextStep.index,
         round: nextStep.round
-      });
+      }));
       setTimeout(resetScrollToTop, 50);
     }
   };
 
   // Bookmark toggle
   const handleToggleBookmark = (questionId) => {
-    setState(prev => toggleBookmark(prev, questionId));
+    setState(prev => toggleBookmark(prev, recordKey(currentExamId, questionId)));
   };
 
   // Wiring Diagram Open
@@ -155,24 +171,25 @@ export default function App() {
     if (idx !== -1) {
       resetScrollToTop();
       const targetQ = questionsData[idx];
-      const rec = state.records[targetQ.id];
-      const attemptedCount = questionsData.filter(q => state.records[q.id]?.attempts > 0).length;
-      const isFirst = attemptedCount < questionsData.length && (state.round || 1) <= 1;
+      const rec = examState.records[targetQ.id];
+      const attemptedCount = questionsData.filter(q => examState.records[q.id]?.attempts > 0).length;
+      const isFirst = attemptedCount < questionsData.length && (examState.round || 1) <= 1;
       const newStep = {
         question: targetQ,
         index: idx,
         isFirstRound: isFirst,
-        round: state.round || 1,
+        round: examState.round || 1,
         modeDescription: isFirst ? '第1巡：全問走破中' : '忘却曲線：間隔反復ループ',
         badge: rec?.status === 'mastered' ? 'マスター 👑' : rec?.status === 'review' ? '要復習 🔥' : '定着中 🌱',
         progressText: `${attemptedCount + 1} / ${questionsData.length} 問`
       };
       setQuizStep(newStep);
-      saveCurrentQuizPosition(state, {
+      setState(saveCurrentQuizPosition(state, {
+        examId: currentExamId,
         questionId: targetQ.id,
         index: idx,
-        round: state.round
-      });
+        round: examState.round
+      }));
       setCurrentMode('quiz');
       setTimeout(resetScrollToTop, 50);
     }
@@ -183,24 +200,31 @@ export default function App() {
     const fresh = getInitialState();
     saveState(fresh);
     setState(fresh);
-    const initialStep = getInitialResumeQuestion(questionsData, fresh);
+    const initialStep = getInitialResumeQuestion(questionsData, getExamView(fresh, currentExamId));
     setQuizStep(initialStep);
     setIsStatsOpen(false);
   };
 
-  // Record mock exam multiple answers
+  // Record mock exam multiple answers（回答した問題だけを学習記録に残す。未回答は記録しない）
   const handleRecordExamResults = (examDetails) => {
     let curState = state;
-    examDetails.forEach(item => {
-      const res = recordAnswer(curState, {
-        questionId: item.question.id,
-        isCorrect: item.isCorrect,
-        timeSpentSec: 20,
-        category: item.question.category
+    let completedRound1 = false;
+    examDetails
+      .filter(item => item.userAnswer !== undefined && item.userAnswer !== null)
+      .forEach(item => {
+        const res = recordAnswer(curState, {
+          examId: currentExamId,
+          questionId: item.question.id,
+          isCorrect: item.isCorrect,
+          timeSpentSec: 20,
+          category: item.question.category,
+          totalQuestions: questionsData.length
+        });
+        curState = res.nextState;
+        if (res.didCompleteRound1) completedRound1 = true;
       });
-      curState = res.nextState;
-    });
     setState(curState);
+    if (completedRound1) setShowRound1CompleteModal(true);
   };
 
   // Exam Selection Handler
@@ -208,7 +232,8 @@ export default function App() {
     saveCurrentExamId(examId);
     setCurrentExamId(examId);
     const newQuestions = getExamQuestions(examId);
-    setQuizStep({
+    // 選んだ年度の続きから再開する
+    setQuizStep(getInitialResumeQuestion(newQuestions, getExamView(state, examId)) || {
       question: newQuestions[0],
       index: 0,
       isFirstRound: true,
@@ -220,7 +245,7 @@ export default function App() {
   };
 
   const currentQuestion = quizStep.question || questionsData[0];
-  const reviewQuestionsCount = questionsData.filter(q => state.records[q.id]?.status === 'review' || (state.records[q.id]?.wrong > 0 && state.records[q.id]?.status !== 'mastered')).length;
+  const reviewQuestionsCount = questionsData.filter(q => examState.records[q.id]?.status === 'review' || (examState.records[q.id]?.wrong > 0 && examState.records[q.id]?.status !== 'mastered')).length;
 
   if (currentMode === 'admin') {
     return (
@@ -239,7 +264,8 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       {/* Top Header */}
       <Header
-        state={state}
+        state={examState}
+        totalQuestions={questionsData.length}
         soundOn={soundOn}
         onToggleSound={handleToggleSound}
         onOpenStats={() => { playClick(); setIsStatsOpen(true); }}
@@ -252,10 +278,10 @@ export default function App() {
       <main className="flex-1 w-full max-w-md mx-auto px-3 pt-3">
         {currentMode === 'quiz' && (
           <QuizCard
-            key={currentQuestion.id}
+            key={`${currentExamId}_${currentQuestion.id}`}
             question={currentQuestion}
-            record={state.records[currentQuestion.id]}
-            isBookmarked={(state.bookmarks || []).includes(currentQuestion.id)}
+            record={examState.records[currentQuestion.id]}
+            isBookmarked={(examState.bookmarks || []).includes(currentQuestion.id)}
             onAnswer={handleAnswer}
             onNext={handleNextQuizQuestion}
             onToggleBookmark={handleToggleBookmark}
@@ -270,8 +296,10 @@ export default function App() {
 
         {currentMode === 'review' && (
           <ReviewMode
+            key={currentExamId}
             allQuestions={questionsData}
-            state={state}
+            state={examState}
+            currentExamMeta={currentExamMeta}
             onAnswer={handleAnswer}
             onToggleBookmark={handleToggleBookmark}
             onOpenWiringDiagram={handleOpenWiringDiagram}
@@ -282,6 +310,7 @@ export default function App() {
 
         {currentMode === 'exam' && (
           <ExamMode
+            key={currentExamId}
             allQuestions={questionsData}
             onOpenWiringDiagram={handleOpenWiringDiagram}
             onRecordExamResults={handleRecordExamResults}
@@ -294,7 +323,7 @@ export default function App() {
         {currentMode === 'list' && (
           <QuestionList
             allQuestions={questionsData}
-            state={state}
+            state={examState}
             onSelectQuestion={handleSelectQuestion}
             onToggleBookmark={handleToggleBookmark}
             onOpenAttribution={() => setIsAttributionOpen(true)}
@@ -324,7 +353,7 @@ export default function App() {
       <StatsModal
         isOpen={isStatsOpen}
         onClose={() => setIsStatsOpen(false)}
-        state={state}
+        state={examState}
         allQuestions={questionsData}
         onResetProgress={handleResetProgress}
         onOpenAdmin={handleOpenAdmin}
@@ -360,6 +389,8 @@ export default function App() {
         isOpen={showRound1CompleteModal}
         onClose={() => setShowRound1CompleteModal(false)}
         reviewCount={reviewQuestionsCount}
+        examName={currentExamMeta?.name}
+        totalQuestions={questionsData.length}
       />
     </div>
   );

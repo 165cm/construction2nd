@@ -441,7 +441,8 @@ export default function AdminCropEditor({ onBack, isEmbedded = false }) {
   // 全端末へ反映するデータ（座標のJSON）をコピー
   const handleCopyShareData = async () => {
     playClick();
-    const text = JSON.stringify(collectShareData(), null, 2);
+    // exportAllCropsData() は既にJSON文字列なので、そのまま使う（二重にJSON化しない）
+    const text = collectShareData();
     try {
       await navigator.clipboard.writeText(text);
       setShareCopied(true);

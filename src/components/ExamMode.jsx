@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sound';
@@ -6,6 +6,38 @@ import { cropKeyForDiagram } from '../utils/customCrops';
 import { getShuffleChoicesSetting } from '../utils/settings';
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
+import { getShortSourceLabel } from '../data/attribution';
+
+const EXAM_DURATION_SEC = 120 * 60;
+// 受験中の模擬試験を年度ごとに自動保存する（タブ移動・再読み込みでも続きから再開できる）
+const EXAM_SESSION_STORAGE_KEY = 'denkou2_exam_session_v1';
+
+const loadExamSession = (examId) => {
+  try {
+    const all = JSON.parse(localStorage.getItem(EXAM_SESSION_STORAGE_KEY) || '{}');
+    const session = all[examId];
+    if (session && typeof session.deadline === 'number' && session.answers) return session;
+  } catch (e) {
+    // ignore
+  }
+  return null;
+};
+
+const saveExamSession = (examId, session) => {
+  try {
+    const all = JSON.parse(localStorage.getItem(EXAM_SESSION_STORAGE_KEY) || '{}');
+    if (session) {
+      all[examId] = session;
+    } else {
+      delete all[examId];
+    }
+    localStorage.setItem(EXAM_SESSION_STORAGE_KEY, JSON.stringify(all));
+  } catch (e) {
+    console.error('Failed to save exam session:', e);
+  }
+};
+
+const secondsUntil = (deadline) => Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
 
 export default function ExamMode({
   allQuestions,
@@ -15,39 +47,55 @@ export default function ExamMode({
   onOpenAttribution,
   currentExamMeta
 }) {
-  const [examStarted, setExamStarted] = useState(false);
-  const [answers, setAnswers] = useState({}); // { [questionId]: choiceId }
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(120 * 60); // 120 minutes in seconds
+  const examId = currentExamMeta?.id || 'r8_1';
+  const [savedSession] = useState(() => loadExamSession(examId));
+  const [examStarted, setExamStarted] = useState(!!savedSession);
+  const [answers, setAnswers] = useState(() => savedSession?.answers || {}); // { [questionId]: choiceId }
+  const [currentIdx, setCurrentIdx] = useState(() => savedSession?.currentIdx || 0);
+  // 終了時刻（ミリ秒）。画面を離れていても本番同様に時間は進む
+  const [deadline, setDeadline] = useState(() => savedSession?.deadline || null);
+  const [timeLeft, setTimeLeft] = useState(() => (savedSession ? secondsUntil(savedSession.deadline) : EXAM_DURATION_SEC));
   const [isFinished, setIsFinished] = useState(false);
   const [resultData, setResultData] = useState(null);
   const [expandedResultIdx, setExpandedResultIdx] = useState(null);
+  const finishedRef = useRef(false);
 
-  // Timer countdown
+  // 受験中は解答・現在位置を自動保存
   useEffect(() => {
-    let timer = null;
-    if (examStarted && !isFinished && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft(t => {
-          if (t <= 1) {
-            handleFinishExam();
-            return 0;
-          }
-          return t - 1;
-        });
-      }, 1000);
+    if (examStarted && !isFinished && deadline) {
+      saveExamSession(examId, { answers, currentIdx, deadline });
     }
+  }, [examStarted, isFinished, answers, currentIdx, deadline, examId]);
+
+  // Timer countdown（終了時刻から残り時間を計算）
+  useEffect(() => {
+    if (!examStarted || isFinished || !deadline) return undefined;
+    const tick = () => setTimeLeft(secondsUntil(deadline));
+    tick();
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [examStarted, isFinished, timeLeft]);
+  }, [examStarted, isFinished, deadline]);
+
+  // 時間切れで自動採点
+  useEffect(() => {
+    if (examStarted && !isFinished && deadline && timeLeft <= 0) {
+      handleFinishExam({ auto: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, examStarted, isFinished, deadline]);
 
   const handleStartExam = () => {
     playClick();
+    const newDeadline = Date.now() + EXAM_DURATION_SEC * 1000;
+    finishedRef.current = false;
     setExamStarted(true);
     setAnswers({});
     setCurrentIdx(0);
-    setTimeLeft(120 * 60);
+    setDeadline(newDeadline);
+    setTimeLeft(EXAM_DURATION_SEC);
     setIsFinished(false);
     setResultData(null);
+    setExpandedResultIdx(null);
   };
 
   const handleSelectChoice = (questionId, choiceId) => {
@@ -56,7 +104,17 @@ export default function ExamMode({
     setAnswers(prev => ({ ...prev, [questionId]: choiceId }));
   };
 
-  const handleFinishExam = () => {
+  const handleFinishExam = ({ auto = false } = {}) => {
+    if (finishedRef.current) return;
+    const unansweredCount = allQuestions.filter(q => answers[q.id] === undefined).length;
+    if (!auto && unansweredCount > 0) {
+      const ok = window.confirm(
+        `未回答の問題が ${unansweredCount} 問あります。\nこのまま採点しますか？\n（未回答は0点として採点し、学習記録には残しません）`
+      );
+      if (!ok) return;
+    }
+    finishedRef.current = true;
+    saveExamSession(examId, null);
     playClick();
     let score = 0;
     let correctCount = 0;
@@ -77,7 +135,7 @@ export default function ExamMode({
     });
 
     const isPassed = score >= 60;
-    const timeSpent = (120 * 60) - timeLeft;
+    const timeSpent = Math.min(EXAM_DURATION_SEC, EXAM_DURATION_SEC - secondsUntil(deadline || Date.now()));
 
     if (isPassed) {
       playLevelUp();
@@ -119,15 +177,16 @@ export default function ExamMode({
           {currentExamMeta?.name || '第二種電気工事士'} 学科試験 模擬試験
         </h2>
         <p className="text-xs text-slate-300 max-w-sm leading-relaxed mb-6">
-          試験時間120分、全50問（配点各2点／100点満点）。<br />
+          試験時間120分、全{allQuestions.length}問（配点各2点／100点満点）。<br />
           <strong>60点以上（30問正解）</strong>で合格です！<br />
-          本番同様に途中で正解は表示されず、全問解き終えた後に総合合否判定と詳細解説が出ます。
+          本番同様に途中で正解は表示されず、全問解き終えた後に総合合否判定と詳細解説が出ます。<br />
+          <span className="text-slate-400">受験中はほかの画面に移っても自動保存され、続きから再開できます（制限時間は進みます）。</span>
         </p>
 
         <div className="grid grid-cols-2 gap-3 w-full max-w-xs mb-8 text-xs text-slate-300">
           <div className="p-3 bg-slate-800/80 rounded-xl border border-slate-700">
             <div className="text-slate-400 mb-0.5">問題数</div>
-            <strong className="text-sm text-sky-400">全 50 問</strong>
+            <strong className="text-sm text-sky-400">全 {allQuestions.length} 問</strong>
           </div>
           <div className="p-3 bg-slate-800/80 rounded-xl border border-slate-700">
             <div className="text-slate-400 mb-0.5">制限時間</div>
@@ -180,7 +239,7 @@ export default function ExamMode({
               <span className="text-[11px] text-slate-400">正解数</span>
               <div className="text-3xl font-black text-sky-400">
                 {resultData.correctCount}
-                <span className="text-sm text-slate-400 font-normal"> / 50問</span>
+                <span className="text-sm text-slate-400 font-normal"> / {resultData.totalCount}問</span>
               </div>
             </div>
           </div>
@@ -295,11 +354,11 @@ export default function ExamMode({
         </div>
 
         <div className="text-slate-400 text-xs">
-          回答済: <strong className="text-sky-400">{answeredCount}</strong> / 50問
+          回答済: <strong className="text-sky-400">{answeredCount}</strong> / {allQuestions.length}問
         </div>
 
         <button
-          onClick={handleFinishExam}
+          onClick={() => handleFinishExam()}
           className="py-1 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md active:scale-95 transition"
         >
           採点する
@@ -457,7 +516,7 @@ export default function ExamMode({
           onClick={() => { playClick(); onOpenAttribution?.(); }}
           className="text-[10px] text-slate-500 hover:text-sky-400 inline-flex items-center gap-1 transition"
         >
-          <span>出典: 一般財団法人 電気技術者試験センター 令和8年度上期（午前）</span>
+          <span>{getShortSourceLabel(currentExamMeta)}</span>
           <span className="underline ml-0.5 text-sky-500/80">著作権・留意事項</span>
         </button>
         <p className="text-[9px] text-slate-600 mt-0.5">

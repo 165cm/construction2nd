@@ -24,5 +24,12 @@ export function getAttributionConfig(examMeta) {
   };
 }
 
+// 画面下に出す短い出典表記（年度に合わせる）。session（午前・午後）は分かっている年度だけ付ける
+export function getShortSourceLabel(examMeta) {
+  const name = examMeta?.name || '令和8年度 上期';
+  const session = examMeta?.session ? `（${examMeta.session}）` : '';
+  return `出典: 一般財団法人 電気技術者試験センター ${name}${session}`;
+}
+
 // 互換性のためのデフォルト
 export const ATTRIBUTION_CONFIG = getAttributionConfig({ name: '令和8年度上期' });

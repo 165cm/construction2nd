@@ -32,6 +32,18 @@ const applySharedImageSetting = (examId, q) => {
   return q;
 };
 
+// 問題文の原本ページ番号。データの fullPage が配線図ページを指している配線図問題は、
+// 通常の出題レイアウト（問31〜40: P11、問41〜45: P12、問46〜50: P13）から求める
+const getQuestionTextPage = (q, floorPlanPageNum) => {
+  const m = (q.fullPage || '').match(/page_(\d+)\.png/);
+  const raw = m ? parseInt(m[1], 10) : null;
+  if (raw && raw !== floorPlanPageNum) return raw;
+  if (q.id >= 46) return 13;
+  if (q.id >= 41) return 12;
+  if (q.id >= 31) return 11;
+  return raw || 5;
+};
+
 export function getExamMeta(examId) {
   return EXAM_LIST.find(e => e.id === examId) || EXAM_LIST[0];
 }
@@ -47,6 +59,8 @@ export function getExamQuestions(examId) {
     const isWiring = q.id >= 31;
     const floorPlanPageNum = meta.floorPlanPage || 15;
     return {
+      // 問題文が載っている原本ページ（配線図問題でも、問題文側の図や写真を切り抜くときに使う）
+      questionPage: getQuestionTextPage(q, floorPlanPageNum),
       ...applySharedImageSetting(meta.id, q),
       examId: meta.id,
       examName: meta.name,

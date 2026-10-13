@@ -7,7 +7,7 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
-| なし | - | - | - |
+| Claude | claude/keen-einstein-0i4ebd | 問31以降の画像取得元（配線図／問題文）の切り替え（PR作成・本番公開の確認待ち） | src/components/AdminCropEditor.jsx, src/components/QuestionEditor.jsx, src/components/QuizCard.jsx, src/components/ExamMode.jsx, src/data/examLoader.js, src/utils/customCrops.js |
 
 ## 次のタスク（上から優先）
 1. 改善提案（利用者側・管理者側）の検討（ユーザーと相談して優先順位を決める）

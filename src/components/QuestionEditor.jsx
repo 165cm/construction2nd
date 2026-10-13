@@ -127,24 +127,27 @@ export default function QuestionEditor({ onOpenCropEditor }) {
   const examOverrideCount = Object.keys(overrides[selectedExamId] || {}).length;
   const totalOverrideCount = Object.keys(overrides).reduce((acc, k) => acc + Object.keys(overrides[k] || {}).length, 0);
 
-  // 原本画像パスの算出（問31以降は自動で配線図P15、それ以外は問題文ページ）
-  const defaultPageMatch = currentQuestion?.fullPage?.match(/page_(\d+)\.png/);
-  const questionTextPageNum = defaultPageMatch ? parseInt(defaultPageMatch[1], 10) : 5;
-  const defaultPageNum = isWiringQuestion ? floorPlanPageNum : questionTextPageNum;
-  const activePageNum = customPageNum !== null ? customPageNum : defaultPageNum;
-  const originalPdfPageUrl = `${examMeta.pageDir}/page_${activePageNum}.png`;
-
   // トリミング設定キーの算出
   const cropKey = useMemo(() => {
     if (!currentQuestion) return '1';
     return cropKeyForDiagram(questionId, currentQuestion.diagram, selectedExamId);
   }, [currentQuestion, questionId, selectedExamId]);
 
+  // 原本画像パスの算出
+  // 問31以降：保存済みの切り抜きがあればその取得元（配線図 or 問題文）のページ、無ければ配線図ページ
+  // それ以外：問題文ページ
+  const defaultPageMatch = currentQuestion?.fullPage?.match(/page_(\d+)\.png/);
+  const questionTextPageNum = currentQuestion?.questionPage || (defaultPageMatch ? parseInt(defaultPageMatch[1], 10) : 5);
+  const savedCropPage = getActiveCropCoords(cropKey)?.page;
+  const defaultPageNum = isWiringQuestion ? (savedCropPage || floorPlanPageNum) : questionTextPageNum;
+  const activePageNum = customPageNum !== null ? customPageNum : defaultPageNum;
+  const originalPdfPageUrl = `${examMeta.pageDir}/page_${activePageNum}.png`;
+
   // トリム座標の初期化・読み込み
   useEffect(() => {
     if (!currentQuestion) return;
     const active = getActiveCropCoords(cropKey);
-    if (active && (active.page === activePageNum || isWiringQuestion)) {
+    if (active && active.page === activePageNum) {
       setCropCoords({
         page: activePageNum,
         pageDir: examMeta.pageDir,
@@ -645,6 +648,19 @@ export default function QuestionEditor({ onOpenCropEditor }) {
               >
                 配線図(P{floorPlanPageNum})
               </button>
+              {isWiringQuestion && (
+                <button
+                  onClick={() => setCustomPageNum(questionTextPageNum)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold border transition ${
+                    activePageNum === questionTextPageNum
+                      ? 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+                      : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                  }`}
+                  title="問題文の原本ページへ（問題文に図・写真がある場合はこちらから切り抜く）"
+                >
+                  問題文(P{questionTextPageNum})
+                </button>
+              )}
               {customPageNum !== null && customPageNum !== defaultPageNum && (
                 <button
                   onClick={() => setCustomPageNum(null)}

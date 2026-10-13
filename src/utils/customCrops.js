@@ -216,6 +216,13 @@ export const getSharedCropCoords = (key) => {
   return { ...entry, pageDir: entry.pageDir || pageDirForCropKey(key) };
 };
 
+// 配線図問題の画像が「配線図ページ」から切り抜かれているか（問題文ページからなら false）。
+// 切り抜き座標が無い場合は、初期画像（配線図の拡大画像）なので true
+export const isCropFromFloorPlan = (key, floorPlanPage = 15) => {
+  const coords = getActiveCropCoords(key);
+  return !coords || coords.page === floorPlanPage;
+};
+
 // 端末ローカルの保存座標を優先し、無ければ共有ファイル座標を返す
 export const getActiveCropCoords = (key) => {
   try {

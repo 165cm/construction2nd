@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sound';
-import { cropKeyForDiagram } from '../utils/customCrops';
+import { cropKeyForDiagram, isCropFromFloorPlan } from '../utils/customCrops';
 import { getShuffleChoicesSetting } from '../utils/settings';
 import CropImage from './CropImage';
 import ExplanationRenderer from './ExplanationRenderer';
@@ -424,14 +424,14 @@ export default function ExamMode({
 
         {activeQ.diagram && (
           <div className="bg-white rounded-xl p-2 my-2 relative flex items-center justify-center max-h-52 overflow-hidden border border-slate-600">
-            {activeQ.wiringMark && (
+            {activeQ.wiringMark && isCropFromFloorPlan(cropKeyForDiagram(activeQ.id, activeQ.diagram, activeQ.examId), currentExamMeta?.floorPlanPage || 15) && (
               <div className="absolute top-2 left-2 z-10 bg-slate-900/90 backdrop-blur border border-amber-500/50 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-md">
                 <span>🎯 対象箇所:</span>
                 <span className="text-amber-400 font-black">{activeQ.wiringMark} 周辺拡大</span>
               </div>
             )}
             <CropImage
-              cropKey={cropKeyForDiagram(activeQ.id, activeQ.diagram)}
+              cropKey={cropKeyForDiagram(activeQ.id, activeQ.diagram, activeQ.examId)}
               defaultPath={activeQ.diagram}
               alt="問題図"
               className="max-h-48 object-contain"

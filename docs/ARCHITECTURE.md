@@ -55,3 +55,4 @@
   - `badges`: 獲得済み実績バッジID配列
 - LocalStorage キー: `denkou2_exam_session_v1` … 受験中の模擬試験（年度ごとの解答・現在位置・終了時刻）。採点すると消える
 - トリミング座標は `pageDir`（年度ごとの元ページ画像フォルダ。例 `/pages/r7_2`）を必ず持つ。無い場合はキーの年度から補う
+- `cropOverrides.json` の各項目は `showImage`（true＝画像あり／false＝テキスト問題）を持てる。全端末で問題の「画像あり／なし」をそろえるために使う（`src/data/examLoader.js` が読み込み時に反映）。管理画面の「全端末へ反映するデータをコピー」には、この設定も含まれる

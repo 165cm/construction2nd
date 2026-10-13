@@ -9,6 +9,11 @@ import { getAssetUrl } from './asset';
 import sharedOverrides from '../data/cropOverrides.json';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
 import { EXAM_LIST } from '../data/examList';
+import { getQuestionOverrides } from './objections';
+
+// 問題ごとのトリミングキー（画像の有無の設定にも使う）。令和8年度上期は番号だけ、他の年度は "r7_2_12" の形
+export const questionCropKey = (examId, questionId) =>
+  !examId || examId === 'r8_1' ? String(questionId) : `${examId}_${questionId}`;
 
 // トリミングキー（例: "r7_2_12", "r7_2_floor_plan", "12"）から、元ページ画像のフォルダを求める。
 // 年度が付いていないキーは令和8年度上期（/pages）
@@ -142,13 +147,24 @@ export const importCustomCrops = (jsonData) => {
 };
 
 // 全トリミング座標をJSONとしてエクスポート（共有データ＋ローカル調整データの完全マージ）
+// 管理画面で切り替えた「画像あり／テキスト問題」の設定も showImage として含める。
+// （以前は座標だけを書き出していたため、画像なしの問題を「画像あり」にしても公開サイトに反映されなかった）
 export const exportAllCropsData = () => {
-  const merged = { ...getSharedOverrides() };
+  const merged = {};
+  Object.entries(getSharedOverrides()).forEach(([k, v]) => { merged[k] = { ...v }; });
   const custom = getCustomCrops();
   Object.keys(custom).forEach((k) => {
     if (custom[k]?.coords) {
-      merged[k] = custom[k].coords;
+      merged[k] = { ...(merged[k] || {}), ...custom[k].coords };
     }
+  });
+  const overrides = getQuestionOverrides();
+  Object.entries(overrides).forEach(([examId, byQuestion]) => {
+    Object.entries(byQuestion || {}).forEach(([qid, q]) => {
+      if (!q || !Object.prototype.hasOwnProperty.call(q, 'diagram')) return;
+      const key = questionCropKey(examId, qid);
+      merged[key] = { ...(merged[key] || { label: `問${qid}` }), showImage: Boolean(q.diagram) };
+    });
   });
   return JSON.stringify(merged, null, 2);
 };

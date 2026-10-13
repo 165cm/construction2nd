@@ -63,3 +63,16 @@
 - 分野名は年度で書き方が違う（例: 「配電理論・配線設計」「配線器具・材料・工具」）。`examLoader.js` が読み込み時にアプリ共通の5分野（電気理論・計算／配線設計・機器／材料・工具／施工方法・法令・検査／配線図問題）にそろえる
 - 弱点特訓は「この年度／全年度まとめて」と分野で絞り込める。年度をまたぐので、記録・ブックマークは年度付きキー（`globalId`）で引く
 - LocalStorage キー: `denkou2_exam_fixed_order_v1` … 模擬試験を「本番と同じ並び（選択肢をシャッフルしない）」で出すか（初期値 ON）。受験中は開始時の設定を `denkou2_exam_session_v1` に保存して固定
+
+## 管理画面の修正を公開サイトへ反映する流れ
+
+管理画面（`#admin`）で保存した内容は、まず**管理者のそのブラウザだけ**に残る。全端末に反映するには次の流れ。
+
+1. 管理画面上部の「公開サイトに未反映の変更が N 件」バーで、未反映の件数を確認
+2. 「反映用データをコピー」を押し、AIとのチャットに貼り付けて「反映して」と伝える
+3. AI は、貼られたデータの `cropOverrides` を `src/data/cropOverrides.json` に、`questionOverrides` を `src/data/questionOverrides.json` に、そのまま上書き保存して PR を作る
+4. PR を公開すると全端末に反映される
+
+- `src/data/questionOverrides.json` … 全端末に反映する問題文の修正。`{ 年度ID: { 問題番号: { 変えた項目だけ } } }`。書き換えてよい項目は `question`・`choices`・`answer`・`explanation`・`keyPoint`・`category`・`categoryTag`（`examLoader.js` の `QUESTION_TEXT_FIELDS`）
+- 問題データの重なり順：元データ（`src/data/exams/*.json`）→ 共有ファイル（`cropOverrides.json` の `showImage`、`questionOverrides.json`）→ そのブラウザだけの修正（LocalStorage `denkou2_question_overrides_v1`）
+- 反映用データ・未反映の件数は `src/utils/publishSync.js` が作る。保存していない変更は `src/utils/unsavedGuard.js` で見張り、問題・年度・タブを移る時やページを閉じる時に確認を出す

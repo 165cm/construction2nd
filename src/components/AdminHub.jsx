@@ -4,6 +4,8 @@ import {
   Download, Upload, CheckCircle2, ShieldCheck, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import AdminCropEditor from './AdminCropEditor';
+import PublishBar from './PublishBar';
+import { confirmDiscardUnsaved, hasUnsavedChanges } from '../utils/unsavedGuard';
 import QuestionEditor from './QuestionEditor';
 import ObjectionReviewer from './ObjectionReviewer';
 import { exportAllCropsData, importCustomCrops, getCustomCropsCount } from '../utils/customCrops';
@@ -20,6 +22,25 @@ export default function AdminHub({ onBack }) {
     return Object.keys(ov).reduce((acc, k) => acc + Object.keys(ov[k] || {}).length, 0);
   });
   const [toastMessage, setToastMessage] = useState(null);
+
+  // 保存していない変更があれば、タブを移る・アプリに戻る・ページを閉じる前に確認する
+  const switchTab = (tab) => {
+    if (tab === activeTab || !confirmDiscardUnsaved()) return;
+    setActiveTab(tab);
+  };
+  const handleBack = () => {
+    if (!confirmDiscardUnsaved()) return;
+    onBack();
+  };
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (!hasUnsavedChanges()) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, []);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -106,7 +127,7 @@ export default function AdminHub({ onBack }) {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button
-              onClick={onBack}
+              onClick={handleBack}
               className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 text-xs font-bold"
             >
               <ArrowLeft size={16} />
@@ -141,7 +162,7 @@ export default function AdminHub({ onBack }) {
         {/* タブ一覧 */}
         <div className="max-w-7xl mx-auto px-4 flex items-center gap-2 overflow-x-auto scrollbar-none border-t border-slate-800/60 pt-1">
           <button
-            onClick={() => setActiveTab('crop')}
+            onClick={() => switchTab('crop')}
             className={`px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap ${
               activeTab === 'crop'
                 ? 'border-sky-400 text-sky-400 bg-sky-500/10'
@@ -156,7 +177,7 @@ export default function AdminHub({ onBack }) {
           </button>
 
           <button
-            onClick={() => setActiveTab('question')}
+            onClick={() => switchTab('question')}
             className={`px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap ${
               activeTab === 'question'
                 ? 'border-sky-400 text-sky-400 bg-sky-500/10'
@@ -173,7 +194,7 @@ export default function AdminHub({ onBack }) {
           </button>
 
           <button
-            onClick={() => setActiveTab('objection')}
+            onClick={() => switchTab('objection')}
             className={`px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap relative ${
               activeTab === 'objection'
                 ? 'border-amber-400 text-amber-400 bg-amber-500/10'
@@ -190,7 +211,7 @@ export default function AdminHub({ onBack }) {
           </button>
 
           <button
-            onClick={() => setActiveTab('backup')}
+            onClick={() => switchTab('backup')}
             className={`px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap ${
               activeTab === 'backup'
                 ? 'border-sky-400 text-sky-400 bg-sky-500/10'
@@ -203,6 +224,9 @@ export default function AdminHub({ onBack }) {
         </div>
       </header>
 
+      {/* 公開サイトに未反映の変更（件数とコピー） */}
+      <PublishBar />
+
       {/* メインコンテンツ */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
         {activeTab === 'crop' && (
@@ -212,16 +236,12 @@ export default function AdminHub({ onBack }) {
         )}
 
         {activeTab === 'question' && (
-          <QuestionEditor onOpenCropEditor={(examId, key) => {
-            setActiveTab('crop');
-          }} />
+          <QuestionEditor onOpenCropEditor={() => switchTab('crop')} />
         )}
 
         {activeTab === 'objection' && (
           <ObjectionReviewer 
-            onOpenEditorWithQuestion={(examId, questionId) => {
-              setActiveTab('question');
-            }} 
+            onOpenEditorWithQuestion={() => switchTab('question')}
           />
         )}
 

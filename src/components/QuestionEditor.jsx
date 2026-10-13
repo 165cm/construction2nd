@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { setUnsavedChanges, confirmDiscardUnsaved } from '../utils/unsavedGuard';
 import { 
   FileText, Check, Save, RotateCcw, Download, Upload, Copy, 
   Eye, AlertCircle, Sparkles, ChevronLeft, ChevronRight, Layers,
@@ -36,6 +37,8 @@ export default function QuestionEditor({ onOpenCropEditor }) {
 
   // 簡易トリミング操作用ステート
   const [cropCoords, setCropCoords] = useState(null);
+  // 開いた時（または保存した時）のトリム枠。今の枠と違えば「未保存」
+  const [loadedCropCoords, setLoadedCropCoords] = useState(null);
   const [isCropActive, setIsCropActive] = useState(true);
   const [cropSavedNotice, setCropSavedNotice] = useState(false);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(true);
@@ -124,6 +127,32 @@ export default function QuestionEditor({ onOpenCropEditor }) {
 
   // 修正中・修正済みステータス
   const isCurrentlyOverridden = Boolean(overrides[selectedExamId]?.[questionId]);
+
+  // 保存していない変更があるか（フォームの内容と、保存済みの内容を比べる）
+  const isDirty = useMemo(() => {
+    if (!currentQuestion) return false;
+    const source = overrides[selectedExamId]?.[questionId] || currentQuestion;
+    if (formData.hasDiagram !== Boolean(source.diagram)) return true;
+    // 簡易トリムの枠だけを動かした場合も未保存
+    if (formData.hasDiagram && isCropActive && cropCoords && loadedCropCoords &&
+      ['page', 'x', 'y', 'w', 'h'].some(f => Math.round(cropCoords[f] ?? 0) !== Math.round(loadedCropCoords[f] ?? 0))) return true;
+    const textFields = ['question', 'answer', 'explanation', 'keyPoint', 'category', 'categoryTag'];
+    if (textFields.some(f => (formData[f] || '') !== (source[f] || ''))) return true;
+    return JSON.stringify(formData.choices || []) !== JSON.stringify(source.choices || []);
+  }, [formData, overrides, selectedExamId, questionId, currentQuestion, isCropActive, cropCoords, loadedCropCoords]);
+
+  // 管理画面全体（タブ切り替え・アプリに戻る・ページを閉じる）にも知らせる
+  useEffect(() => {
+    setUnsavedChanges(isDirty);
+  }, [isDirty]);
+  useEffect(() => () => setUnsavedChanges(false), []);
+
+  // 保存していない変更があれば、別の問題・年度へ移る前に確認する
+  const confirmLeave = () => !isDirty || confirmDiscardUnsaved();
+  const goToQuestion = (idx) => {
+    if (idx === selectedQuestionIndex || !confirmLeave()) return;
+    setSelectedQuestionIndex(idx);
+  };
   const examOverrideCount = Object.keys(overrides[selectedExamId] || {}).length;
   const totalOverrideCount = Object.keys(overrides).reduce((acc, k) => acc + Object.keys(overrides[k] || {}).length, 0);
 
@@ -147,8 +176,8 @@ export default function QuestionEditor({ onOpenCropEditor }) {
   useEffect(() => {
     if (!currentQuestion) return;
     const active = getActiveCropCoords(cropKey);
-    if (active && active.page === activePageNum) {
-      setCropCoords({
+    const initial = active && active.page === activePageNum
+      ? {
         page: activePageNum,
         pageDir: examMeta.pageDir,
         x: active.x,
@@ -156,10 +185,9 @@ export default function QuestionEditor({ onOpenCropEditor }) {
         w: active.w,
         h: active.h,
         label: active.label || `${examMeta.badge} 問${questionId}`
-      });
-    } else {
-      // 既定の初期枠（配線図または問題図）
-      setCropCoords({
+      }
+      : {
+        // 既定の初期枠（配線図または問題図）
         page: activePageNum,
         pageDir: examMeta.pageDir,
         x: 250,
@@ -167,8 +195,9 @@ export default function QuestionEditor({ onOpenCropEditor }) {
         w: 380,
         h: 240,
         label: `${examMeta.badge} 問${questionId}`
-      });
-    }
+      };
+    setCropCoords(initial);
+    setLoadedCropCoords(initial);
   }, [cropKey, activePageNum, questionId, selectedExamId, isWiringQuestion, examMeta]);
 
   // キャンバスプレビューのリアルタイム描画
@@ -358,6 +387,9 @@ export default function QuestionEditor({ onOpenCropEditor }) {
     }
 
     triggerHaptic('success');
+    // 保存した枠を「開いた時の枠」にする（未保存の表示を消す）
+    setCropCoords(savedCoords);
+    setLoadedCropCoords(savedCoords);
     // フォーム側も「図面・写真あり」に自動連動
     setFormData(prev => ({
       ...prev,
@@ -480,6 +512,7 @@ export default function QuestionEditor({ onOpenCropEditor }) {
                 <button
                   key={e.id}
                   onClick={() => {
+                    if (e.id === selectedExamId || !confirmLeave()) return;
                     setSelectedExamId(e.id);
                     setSelectedQuestionIndex(0);
                   }}
@@ -579,7 +612,7 @@ export default function QuestionEditor({ onOpenCropEditor }) {
             return (
               <button
                 key={q.id}
-                onClick={() => setSelectedQuestionIndex(idx)}
+                onClick={() => goToQuestion(idx)}
                 className={`flex-shrink-0 w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center relative ${
                   isSelected
                     ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20'
@@ -998,9 +1031,18 @@ export default function QuestionEditor({ onOpenCropEditor }) {
                     <span>元に戻す</span>
                   </button>
                 )}
+                {isDirty && (
+                  <span className="px-2 py-1 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-[11px] font-black animate-pulse">
+                    ● 未保存の変更あり
+                  </span>
+                )}
                 <button
                   onClick={handleSave}
-                  className="px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-sky-500/20 active:scale-95 transition"
+                  className={`min-h-[44px] px-3 py-1.5 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition ${
+                    isDirty
+                      ? 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-amber-500/30 ring-2 ring-amber-300'
+                      : 'bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-sky-500/20'
+                  }`}
                 >
                   <Save size={13} />
                   <span>{saveSuccessNotice ? '保存完了！' : 'この問を保存'}</span>
@@ -1162,7 +1204,7 @@ export default function QuestionEditor({ onOpenCropEditor }) {
             {/* フッターナビゲーション */}
             <div className="pt-2 flex items-center justify-between border-t border-slate-800">
               <button
-                onClick={() => setSelectedQuestionIndex(prev => Math.max(0, prev - 1))}
+                onClick={() => goToQuestion(Math.max(0, selectedQuestionIndex - 1))}
                 disabled={selectedQuestionIndex === 0}
                 className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none rounded-xl text-xs font-bold text-slate-300 flex items-center gap-1"
               >
@@ -1173,7 +1215,7 @@ export default function QuestionEditor({ onOpenCropEditor }) {
                 Q{currentQuestion?.id} / {rawQuestions.length}
               </span>
               <button
-                onClick={() => setSelectedQuestionIndex(prev => Math.min(rawQuestions.length - 1, prev + 1))}
+                onClick={() => goToQuestion(Math.min(rawQuestions.length - 1, selectedQuestionIndex + 1))}
                 disabled={selectedQuestionIndex === rawQuestions.length - 1}
                 className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none rounded-xl text-xs font-bold text-slate-300 flex items-center gap-1"
               >

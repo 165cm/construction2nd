@@ -16,6 +16,7 @@ const EXAM_DATA_MAP = {
 import { applyOverridesToQuestions, getQuestionOverrides } from '../utils/objections';
 import sharedCropOverrides from './cropOverrides.json';
 import sharedQuestionOverrides from './questionOverrides.json';
+import visualChoices from './visualChoices.json';
 
 // 全端末に反映する問題文の修正（questionOverrides.json）で書き換えてよい項目
 export const QUESTION_TEXT_FIELDS = ['question', 'choices', 'answer', 'explanation', 'keyPoint', 'category', 'categoryTag'];
@@ -102,6 +103,7 @@ export function getSharedExamQuestions(examId) {
       // 問題文が載っている原本ページ（配線図問題でも、問題文側の図や写真を切り抜くときに使う）
       questionPage: getQuestionTextPage(q, floorPlanPageNum),
       ...base,
+      visualChoices: visualChoices[meta.id]?.[String(q.id)] || null,
       category: normalizeCategory(base.category),
       examId: meta.id,
       examName: meta.name,

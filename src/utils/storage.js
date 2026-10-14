@@ -17,8 +17,8 @@ export const LEVEL_TITLES = [
   { minLevel: 5, maxLevel: 9, title: '駆け出し電気工 🛠️', desc: '基本回路を理解し始めた' },
   { minLevel: 10, maxLevel: 19, title: '一人前電工 ⚡', desc: '過去問の要点を掴んでいる' },
   { minLevel: 20, maxLevel: 34, title: '敏腕スペシャリスト 🔥', desc: '配線図もスラスラ解ける' },
-  { minLevel: 35, maxLevel: 49, title: '電気工事マイスター 🏆', desc: '学科試験合格圏内確実！' },
-  { minLevel: 50, maxLevel: 999, title: '電工神 (全問制覇) 👑', desc: 'もはや迷いなし！満点合格レベル' }
+  { minLevel: 35, maxLevel: 49, title: '電気工事マイスター 🏆', desc: '学習を積み重ねています。模擬試験でも確認しよう' },
+  { minLevel: 50, maxLevel: 999, title: '電工神 (全問制覇) 👑', desc: '学習経験を重ねた証。別の回にも挑戦しよう' }
 ];
 
 export const BADGES_DEF = [

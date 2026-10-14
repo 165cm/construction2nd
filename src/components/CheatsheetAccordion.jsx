@@ -38,7 +38,7 @@ export default function CheatsheetAccordion({ cheatsheets }) {
                       {sheet.badge || '必修暗記'}
                     </span>
                     <span className="text-[10px] text-sky-400 font-bold">
-                      🔍 ついでに丸暗記！
+                      🔍 関連知識を確認
                     </span>
                   </div>
                   <h5 className="text-xs font-bold text-slate-100 truncate">

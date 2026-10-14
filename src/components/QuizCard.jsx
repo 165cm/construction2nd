@@ -5,6 +5,8 @@ import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound
 import { cropKeyForDiagram, isCropFromFloorPlan } from '../utils/customCrops';
 import { getShuffleChoicesSetting, setShuffleChoicesSetting, getAutoAdvanceMode, setAutoAdvanceMode, AUTO_ADVANCE_MODES } from '../utils/settings';
 import CropImage from './CropImage';
+import VisualChoices from './VisualChoices';
+import ExamInstructions from './ExamInstructions';
 import ExplanationRenderer from './ExplanationRenderer';
 import CheatsheetAccordion from './CheatsheetAccordion';
 import ObjectionModal from './ObjectionModal';
@@ -135,7 +137,7 @@ export default function QuizCard({
       clearTimeout(t2);
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [question.id]);
+  }, [question.globalId || question.id]);
 
   // Handle 3-second auto-advance countdown after answer
   useEffect(() => {
@@ -245,7 +247,7 @@ export default function QuizCard({
       return <span className="bg-slate-700/60 text-slate-300 text-[10px] px-2 py-0.5 rounded font-medium">未挑戦</span>;
     }
     if (record.status === 'mastered' || record.box === 4) {
-      return <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded font-bold">完全マスター 👑</span>;
+      return <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded font-bold">2回連続正解 👑</span>;
     }
     if (record.status === 'review' || record.box === 1) {
       return <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded font-bold animate-pulse">要復習 🔥</span>;
@@ -280,12 +282,12 @@ export default function QuizCard({
         <div className="mb-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-900/90 to-purple-950/60 border border-purple-500/30 flex items-center justify-between text-xs">
           <div className="flex items-center space-x-1.5">
             <span className="text-purple-300 font-black flex items-center gap-1">
-              <span>🧠 忘却曲線 復習巡</span>
+              <span>🧠 間隔をあけて復習</span>
             </span>
             <span className="text-slate-400 text-[10px]">
               {record?.box === 1 || record?.status === 'review'
                 ? '要復習🔥を最優先'
-                : '定着度に応じて間隔反復'}
+                : '解答履歴に応じて出題'}
             </span>
           </div>
           <span className="font-bold text-xs px-2 py-0.5 rounded-lg bg-purple-950/80 border border-purple-400/40 text-purple-200">
@@ -378,7 +380,7 @@ export default function QuizCard({
         </h2>
 
         {/* Diagram Image if available */}
-        {question.diagram && (
+        {(question.diagram && !(question.visualChoices && question.id >= 31) || (question.diagram && question.visualChoices && question.id >= 31 && isCropFromFloorPlan(cropKeyForDiagram(question.id, question.diagram, question.examId), currentExamMeta?.floorPlanPage || 15))) && (
           <div className="mt-3 relative group">
             {question.wiringMark && isCropFromFloorPlan(
               cropKeyForDiagram(question.id, question.diagram, question.examId || currentExamMeta?.id),
@@ -416,6 +418,9 @@ export default function QuizCard({
           🔁 解き直し中（この回答は学習記録・EXPには数えません）
         </div>
       )}
+
+      <ExamInstructions question={question} />
+      <VisualChoices key={question.globalId} question={question} />
 
       {/* Choices Grid */}
       <div className={`${areChoicesShort ? 'grid grid-cols-2 gap-2' : 'space-y-2'} mb-4`}>
@@ -496,12 +501,12 @@ export default function QuizCard({
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-emerald-400 font-black text-sm">正解！ お見事です！</span>
+                      <span className="text-emerald-400 font-black text-sm">正解！ 根拠も確認しよう</span>
                     </div>
                     <div className="text-emerald-300/80 text-[11px] font-medium mt-0.5">
                       {record?.box >= 3
-                        ? '🧠 長期記憶に定着中（間隔拡大）'
-                        : `🌱 定着度UP (次回は約${record?.interval || 8}問後に再確認)`}
+                        ? '🧠 次は間隔をあけて再確認'
+                        : `🌱 正解を記録。間隔をあけて再確認しよう`}
                     </div>
                   </div>
                 </>
@@ -515,7 +520,7 @@ export default function QuizCard({
                       <span className="text-rose-400 font-black text-sm">{isUnknownAnswer ? 'わからない → 要復習に追加' : '不正解… 要復習に追加'}</span>
                     </div>
                     <div className="text-rose-300/90 text-[11px] font-medium mt-0.5">
-                      🔥 忘却防止のため最優先（3問以内）で再出題されます
+                      解説で理由を確認し、あとで自力で解き直しましょう
                     </div>
                   </div>
                 </>
@@ -548,7 +553,7 @@ export default function QuizCard({
               <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200">
                 <div className="flex items-center space-x-1.5 text-xs font-bold mb-1 text-amber-300">
                   <Sparkles size={14} />
-                  <span>⚡ 試験直前！重要暗記ポイント</span>
+                  <span>次に解くときのポイント</span>
                 </div>
                 <p className="text-xs leading-relaxed text-amber-100">
                   {question.keyPoint}
@@ -576,7 +581,7 @@ export default function QuizCard({
               className="py-3 px-4 rounded-xl bg-slate-700/80 text-slate-300 hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition"
             >
               <RotateCcw size={14} />
-              <span>もう一度</span>
+              <span>すぐ解き直す（記録なし）</span>
             </button>
 
             <button

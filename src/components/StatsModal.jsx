@@ -186,12 +186,12 @@ export default function StatsModal({
                     <span>定着度ステップ（ライトナーBox）</span>
                   </div>
                   <span className="text-[10px] text-purple-300 font-bold bg-purple-950/80 px-2 py-0.5 rounded border border-purple-500/30">
-                    忘却曲線SRS
+                    解答履歴から出題
                   </span>
                 </div>
 
                 <p className="text-[11px] text-slate-400 leading-tight mb-3">
-                  連続正解するほど出題間隔が伸び、長期記憶に定着します。
+                  連続正解すると出題間隔が伸びます。マスターは2回連続正解の目印です。日をあけても根拠を思い出せるか確認しましょう。
                 </p>
 
                 <div className="grid grid-cols-4 gap-1.5 text-center">

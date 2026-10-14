@@ -1,0 +1,2870 @@
+[
+  {
+    "id": "r6_1_1",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "2f26d2f0b0e56c6cc0ada3f2cbe228917670f8929ea5be85ef23e625a5c1f994"
+  },
+  {
+    "id": "r6_1_2",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "746c388026c21af9446b3053fb866ea927fce99418cdc1fecff0c796bc6dbaf3"
+  },
+  {
+    "id": "r6_1_3",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "3d3d2e81e173d8790b59b9c9ffd0e999cd3347d278be1f7f6a9def938dd9918e"
+  },
+  {
+    "id": "r6_1_4",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d812701026c2a68c836c355eeee0591d9e2727630bac69e920f3a1454584ad80"
+  },
+  {
+    "id": "r6_1_5",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "3a9dc4010d06d31e94c55dc9ec744d08af37864f214e6468249e8deeda1d840e"
+  },
+  {
+    "id": "r6_1_6",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "900b10bebbd105312afc737101e4c4929776bf3f8be4e3c71cff6e1019e0226f"
+  },
+  {
+    "id": "r6_1_7",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "cbda49c7ab357a3a3f5cd7b76886c67a95e4bf6b67fec98707216aac1b24e48a"
+  },
+  {
+    "id": "r6_1_8",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "原本の数値選択肢の指示に統一",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "170ef4c37d3690dc19cf6aa939d5df0db068b38330b28ab0a8a432ca038507c6"
+  },
+  {
+    "id": "r6_1_9",
+    "answer": "ハ",
+    "changedFields": [
+      "keyPoint"
+    ],
+    "reasons": [
+      "電動機が他の負荷より大きい条件を補足",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "bce997bbbcbe9afa769728147abe2cc27498a031ee8cc067b64cdc2fbd8a9a5a"
+  },
+  {
+    "id": "r6_1_10",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "879dd498807518f580ebde48ce34552386dabc301a97cc14a7a138716189f1f0"
+  },
+  {
+    "id": "r6_1_11",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "28c3513cbec714d43b7c3c7aeee25e5d03c0c5bb804ed4f9b4c729841b5517c3"
+  },
+  {
+    "id": "r6_1_12",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d2a95b97631c139b987564ac9b7bb4661325a8b2da726bf40d46d53f992516ea"
+  },
+  {
+    "id": "r6_1_13",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "ffcddc9274782966e3c1e1a01fba10202898370cfd7f24d168d737e80c4198fa"
+  },
+  {
+    "id": "r6_1_14",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "81b9ccefad5b80108d71b4039d44fa5d388129c7f313c152b2d38230beb6e484"
+  },
+  {
+    "id": "r6_1_15",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "0edffe2e3d3bf6f4bcd681f3920a40fd2bced7b488d909f6abf70e327ce6b949"
+  },
+  {
+    "id": "r6_1_16",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "bae11e0d034b558f8c9d0d9d75993f3178e31835335d2b9ac0e68148099992da"
+  },
+  {
+    "id": "r6_1_17",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "643dc77df55ef0c830b98e04039aab210fb9c088266125cde875118fbf084f4d"
+  },
+  {
+    "id": "r6_1_18",
+    "answer": "イ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "f5c8ab7537733adeb0b7afb41b0ac1f00d6f549e469fdb98bf9c5eb4ba32db95"
+  },
+  {
+    "id": "r6_1_19",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "7aa8b7c51b0d4d4e34cb7b077a7701dd8985393bb0b01351d7f6f8bc6a7dc103"
+  },
+  {
+    "id": "r6_1_20",
+    "answer": "ニ",
+    "changedFields": [
+      "keyPoint"
+    ],
+    "reasons": [
+      "金属ダクトまで貫通禁止とする誤った一般化を修正",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "5a567a604c94412fcd349784c4d9a89fe4718ac427ddcbc06c60d722d88d4ead"
+  },
+  {
+    "id": "r6_1_21",
+    "answer": "イ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "1種の使用場所と2種の防湿条件を修正"
+    ],
+    "visualChoices": false,
+    "sha256": "45ecf4a6770702c46919c44e0ff08e9e2d4a9be478f385a826b8a4c92b0e7d6a"
+  },
+  {
+    "id": "r6_1_22",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "8a1ebccbc7cc71c03a3db4df5c69fcc410be182042d17e7f3e62eb35ec40d75a"
+  },
+  {
+    "id": "r6_1_23",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "e7832f529f1fea0b0c04512c094a5d6cf70c07283aeea7e29658f3661d32f255"
+  },
+  {
+    "id": "r6_1_24",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "8caad1b8069244d3d2c384101eb9b83e662b3a43aef997796e6e52dafbda5b8c"
+  },
+  {
+    "id": "r6_1_25",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "58e44a139edf200f2247a2c131e5cf381868e2301ea6a085c5963161b68e43ea"
+  },
+  {
+    "id": "r6_1_26",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "5572d3e418b5fbd4e43c799f3e8237dcb7cd95b5d8bee462aeda41b60ed9c3a9"
+  },
+  {
+    "id": "r6_1_27",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "交流記号だけで計器の動作原理を断定しない"
+    ],
+    "visualChoices": false,
+    "sha256": "f992851499e2771322b000b2bb2ae14b063fd2e71474f977db8a39b5b85b6058"
+  },
+  {
+    "id": "r6_1_28",
+    "answer": "イ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "資格要否の理由と軽微な工事／作業の区別を補足",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "dba558d720da266820f70e3fd790ef5f2a0f62b56026c566c6249fb95821825c"
+  },
+  {
+    "id": "r6_1_29",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "be4ea4b2ff395ba67d48d2771f835c88579afb9bdf7a643770015ec0866f192e"
+  },
+  {
+    "id": "r6_1_30",
+    "answer": "ニ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "電線の定義の不正確な引用を修正",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "13871f6f546fd9bf717c398611f3c87925ea9b4b2fae21c9f5fcbe55d6c60786"
+  },
+  {
+    "id": "r6_1_31",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "52c1e838943ffbc36c7b615a738b59c39e20b9b036a53bbae99f09288dea9eb0"
+  },
+  {
+    "id": "r6_1_32",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "fb3606e43ee0ce297a8a63398c167222ae1b3353d9701d654c644da97d8e058c"
+  },
+  {
+    "id": "r6_1_33",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "32f980b3a076f76b3be65b43859ded40fcf81d4464c36529737007f5031587d2"
+  },
+  {
+    "id": "r6_1_34",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "cffd06d461a5cef8cb3f988ff55f18f7382f0d4ed0024468087bb597b032d66f"
+  },
+  {
+    "id": "r6_1_35",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "b2c3506b4e597d207c5973935d5405331f96d66941d2b9eafa627cc301e07d84"
+  },
+  {
+    "id": "r6_1_36",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "966a9c9b429d454c641a7ae72fa8b9ee45c5e6607aad8bc7c3db1e9d1c42aece"
+  },
+  {
+    "id": "r6_1_37",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "a40c672c8a76581e96c092338dacc9fba0a51b66dbc1f86d6df581021b3448d3"
+  },
+  {
+    "id": "r6_1_38",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "59d5fd6c2c6b10829a7e7e7c6742522fd80cb09249c89c1cb77aad85f8cfc913"
+  },
+  {
+    "id": "r6_1_39",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d856e3983b22d231671d4b91431260db01e992f88c97f8fc2622fb10a7890b67"
+  },
+  {
+    "id": "r6_1_40",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d89c2f31cf4ebdd6b5f395acb6c49af446d23f4887e3504d2dbdcb98a7c25fd2"
+  },
+  {
+    "id": "r6_1_41",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "f8af7d13a7ba831e144037d42bc332f7b1d3c2a6c288c2f6e9648ca555265ef8"
+  },
+  {
+    "id": "r6_1_42",
+    "answer": "ハ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "1cf5f782d5030fb236f3a5409d57ce3dcd3d59dc546f3011c52e9d2dc88a751b"
+  },
+  {
+    "id": "r6_1_43",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "2f9a529273be8a5bd331f4515b81722ce38bcdc043d0029a5721f7e8afa01939"
+  },
+  {
+    "id": "r6_1_44",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "5e6bbff88b2df30f4abb519527a56c6d0e5c5d19fc06da2c099d44b6e8e376f0"
+  },
+  {
+    "id": "r6_1_45",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "8a4dafc996890ff6c886c39e30720b8f8a41cb9e0fd8ae79f4b4f9ec0583d23f"
+  },
+  {
+    "id": "r6_1_46",
+    "answer": "ニ",
+    "changedFields": [
+      "choices",
+      "explanation"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "不確かな規格番号を除き工具と用途に集中"
+    ],
+    "visualChoices": true,
+    "sha256": "7f686eceb6e7c121e0e32922a406ce8dc72c7b87403080cb45efa0b17ac70fd1"
+  },
+  {
+    "id": "r6_1_47",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "4584b76ded6eef2913f93724a27231f53f4a65089adc19e8d64a0adde8504875"
+  },
+  {
+    "id": "r6_1_48",
+    "answer": "ロ",
+    "changedFields": [
+      "choices",
+      "keyPoint"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "中スリーブの上限のない一般化を修正",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "62dd3e2ac692925b94912fa2a45ee21aff7e0db65965f1547e0042c12ae279fe"
+  },
+  {
+    "id": "r6_1_49",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "10f356947edc8f764289369d2f1717f3e54c2b1ef76360c2d8736f37a7648ce0"
+  },
+  {
+    "id": "r6_1_50",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "6b0b763aac5fc5ead3ea12fb66e9079e8c51189d27a32f9b2418f9fff8ca5511"
+  },
+  {
+    "id": "r6_2_1",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "49e541e7e84b6be0fcda03b0c4dcc6557eda616d62edbdd7a29bced347282c82"
+  },
+  {
+    "id": "r6_2_2",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "3cbc6d00f4a1165986dc8d3df953e0a49d20fdcfe30f37db4988155cefedbf15"
+  },
+  {
+    "id": "r6_2_3",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "78fea782625c230324fc8a40c4faf438914ca1456f8867ae3cc63dc2ca29f533"
+  },
+  {
+    "id": "r6_2_4",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "80aafae20dce27e5fcf6b3f819961a04f3a9730778286abbe4d7d2209bab8f4f"
+  },
+  {
+    "id": "r6_2_5",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "04fc00c56c6b56652d036d5841a1c8af6e50013f3f7f7f99b540d7b6b0e0a2ae"
+  },
+  {
+    "id": "r6_2_6",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "6dc0b588d596c897694ea74bfed404a697a66198fbcd41149d9d3662ef5b8da4"
+  },
+  {
+    "id": "r6_2_7",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "6cd977e4b1f38f61e85d0066a114f7eb796b94ad5597a7251876a32d8b58f3fc"
+  },
+  {
+    "id": "r6_2_8",
+    "answer": "ハ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "原本の数値選択肢の指示に統一",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "c5e940e940cae95f7b3f95200a90bcd4a08d71acfeefbb69d2a61c54462472d3"
+  },
+  {
+    "id": "r6_2_9",
+    "answer": "ハ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "3m以下でも電線の太さが無制限にはならない"
+    ],
+    "visualChoices": false,
+    "sha256": "010656d06df1ecfb0a8fcd645e11811329ab363d37fc4f38bff3882f73adb90a"
+  },
+  {
+    "id": "r6_2_10",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "2b2b12d717f554874fd2ce577dd384ee59466caef6409bb85561ea3bd33152ff"
+  },
+  {
+    "id": "r6_2_11",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "21713926f4682ed4f60a362506eca26784aea482e4f552a1018237266e801c1d"
+  },
+  {
+    "id": "r6_2_12",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "cb334a28ab1881aba873e88387aa79939bf3054844455c3dd8115fc7c35a5d7f"
+  },
+  {
+    "id": "r6_2_13",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "32a1771b119ec62be3fbe8e373d7743327672b03363df6deb96867dade1092f7"
+  },
+  {
+    "id": "r6_2_14",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "a0be027630c02048ec58b81d96338f4e8adeb5a02f88722cfe864c41ee304fdc"
+  },
+  {
+    "id": "r6_2_15",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "6a9e9b5b4a29719ac95ce0ec815048cb077cf9bcb14ad3564653d17fe9622c52"
+  },
+  {
+    "id": "r6_2_16",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "0dab0782c343128e29a5d0489e079e9a927e603f8a26cc11b11288e8529945cf"
+  },
+  {
+    "id": "r6_2_17",
+    "answer": "ニ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "写真で特定する対象を原本に合わせる"
+    ],
+    "visualChoices": false,
+    "sha256": "0160e69e05fad0ffb1f7b04f3f0de94c590b9db0f533b123249bc2330e689cfa"
+  },
+  {
+    "id": "r6_2_18",
+    "answer": "イ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除"
+    ],
+    "visualChoices": false,
+    "sha256": "1ce7017c2ac561e2d61b30b694f62031e1055fe508adaaab684a62a3fa33e71a"
+  },
+  {
+    "id": "r6_2_19",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "9cdd2e93ad562aa5f273ccb1d3a975a2aebcc6c33b5a2976a5909d22ab48fc07"
+  },
+  {
+    "id": "r6_2_20",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "b07300d25b634522a781bdee90ef3428a5033ebc9d9f4c9c83f94dfcd681c826"
+  },
+  {
+    "id": "r6_2_21",
+    "answer": "ロ",
+    "changedFields": [
+      "keyPoint"
+    ],
+    "reasons": [
+      "例外規定の2kW以上・直接接続条件を明記",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "868f6aa60d7ca6168a27024fcd07efa8a44dc9bef9540b21981f9ce07b812438"
+  },
+  {
+    "id": "r6_2_22",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "042fe1a5dbc7a251c49c5f94dfab15ad2439f0bf5a4bb066457d5ed55fb7016e"
+  },
+  {
+    "id": "r6_2_23",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "10b3f7fc1bc185200602e31d7f46687e36839fe07b722b93032a9ddfa4a07095"
+  },
+  {
+    "id": "r6_2_24",
+    "answer": "ハ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "ed193bd278267e627de72525bfb755f9f96f6336513ca811542b6459218e6e6b"
+  },
+  {
+    "id": "r6_2_25",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "78f4c1236b08b4f158586829c99973e58e9bf03cabeb10ae889de3a854f85b1b"
+  },
+  {
+    "id": "r6_2_26",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "a41fa293c4af9e59a203fd8d72362738077d7bee8fc13dcdeaeb38bb09a50267"
+  },
+  {
+    "id": "r6_2_27",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "ebe23e4acdf0e403ec2011162196265c044e2c6e8902bf94597c51f89efad772"
+  },
+  {
+    "id": "r6_2_28",
+    "answer": "イ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "資格要否の理由と軽微な工事／作業の区別を補足",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "fc379d4f9d88e7c5e0864b8885ef91ab1fac2e9a1a1b51a83e386468a234d64e"
+  },
+  {
+    "id": "r6_2_29",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "ef232bf22c5fd07fa1a545c606c0ae27db0ded1eeee0d630df91d550d90aa44e"
+  },
+  {
+    "id": "r6_2_30",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "0e8ea66f84bd8a97e721011e1a76c36336c549beb395c492b15c506996aac936"
+  },
+  {
+    "id": "r6_2_31",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "a38fc72fcc42793e8b4934839a821d74c0292b5240a5410195d550d624ff2486"
+  },
+  {
+    "id": "r6_2_32",
+    "answer": "ハ",
+    "changedFields": [
+      "keyPoint"
+    ],
+    "reasons": [
+      "15mだけで無条件に省略可能としない",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "a45fefa952108f838e38086881ec4d4064748df93ac11fbfac6b5a516448e625"
+  },
+  {
+    "id": "r6_2_33",
+    "answer": "ハ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除"
+    ],
+    "visualChoices": false,
+    "sha256": "3b64e718349d6152677a3607303877dbd5279244eb4adf67843ef3f3936215ff"
+  },
+  {
+    "id": "r6_2_34",
+    "answer": "ハ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除"
+    ],
+    "visualChoices": false,
+    "sha256": "ba10a11e8d5bc3094aff81d1002290840238afffeb3772c6d9589909014ec004"
+  },
+  {
+    "id": "r6_2_35",
+    "answer": "ニ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除"
+    ],
+    "visualChoices": false,
+    "sha256": "f9c56116732feda8ee4f5b5ba443e5f7c0f65e46d7f26af8f8446d9f95b7caeb"
+  },
+  {
+    "id": "r6_2_36",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "61f4367cbeb4636863eeeca1e793306e0c19bd620b1a411898658995c202f97d"
+  },
+  {
+    "id": "r6_2_37",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "242250ec9ae0d97a93bfd6f21dd27e991a86d0d4da4fe61d29b14a28c6f11a58"
+  },
+  {
+    "id": "r6_2_38",
+    "answer": "ロ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "b91243729dbbd4c615ee84cc868b51b2bb667dd4131e860d84164f465ed027a7"
+  },
+  {
+    "id": "r6_2_39",
+    "answer": "イ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "be46c45ba5341d7bdad7791284093c4445e89acdd9534d648c64a75d4769ed38"
+  },
+  {
+    "id": "r6_2_40",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "700697212950253a184ce19dbf006a0701960d7a206a3cd1e04977e9d1f58d62"
+  },
+  {
+    "id": "r6_2_41",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "effb8ab88ba53256739b72a1da12d90392332aa37e0697bf3de6e2606f1fda1e"
+  },
+  {
+    "id": "r6_2_42",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "d7af8dfb82aed15cf03a4ec11f5428cf78b6588d4e7b2060f307738727513be0"
+  },
+  {
+    "id": "r6_2_43",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "171ed02c4609e3d72c4a4bbd5baa5686a380ea8aa5fa75712600d502cf844637"
+  },
+  {
+    "id": "r6_2_44",
+    "answer": "ニ",
+    "changedFields": [
+      "choices",
+      "keyPoint"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "露出ボックスを屋外・防雨と断定しない",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "bbb427f3c0c31de60e87ac55c8e4d1f9def4bb04a4e8d6b832fd33b1ba8c2191"
+  },
+  {
+    "id": "r6_2_45",
+    "answer": "ハ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "e80c2031f06cd54a6c5f3c103c82e591dda17ae95b843a2bf7a7e0f59992494d"
+  },
+  {
+    "id": "r6_2_46",
+    "answer": "ハ",
+    "changedFields": [
+      "choices",
+      "keyPoint"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "電灯回路なら必ずVVFとする一般化を修正",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "c98c5dfadcbf543bafadecb7e127633d4360cd0cd4b5e6bc3470888f2438405d"
+  },
+  {
+    "id": "r6_2_47",
+    "answer": "ロ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない用途補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "a6ecc58936f6c505e42665c340b0c9b859453e6a8c9079ac88ed6b5868fc9184"
+  },
+  {
+    "id": "r6_2_48",
+    "answer": "イ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "dd9a883037dae699edd208166c3f814482f8c6dafd44bf98208e923addce4279"
+  },
+  {
+    "id": "r6_2_49",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "2df9db2aab84f0f7fa21ae604222991fe8c9a49f85f17b73784840c457b73767"
+  },
+  {
+    "id": "r6_2_50",
+    "answer": "ロ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "2fb6f0ff970aca9b9db0ac63129344832e27e2452fd6d898a2a2dca8b45ef072"
+  },
+  {
+    "id": "r7_1_1",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "9578eb0dde16cc0cd6789acb0161af55d94e77ece39011e2b3a242dd56e207ae"
+  },
+  {
+    "id": "r7_1_2",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "5259932f942087a6deb213cebe189c96cbb672fd0b4fd126695eef77b7e2279b"
+  },
+  {
+    "id": "r7_1_3",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "990fc114b98571f4e199bb6c7e74a62d9687513552d352441041c8c94a55f277"
+  },
+  {
+    "id": "r7_1_4",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "c7701cfec64b37fe5c974795027f9bf41a4a09fdc8798dfb03444e1af81601e3"
+  },
+  {
+    "id": "r7_1_5",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "591fce81c634cfb259f975d56308198b0803527ff2bc0b5c088b3b4735def4d2"
+  },
+  {
+    "id": "r7_1_6",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "cf175c3ed5d551378dce3ec0a2692d1080c5df3870f211e28d5c0577e95b43cc"
+  },
+  {
+    "id": "r7_1_7",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "54e1db873f73324404d6b165360fbd43890835241945ca93e89873ac3c52d796"
+  },
+  {
+    "id": "r7_1_8",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "原本の数値選択肢の指示に統一",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "5ab1c6ab688ce734943384c25d5e8223cc9e29bf0bad8d6977a014c9a80215b1"
+  },
+  {
+    "id": "r7_1_9",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "3m以下でも電線の太さが無制限にはならない",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "05e343825a14812d855b5552b2a8a262a3c5f4f08e876a1a57d945cc4c665d05"
+  },
+  {
+    "id": "r7_1_10",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "e8ac02257c04f75defd7da1f430e9460d2c9cf886d98de5a5416a75583a09ecc"
+  },
+  {
+    "id": "r7_1_11",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "973c27a89318f0a478f798a07bd0939312f97d37857a5bc45312ec774b878a69"
+  },
+  {
+    "id": "r7_1_12",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "aab8c1e2146a388e3d3dc0826e7a6bee9065213d2ff64887bdd25c6c3ddc7900"
+  },
+  {
+    "id": "r7_1_13",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "abe8cdc6104294b79b22799fec5391e7246baff1a9b4f1bb25a3678528c49f93"
+  },
+  {
+    "id": "r7_1_14",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "3836dde1009f42c3a6b6b95e98b89decd5db23355cec76c05426dc920c6d63f0"
+  },
+  {
+    "id": "r7_1_15",
+    "answer": "ハ",
+    "changedFields": [
+      "keyPoint"
+    ],
+    "reasons": [
+      "ランプと安定器は適合製品を組み合わせる",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "1b6b95de225cfabba20d1e22b0c9ea71739b0ef232a53ee4794b6de214c0eb2d"
+  },
+  {
+    "id": "r7_1_16",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "cd94ac4fe3928cf3995e23058e2a0e5fbad93d1fae9c0db917ab6976cff895d7"
+  },
+  {
+    "id": "r7_1_17",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "e1244fac4a790623777819255278aa3d5d082c9ade5f12ece8ceeee340e408d2"
+  },
+  {
+    "id": "r7_1_18",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "1c0d0d3087e4004a2ec71b70cfcc7b781f77946ce4606e2d229613b1e7f1135f"
+  },
+  {
+    "id": "r7_1_19",
+    "answer": "ニ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "20%ちょうどを禁止する要点の不整合を修正",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "f786580a6ff7e4394e93bfa3d5566b8bf4d18b3431faad0b69ee4cc56aa60a12"
+  },
+  {
+    "id": "r7_1_20",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "ab4eeb7b2041958b1c0a5e64c7faa2b247925fa371c78fcb698341f6a0ce39a9"
+  },
+  {
+    "id": "r7_1_21",
+    "answer": "ハ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "2kW未満なら直接接続不要と読める説明を修正"
+    ],
+    "visualChoices": false,
+    "sha256": "34db50b6f7253a2b4355fe9939c1f12b5210f590748520e67e8c69041fee3dec"
+  },
+  {
+    "id": "r7_1_22",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "9a088b351b9d20cf0a514e3730387faf4f59d9acebce44c033e883317bd71c59"
+  },
+  {
+    "id": "r7_1_23",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "42e97b6a5d51c1964cf143b9f5129fbbb116bc8bf56a71f009adc8297dab3af6"
+  },
+  {
+    "id": "r7_1_24",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "963179be9701128768899311689ae615255158b637434d4db902ea4510c1a180"
+  },
+  {
+    "id": "r7_1_25",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "fb20935897fe735c248908b50dc25ad3247437e8ad3902e7087ac2a59a500f82"
+  },
+  {
+    "id": "r7_1_26",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "072bfcf244bb46ada6caa9c6283bb2b3295e022bdb4145b7049f8ea1f405747e"
+  },
+  {
+    "id": "r7_1_27",
+    "answer": "イ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "計器の構造を先に説明しない",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "e148026fff8137528089f6be0d16d2d801d013082653c564cc6abc1c0b0d35d2"
+  },
+  {
+    "id": "r7_1_28",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "4f6e832ca8367e1162af57864e051b4c5f72b12862211a05246c2a902c42cfc9"
+  },
+  {
+    "id": "r7_1_29",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "79a645f5c1cc203d1f72aad551ff8cd045f9b5378d1d48a06b2970bb2913b7e2"
+  },
+  {
+    "id": "r7_1_30",
+    "answer": "イ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "発電設備の容量だけで一般用と断定しない"
+    ],
+    "visualChoices": false,
+    "sha256": "90694ba05a1ddcc3edf1249191063fb2266b3c0807a12c16127015e85b6eb133"
+  },
+  {
+    "id": "r7_1_31",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "a87658551ac1482084e5d9a363a620cc8e486a0124701ba0e53d171c51b3a121"
+  },
+  {
+    "id": "r7_1_32",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "185cf36ee66234ebe7ed663b8cd7ce57c579a438ba24ed569802dd7bda552181"
+  },
+  {
+    "id": "r7_1_33",
+    "answer": "ロ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "aa317d656b58000897322299908b7c7a78262cc72bc9691f1e3e53ba36c80ad5"
+  },
+  {
+    "id": "r7_1_34",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "2b81a61b920e3024941e04e7470c2ca526dedbe313f34fcc189f1fdfcbee5f45"
+  },
+  {
+    "id": "r7_1_35",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "3e0a13fecaa6a124c59188d75a844648389e435c2d97c602339d920ba0dab2bc"
+  },
+  {
+    "id": "r7_1_36",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "c28ba3b4e13dda97bf221aa3eadd261ab29b242e1de63a2a83d0b24c2151e62e"
+  },
+  {
+    "id": "r7_1_37",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "5dbc048c6e5b1014b4354bc7bea52cdde4d47f607117b03966c738594e711f30"
+  },
+  {
+    "id": "r7_1_38",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "c2e12f0a49e0cbda3561006e0778e15c858a400d86751afcac0bea4eaf9a25cb"
+  },
+  {
+    "id": "r7_1_39",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "e66039b50e4f6e5458a358c0caaf3723ae871d67773202dc1b37f82afeaac81a"
+  },
+  {
+    "id": "r7_1_40",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "423451f711fdd24daa545295248b53d86e15a7b66fee748905681431bc534c9b"
+  },
+  {
+    "id": "r7_1_41",
+    "answer": "ロ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "a921e3896a090417def4ce389c26a886c57cc7854ce47698197fc7465e1a4b5a"
+  },
+  {
+    "id": "r7_1_42",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "a57f62f20d4de9bc44a0d00f49e8f436d195c4994a041c96cc1448042ec8a56a"
+  },
+  {
+    "id": "r7_1_43",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "9d634afc941b24913713d822ee896aaf0040eb92e5138e7fd59b6cdbda2c32c1"
+  },
+  {
+    "id": "r7_1_44",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "97c17165eedd43208dc0fa1ff34a45ffe6cac23a84f78f7fc28b91e7fa04f521"
+  },
+  {
+    "id": "r7_1_45",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "62d4c8d5114091a5ac1982f4cd58a692ffb3d360541e68b8ebcaefdf309c302f"
+  },
+  {
+    "id": "r7_1_46",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "625a03ae27d93a001532dece046bddcbcfa9ac5bbf97052f557b4cb3d156bb90"
+  },
+  {
+    "id": "r7_1_47",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "3b61dab1c013a09db3d7baf810dfe1b08d98e52111543a5e42668ddda9dab50a"
+  },
+  {
+    "id": "r7_1_48",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "5d7abfb614c37d0360796c8610849a45264746bcde25de449c9a239f860b6434"
+  },
+  {
+    "id": "r7_1_49",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "b1e8ff479100dcb0a2256ec0e5add7586eacd620c372fa5b89fa9ace94dba3a7"
+  },
+  {
+    "id": "r7_1_50",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "a305069103309b9e16242744a4a84bcb3c11815c3b59bc34db0c5df5a486c9b0"
+  },
+  {
+    "id": "r7_2_1",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "c3b00fc68c3b5000650006a14bf80c9a65eebcfa5440d36083237c17adf10f26"
+  },
+  {
+    "id": "r7_2_2",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "344c65c0e7a0dff7ddb34e5cf3859fb894a3455237aeade274756c5bdc2d09c4"
+  },
+  {
+    "id": "r7_2_3",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "039445f905b86703f8c09d6a137548d0998191a3691807d246f6f50060fb6b59"
+  },
+  {
+    "id": "r7_2_4",
+    "answer": "イ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "f03b2fa6135dcae0320502577a352674b73483aa20c51244fcba354dae4c94fe"
+  },
+  {
+    "id": "r7_2_5",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "5bde81079c5f8d56a2ce4e234581f40c7877ca67b40bcf84239b1e510dcd672a"
+  },
+  {
+    "id": "r7_2_6",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "878ebe6d739bfa73145da37eb89b3ddcbeef0c794ac9c2e1223921f11c211000"
+  },
+  {
+    "id": "r7_2_7",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "7671a8eea0743ccba0e964d60ce3168728ee26c91fab3ff640de962589fe46ec"
+  },
+  {
+    "id": "r7_2_8",
+    "answer": "ハ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "原本の数値選択肢の指示に統一",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "a43283f106cad865151fb4968fc9b6ce48f8d205e6696225e2b0555a1e67e8ca"
+  },
+  {
+    "id": "r7_2_9",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "3m以下でも電線の太さが無制限にはならない",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "3b52471b6f3264146b91555026408e89856f30d55ad2a2baec0c987949438202"
+  },
+  {
+    "id": "r7_2_10",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d2a75b7f4fe0333a3a0aa6c111dafcf8443e1bda115139f4cbe05525bd246938"
+  },
+  {
+    "id": "r7_2_11",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "05a2929642ac54f3b83b677da7d2bee484d32c36f325924860e325397b57cb14"
+  },
+  {
+    "id": "r7_2_12",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "22a5cace309ff00a4b7c7540d60abf5e485b31558615bfa2c629a446f36c2c4b"
+  },
+  {
+    "id": "r7_2_13",
+    "answer": "ニ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除"
+    ],
+    "visualChoices": false,
+    "sha256": "bf66b2174a7f2a93a45ee03f89922909418bc09a833241c3c009716835adabc4"
+  },
+  {
+    "id": "r7_2_14",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d554db164e63c73087d217081f49d089f2f00cbb8aee1a61bf8b86a629f40c59"
+  },
+  {
+    "id": "r7_2_15",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "bb636c9a5b285a393b7d0fcd4332a600287c57bf148fa2a346a98a5bec8f3206"
+  },
+  {
+    "id": "r7_2_16",
+    "answer": "ロ",
+    "changedFields": [
+      "question",
+      "explanation"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "f9013db61a932d167928b1ad8ab69fdd7b0cdf57182d90cf4494193e37bf0a10"
+  },
+  {
+    "id": "r7_2_17",
+    "answer": "ロ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除"
+    ],
+    "visualChoices": false,
+    "sha256": "dcfc54f2970f7b03c5a843258d2f417b08deeb0fb0c81c919c305888f43894fc"
+  },
+  {
+    "id": "r7_2_18",
+    "answer": "ニ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除"
+    ],
+    "visualChoices": false,
+    "sha256": "a0241099f545f41a340ac2388a18aaefda4680478329fb8c942a50ab5ecea8d6"
+  },
+  {
+    "id": "r7_2_19",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "9fd411d85a38b62472d8aa78b52b3deab26866b52d6b6793f4e496653cbace6b"
+  },
+  {
+    "id": "r7_2_20",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "66f29e6ee9de656dacc528923f0db2b9ab3f89a357fc23de3a3510d15ee6b0e1"
+  },
+  {
+    "id": "r7_2_21",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "717c492c8d91ee8a355ee7f6fdfc78cf62f54d99305730571af079f17272e0e3"
+  },
+  {
+    "id": "r7_2_22",
+    "answer": "イ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "30mAでは15mAの接地省略条件を満たさない理由を補足"
+    ],
+    "visualChoices": false,
+    "sha256": "a7cbca91ed58a7505dbf0e2c75e6d39c7fc2b1210ca4303ebf01214cb62dcc58"
+  },
+  {
+    "id": "r7_2_23",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "5542a84996a2b2329c8627ed789f6fbbb01f4348435be694be0452985c3bb831"
+  },
+  {
+    "id": "r7_2_24",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "原本のロ・ハの空欄Aを復元",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "ae89b810ee64f9dfcafa1b01b801695dd7d42ef562e9802b3d665938262b3ba0"
+  },
+  {
+    "id": "r7_2_25",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "94eeb099f47a7b918c603a98ccabb9debf6c378db03f94f3bc83fac4106ef4f1"
+  },
+  {
+    "id": "r7_2_26",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "80e67bd4ceff938a492b623e347236a4ba89060db5c6023cd9674c3df210b18f"
+  },
+  {
+    "id": "r7_2_27",
+    "answer": "ニ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "計器の構造を先に説明しない",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "5ac409b995bf84c9f95aaa69365a5317effeacd4cc1677a8cab3d1e0ca67cc28"
+  },
+  {
+    "id": "r7_2_28",
+    "answer": "ニ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "d02dce1d719f3f64132c72d17e11055c45b6de77c302cf658df168ee39e8a142"
+  },
+  {
+    "id": "r7_2_29",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "82fa3b0718b95003d4047a032dcead5b6796dbb6f63229abda1f6d442d5b16ee"
+  },
+  {
+    "id": "r7_2_30",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "c255015e2904e68b956ed5770263805284de3ab67a7e1556e1eb4da615ee5a5a"
+  },
+  {
+    "id": "r7_2_31",
+    "answer": "ハ",
+    "changedFields": [
+      "question",
+      "explanation"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "18945f958b7ceb5a0e1d24e44fc6e56c00a08f3ce356f50d6ff30c8e96e992d5"
+  },
+  {
+    "id": "r7_2_32",
+    "answer": "ロ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "選択肢に後付けされた記号対応を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "76363bf4eba6f7dbfe21adf943f2eabe6e7793a3d8d1228b5b964957f50e6aa0"
+  },
+  {
+    "id": "r7_2_33",
+    "answer": "ニ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "ccb70641e2801920960a80af6e791a32ab6fceea9e41754ff100718db06f1fba"
+  },
+  {
+    "id": "r7_2_34",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "13ca648bb1f0f251955d9c8437f049bfc115bbc26d9546f318da2c4cda400f0e"
+  },
+  {
+    "id": "r7_2_35",
+    "answer": "ロ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "9777ca8449766c9107117bdf22db6c7a462f39220b94c34b2fb7cb7e65610b20"
+  },
+  {
+    "id": "r7_2_36",
+    "answer": "ハ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "491f533078a3957ac6e65dcea47f29e326bc4822c457b3b81e064c2bf8b36e76"
+  },
+  {
+    "id": "r7_2_37",
+    "answer": "ロ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "f97708c998a2698c461fd324410f06d9d8406069a53d6b3ac7a2ff957fdc9304"
+  },
+  {
+    "id": "r7_2_38",
+    "answer": "ニ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "97e7d734b01ababea19dbc7080d8c9c42ed1f371652a7d62590d9547c0b4a3e4"
+  },
+  {
+    "id": "r7_2_39",
+    "answer": "イ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "f11a2e067a63e141cdc523d41322b15b3fb7bd1a75c647aef1bd25ded64f8bc5"
+  },
+  {
+    "id": "r7_2_40",
+    "answer": "ニ",
+    "changedFields": [
+      "question"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除"
+    ],
+    "visualChoices": false,
+    "sha256": "e32f0ad306c513ca511b9e68eebc73c4c9447035fce16afa931428d50cbb2d70"
+  },
+  {
+    "id": "r7_2_41",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "3be73a45cf7e2c1af56a7fe58e40eb0d26ebb9b791dc24fe10a4f146453b1be2"
+  },
+  {
+    "id": "r7_2_42",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "0a12c2c09c9ee585f9d77fb0fbdab6dbde3cdcfb4dba0f173b507fb6808e6e0f"
+  },
+  {
+    "id": "r7_2_43",
+    "answer": "ハ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "98c97db968745157de419d3f0ea7f33421f6bb539c29e2de4c6961b226582c1e"
+  },
+  {
+    "id": "r7_2_44",
+    "answer": "イ",
+    "changedFields": [
+      "question",
+      "choices"
+    ],
+    "reasons": [
+      "原本にない図・写真の読み取り補足を削除",
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "386635ef64975689e329814a6f1cb9dd34c5705349e41dca8c36d181489356dc"
+  },
+  {
+    "id": "r7_2_45",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "f192d014a87a754947a13619603ee73d79d7a3c16285bf8385fdf12f045e2f93"
+  },
+  {
+    "id": "r7_2_46",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "e9b40b4764dc27c7b12fc3833cd4d3bc92b17290591ea42cc1a71ccd6ee550fe"
+  },
+  {
+    "id": "r7_2_47",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "6b526e725b7f22f35e03df0719a458f718ddad27a52e8314f66941a14728197b"
+  },
+  {
+    "id": "r7_2_48",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "b97b384caed79a7d6ddf29f937c7368e9bca621e896fc265c0e532bb5db2b27b"
+  },
+  {
+    "id": "r7_2_49",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "9a939db3dbe7fbb029aa2772373237e8dbebbe53a3eb4c3ca918029c6f9d4b93"
+  },
+  {
+    "id": "r7_2_50",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "5db208dad876bf4ce19e8b63ade7c447088e84c5ea74bb6cc82e7f27c320736a"
+  },
+  {
+    "id": "r8_1_1",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "19ba9574bdb1c96a7905e98334892611d28f0cd6a4fb8f12dae4358a8c930612"
+  },
+  {
+    "id": "r8_1_2",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "13dd834e6bce64d8624a1761b3b27bf5aa8c355666f95475a5add6bdf9114945"
+  },
+  {
+    "id": "r8_1_3",
+    "answer": "ハ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "表示されない1行表を解法の完結した文章に修正"
+    ],
+    "visualChoices": false,
+    "sha256": "8f9cecc12fd814fd9f777b9db7eb75e288f8e71b707d5e19bb351011d616bf27"
+  },
+  {
+    "id": "r8_1_4",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "502afad9e6afe4838f92f80b6b5fed46c0a43c723bf62502884350c8938b1892"
+  },
+  {
+    "id": "r8_1_5",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "f7957ac2c202a68f5da03262ee169b15234eb85c0a314f5902c16b5583724a1c"
+  },
+  {
+    "id": "r8_1_6",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d5f98396c6aae471f1bb561e8abe02073c42aa32ea7a94850e8787952904e741"
+  },
+  {
+    "id": "r8_1_7",
+    "answer": "ニ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "負荷抵抗一定時の電流変化も含めて計算"
+    ],
+    "visualChoices": false,
+    "sha256": "0e40a5961c6868b20e9e928e4e059ded9127355fd7fcce15dae8502e1b5b9e4c"
+  },
+  {
+    "id": "r8_1_8",
+    "answer": "ロ",
+    "changedFields": [
+      "question",
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "原本の数値選択肢の指示に統一",
+      "面積単位をmm²に統一",
+      "面積単位をmm²に統一",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "ece42113b75daf4682e8a06184f30a17cb733393d741106b0650e3d54d713e4a"
+  },
+  {
+    "id": "r8_1_9",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "0c7e4bbc54e3fd91cf1d76b6550a60af989dc6cc81f41c33c36d25effe8992f0"
+  },
+  {
+    "id": "r8_1_10",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d5bb16469ed12f1ace42a3d79a34156d41c0a88ffa44dc04eedd0c1f155336d9"
+  },
+  {
+    "id": "r8_1_11",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "5037a35091ac1a79815cd35248e3e3249089bc137ff6add3ec5353e9bc083504"
+  },
+  {
+    "id": "r8_1_12",
+    "answer": "ロ",
+    "changedFields": [
+      "question",
+      "keyPoint"
+    ],
+    "reasons": [
+      "面積単位をmm²に統一",
+      "面積単位をmm²に統一"
+    ],
+    "visualChoices": false,
+    "sha256": "c27106f6a4f107fc1c2f62f26dba47dd33a6a432c22279598b390462cb5fdfb6"
+  },
+  {
+    "id": "r8_1_13",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "d4fbf8820c10e6f2e9c8b205b9c6a3708d5263583339be406afebdcdc9aa7670"
+  },
+  {
+    "id": "r8_1_14",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "cad9571d1495930b082c6ba11e64db22b6f4c27326fda34898605ee9b89e1df1"
+  },
+  {
+    "id": "r8_1_15",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "134777d48d423d126d19e7524ff28bf157e190260c12a6fff14039b7c53ee357"
+  },
+  {
+    "id": "r8_1_16",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "6d0c076eec57e652d47dcbdab9b7c8c76674531f0eedd6b5f55cd81b02fa3d35"
+  },
+  {
+    "id": "r8_1_17",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "4785941120cc7280ef6ef037b1b19072f4579342e1b851f5a4bcb6ee644a96fa"
+  },
+  {
+    "id": "r8_1_18",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "49fc78ee1f953a10bd26307ce618e2ac398d619ee912dec6de3c901eb258df70"
+  },
+  {
+    "id": "r8_1_19",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "74625b6c9e3a267db6e5d1fbbc72ec8e1790fd6ff389fa2d25973b428c0c7079"
+  },
+  {
+    "id": "r8_1_20",
+    "answer": "イ",
+    "changedFields": [
+      "keyPoint"
+    ],
+    "reasons": [
+      "垂直6mの接触防護条件を要点にも明記",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "09428b26feb4c29e7d1cef42e833d3f315abe02db5d990e82726d71352f1ace3"
+  },
+  {
+    "id": "r8_1_21",
+    "answer": "イ",
+    "changedFields": [
+      "keyPoint"
+    ],
+    "reasons": [
+      "木造住宅全体への一律禁止としない",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "681f1d8ef54d4b2c8523afb76e8bd6bb16d95455c605372315d601841e4818aa"
+  },
+  {
+    "id": "r8_1_22",
+    "answer": "ニ",
+    "changedFields": [
+      "explanation",
+      "keyPoint"
+    ],
+    "reasons": [
+      "湿気と水気を区別し他の選択肢も説明"
+    ],
+    "visualChoices": false,
+    "sha256": "b705982d8143200c778226837562872b3709b4d9bcf9b8035b0219c19725b436"
+  },
+  {
+    "id": "r8_1_23",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "aed13167ebcd3917e89121ea4e18e8231063565a0fbf7ce045b46db980deee0a"
+  },
+  {
+    "id": "r8_1_24",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "19f425db5a00998102db6e8952a2d2b90b0df8ebe76394030c004fdbd2c52b77"
+  },
+  {
+    "id": "r8_1_25",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "a89cc726877328b97405614402466fa51af320dbd1ebf0371a7318a331acab5b"
+  },
+  {
+    "id": "r8_1_26",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "5f68bdb985aa47b4bd4daee2913a4787ae771094b4def34c3b2b991c368b4f7f"
+  },
+  {
+    "id": "r8_1_27",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "b771de77fe9a6303b10098ea66af4f505e03c20462b531f876810b31b80738fc"
+  },
+  {
+    "id": "r8_1_28",
+    "answer": "ロ",
+    "changedFields": [
+      "explanation"
+    ],
+    "reasons": [
+      "資格要否の理由と軽微な工事／作業の区別を補足",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "6b142427f7bab2c09635c1c73eba93feb6f853dae07622bcf47f6ef9f2c7b9b5"
+  },
+  {
+    "id": "r8_1_29",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "5e0be89aefdce2a3088de8517b40ad7eb903cc1af8bc3d04922246e42db2bd10"
+  },
+  {
+    "id": "r8_1_30",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "e1bfd7e7c0073def14d7ee02d1de512719a0c11304143ec69021a6e17e30619a"
+  },
+  {
+    "id": "r8_1_31",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "8d652fb1eac5ee51f896954bd328f8d0fa0ff00bf40f2e1fb5e3d06aab4c8330"
+  },
+  {
+    "id": "r8_1_32",
+    "answer": "ハ",
+    "changedFields": [
+      "keyPoint"
+    ],
+    "reasons": [
+      "問題の5本と矛盾する白黒2本の定型説明を修正",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": false,
+    "sha256": "b91d1d7fd7be4136f431476d7e26ee04b8f0fd12f1d8812c267176df35cd81d3"
+  },
+  {
+    "id": "r8_1_33",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "f135122e0a7f225dcb8063611b472753524927ea96e147a250a7cd586d59af9c"
+  },
+  {
+    "id": "r8_1_34",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "66e2430abfa876b953ea7221900c2b60fd08f6ceb78a5580ce2aeacc45d08077"
+  },
+  {
+    "id": "r8_1_35",
+    "answer": "ロ",
+    "changedFields": [
+      "choices",
+      "explanation"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "実際の選択肢ハの記号を解説に復元"
+    ],
+    "visualChoices": true,
+    "sha256": "329490150bd13a58081c6841aa8248a5b2adf27c8cac4b51c4fc724a1bf2818b"
+  },
+  {
+    "id": "r8_1_36",
+    "answer": "ハ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "0ddae3fcf037ce207c967301a4a48d21e592362f37e5c198023e5f6d4ff4bf04"
+  },
+  {
+    "id": "r8_1_37",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "b989ec9b67ed8b513795a2ebe84c6a9146e2a7d0c1c2d801d71fc372985d2d6d"
+  },
+  {
+    "id": "r8_1_38",
+    "answer": "ロ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "8d06429e87c10f21ce7c057b916a2020aa3e6d7be417a4aa61a1b8e985ba3192"
+  },
+  {
+    "id": "r8_1_39",
+    "answer": "イ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "a67d0db90eef8d792cfb36ca9624ed14bd46aecce6dbb693391541dce6d4d2ce"
+  },
+  {
+    "id": "r8_1_40",
+    "answer": "ニ",
+    "changedFields": [],
+    "reasons": [
+      "点検済み・本文変更なし"
+    ],
+    "visualChoices": false,
+    "sha256": "ce320dbd6a36193a0beda1e6ffdd08935b03713ac5a27a3a778541bc4d7d68ce"
+  },
+  {
+    "id": "r8_1_41",
+    "answer": "ニ",
+    "changedFields": [
+      "choices",
+      "keyPoint"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "中スリーブの上限のない一般化を修正",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "a63f972ae2bd7e9b7f806709a415afd4ac619ad4c19cb9e442620561d8b9dae8"
+  },
+  {
+    "id": "r8_1_42",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "756d47fd421c2e6b4cb14185fc8a4481df352001c82d3622aea92f581e056e8c"
+  },
+  {
+    "id": "r8_1_43",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "2dcb5e01a838648f49b1a214b0f0e991e12bd3022bfc303ccc1b091b4c13747e"
+  },
+  {
+    "id": "r8_1_44",
+    "answer": "イ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消"
+    ],
+    "visualChoices": true,
+    "sha256": "ee57ab240bdaa96103ead6322bae236c1684dcdeb759639af392c7b3372d9205"
+  },
+  {
+    "id": "r8_1_45",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "40490a8a8d1833006c4df1e2a0e39b46f7ba023b364e6276d6127f46160cf46e"
+  },
+  {
+    "id": "r8_1_46",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "510f44d047f45360893de71b43603f09e1835c291833d634f2ae7afd272e9dec"
+  },
+  {
+    "id": "r8_1_47",
+    "answer": "ハ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "15cca9b3b2f2cf54c4cded777575127c3790691c319abafe27d1536094c2fdb8"
+  },
+  {
+    "id": "r8_1_48",
+    "answer": "ロ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "fc05595af616e9bb184a2a7efcf9689865207a6a7829e8a310cd4fd9f65e732a"
+  },
+  {
+    "id": "r8_1_49",
+    "answer": "イ",
+    "changedFields": [
+      "choices",
+      "keyPoint"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "メーカー依存の色暗記を本数確認に置換",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "e736f1fc7150919b57218880a7bfda54f8380ed144b4f1b87b68465ece489465"
+  },
+  {
+    "id": "r8_1_50",
+    "answer": "ニ",
+    "changedFields": [
+      "choices"
+    ],
+    "reasons": [
+      "図・写真選択肢を原本画像に戻し、鑑別結果の先出しを解消",
+      "解説表の列数を整合"
+    ],
+    "visualChoices": true,
+    "sha256": "f1c226ef9326831a11930e274f19da9473e198dc07a89530b18ddee32e243a46"
+  }
+]

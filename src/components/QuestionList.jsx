@@ -46,9 +46,8 @@ export default function QuestionList({
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const textMatch = q.question.toLowerCase().includes(query) ||
-                          q.categoryTag.toLowerCase().includes(query) ||
-                          q.number.toString() === query ||
-                          (q.keyPoint && q.keyPoint.toLowerCase().includes(query));
+                          q.category.toLowerCase().includes(query) ||
+                          q.number.toString() === query;
         if (!textMatch) return false;
       }
 
@@ -177,7 +176,7 @@ export default function QuestionList({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="text-[10px] font-bold text-slate-400 bg-slate-900/60 px-1.5 py-0.2 rounded">
-                        {q.categoryTag}
+                        {q.category}
                       </span>
                       {rec?.status === 'mastered' && (
                         <span className="text-[10px] font-bold text-emerald-400">👑 マスター</span>
@@ -190,12 +189,6 @@ export default function QuestionList({
                     <h4 className="text-xs text-slate-200 font-medium truncate leading-tight">
                       {q.question}
                     </h4>
-
-                    {q.keyPoint && (
-                      <p className="text-[10px] text-amber-300/80 truncate mt-0.5">
-                        💡 {q.keyPoint}
-                      </p>
-                    )}
                   </div>
                 </div>
 

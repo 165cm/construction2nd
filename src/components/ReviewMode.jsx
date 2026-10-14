@@ -117,7 +117,7 @@ export default function ReviewMode({
             <div>
               <h2 className="text-sm font-black text-white">弱点克服・復習特訓</h2>
               <p className="text-[11px] text-rose-300">
-                間違えた問題や未完全な問題を効率よく撃破！
+                間違えた問題や、まだ2回連続正解していない問題を復習。
               </p>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function ReviewMode({
               ? '素晴らしい！現在、間違えたままの問題はありません。通常モードでさらに問題を解くか、本番模擬試験で腕試しをしましょう！'
               : filterType === 'bookmark'
               ? 'ブックマークされた問題はありません。解いている途中で気になった問題に★をつけてみましょう。'
-              : `対象の${pool.length}問がすべて完全マスター状態です！本番試験でも合格間違いなしです！`}
+              : `対象の${pool.length}問はすべて2回連続正解済みです。日をあけた解き直しや別の回で、根拠も説明できるか確かめましょう。`}
           </p>
 
           <button

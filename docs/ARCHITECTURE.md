@@ -6,7 +6,7 @@
 ブラウザ（React / Vite SPA）
    │
    ├─ src/App.jsx (メインルーティング・モード切替)
-   ├─ src/data/questions.json (全50問・解説・画像パス)
+   ├─ src/data/exams/*.json + questionOverrides.json (5回250問)
    ├─ src/utils/sound.js (Web Audio API 効果音合成)
    ├─ src/utils/storage.js (LocalStorage & ゲーミフィケーション・時間推計)
    └─ public/crops/ & public/pages/ (図面・写真素材)
@@ -107,3 +107,11 @@
 - 先読み：問25以降で配線図ページを、次の問題に図があればその図のページを、裏で先に読み込む（`App.jsx`、`prefetchHdPage`）。一度読んだ画像は Service Worker が保存する
 - `public/pages/**/answer.webp` … 試験センターの「解答」PDF の解答表（全50問）を切り抜いた画像。②問題文エディタの原本プレビューの下に表示する。`scripts/build_answer_pages.py <解答PDF>` で作る（ファイル名の試験日から年度を決める）
 - 新しい年度を足す時は、高画質の PNG（PDF を2倍で書き出したもの）から WebP を作り、高さ 1200px に縮めた PNG も置く
+
+## 出題テキストと原本選択肢（2026-10-14）
+
+- 元データは `src/data/exams/*.json`、公開用の修正は `questionOverrides.json` に置く。学習記録のID・正答の記号は維持する。
+- `visualChoices.json` に原本選択肢のページと切り抜き範囲（高さ1200px基準）を管理。`scripts/build_visual_choices.py`（Pillowが必要）で `public/choices/<exam>/<id>.webp` を生成する。
+- `VisualChoices` を通常・復習・模試で共用。拡大・原本ページへの導線を持ち、画像を読めない場合は原本への案内を表示する。配線図の切り抜きは併用できる。
+- 管理者調整済み `cropOverrides.json` は今回変更していない。端末独自の問題修正は既存の優先順位を維持する。
+- 点検資料：`docs/audits/2026-10-14-learning-text.md`。`npm test` で250問の公式解答・解答前表示などを確認する。

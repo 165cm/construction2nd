@@ -27,11 +27,11 @@ export const setShuffleChoicesSetting = (enabled) => {
 // 'always' = 常に3秒後に次へ / 'correct_only' = 正解の時だけ（不正解は止まって解説を読める） / 'off' = 自動で進まない
 const AUTO_ADVANCE_STORAGE_KEY = 'denkou2_auto_advance_v1';
 export const AUTO_ADVANCE_MODES = [
-  { id: 'correct_only', label: '正解の時だけ', desc: '不正解の時は止まるので、解説をじっくり読めます（おすすめ）' },
+  { id: 'correct_only', label: '正解の時だけ', desc: '正解の時は3秒後に次へ。不正解の時は止まります' },
   { id: 'always', label: 'いつも', desc: '正解・不正解に関わらず3秒後に次の問題へ進みます' },
-  { id: 'off', label: 'オフ', desc: '自動では進みません。「次に進む」を押して進みます' }
+  { id: 'off', label: 'オフ', desc: '正解でも根拠を確認してから進めます（おすすめ）' }
 ];
-const DEFAULT_AUTO_ADVANCE_MODE = 'correct_only';
+const DEFAULT_AUTO_ADVANCE_MODE = 'off';
 
 export const getAutoAdvanceMode = () => {
   try {

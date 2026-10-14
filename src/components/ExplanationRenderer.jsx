@@ -132,7 +132,8 @@ export default function ExplanationRenderer({ explanation, answerChoice }) {
 
         // Render Markdown Table
         const rows = block.rows;
-        if (rows.length < 2) return null;
+        // 管理画面で保存された1行だけの表も、解説を消さずに表示する。
+        if (rows.length < 2) return <p key={bIdx} className="leading-relaxed text-slate-300">{renderFormattedText(rows[0].slice(1, -1).replaceAll('|', ' ／ '))}</p>;
 
         // Parse header
         const headerCells = rows[0]

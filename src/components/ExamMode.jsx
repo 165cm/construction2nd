@@ -5,6 +5,8 @@ import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sou
 import { cropKeyForDiagram, isCropFromFloorPlan } from '../utils/customCrops';
 import { getShuffleChoicesSetting } from '../utils/settings';
 import CropImage from './CropImage';
+import VisualChoices from './VisualChoices';
+import ExamInstructions from './ExamInstructions';
 import ExplanationRenderer from './ExplanationRenderer';
 import { getShortSourceLabel } from '../data/attribution';
 
@@ -204,7 +206,7 @@ export default function ExamMode({
         </h2>
         <p className="text-xs text-slate-300 max-w-sm leading-relaxed mb-6">
           試験時間120分、全{allQuestions.length}問（配点各2点／100点満点）。<br />
-          <strong>60点以上（30問正解）</strong>で合格です！<br />
+          <strong>60点以上（30問正解）</strong>をこの模擬試験の目標にします。<br />
           本番同様に途中で正解は表示されず、全問解き終えた後に総合合否判定と詳細解説が出ます。<br />
           <span className="text-slate-400">受験中はほかの画面に移っても自動保存され、続きから再開できます（制限時間は進みます）。</span>
         </p>
@@ -263,11 +265,11 @@ export default function ExamMode({
             {resultData.isPassed ? '🏆' : '⚠️'}
           </div>
           <h2 className={`text-2xl font-black mb-1 ${resultData.isPassed ? 'text-emerald-400' : 'text-rose-400'}`}>
-            {resultData.isPassed ? '合格水準達成！！' : '不合格（惜しい！）'}
+            {resultData.isPassed ? '目標の60点に到達' : '目標の60点まであと一歩'}
           </h2>
           <p className="text-xs text-slate-300 mb-4">
             {resultData.isPassed
-              ? 'おめでとうございます！本番でも十分に合格可能な得点です！'
+              ? 'この回の目標点に到達しました。迷った問題の根拠も確認し、別の回でも力を試しましょう。'
               : `合格ライン（60点）まであと ${Math.max(0, 30 - resultData.correctCount)} 問でした。弱点を復習しましょう！`}
           </p>
 
@@ -467,7 +469,7 @@ export default function ExamMode({
             第 {activeQ.number} 問
           </span>
           <span className="text-slate-400">
-            {activeQ.category} ({activeQ.categoryTag})
+            {activeQ.category}
           </span>
         </div>
 
@@ -475,7 +477,7 @@ export default function ExamMode({
           {activeQ.question}
         </h3>
 
-        {activeQ.diagram && (
+        {(activeQ.diagram && !(activeQ.visualChoices && activeQ.id >= 31) || (activeQ.diagram && activeQ.visualChoices && activeQ.id >= 31 && isCropFromFloorPlan(cropKeyForDiagram(activeQ.id, activeQ.diagram, activeQ.examId), currentExamMeta?.floorPlanPage || 15))) && (
           <div className="bg-white rounded-xl p-2 my-2 relative flex items-center justify-center max-h-52 overflow-hidden border border-slate-600">
             {activeQ.wiringMark && isCropFromFloorPlan(cropKeyForDiagram(activeQ.id, activeQ.diagram, activeQ.examId), currentExamMeta?.floorPlanPage || 15) && (
               <div className="absolute top-2 left-2 z-10 bg-slate-900/90 backdrop-blur border border-amber-500/50 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-md">
@@ -492,6 +494,9 @@ export default function ExamMode({
           </div>
         )}
       </div>
+
+      <ExamInstructions question={activeQ} />
+      <VisualChoices key={activeQ.globalId} question={activeQ} />
 
       {/* Choice Buttons (2 columns if short, 1 column if long) */}
       {(() => {

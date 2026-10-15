@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
-import confetti from 'canvas-confetti';
+
 import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sound';
 import { getQuestionDiagram } from '../utils/questionDiagram';
 import { getShuffleChoicesSetting } from '../utils/settings';
@@ -165,11 +165,6 @@ export default function ExamMode({
     const isPassed = score >= 60;
     const timeSpent = Math.min(EXAM_DURATION_SEC, EXAM_DURATION_SEC - secondsUntil(deadline || Date.now()));
 
-    if (isPassed) {
-      playLevelUp();
-      triggerHaptic('levelup');
-      confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-    }
 
     setResultData({
       score,

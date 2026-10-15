@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
 import { EXAM_LIST } from './data/examList';
-import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition, getExamView, recordKey } from './utils/storage';
+import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition, getExamView, recordKey, getTodayCount } from './utils/storage';
 import { getInitialResumeQuestion, determineNextQuizQuestion } from './utils/spacedRepetition';
 import { isSoundEnabled, setSoundEnabled, playClick } from './utils/sound';
 import { prefetchHdPage, getActiveCropCoords, cropKeyForDiagram } from './utils/customCrops';
-import confetti from 'canvas-confetti';
+
 
 import { needsReview } from './utils/reviewFilter';
 import Header from './components/Header';
@@ -15,8 +15,8 @@ import ExamMode from './components/ExamMode';
 import QuestionList from './components/QuestionList';
 import StatsModal from './components/StatsModal';
 import WiringDiagramModal from './components/WiringDiagramModal';
-import LevelUpModal from './components/LevelUpModal';
-import Round1CompleteModal from './components/Round1CompleteModal';
+
+
 import AttributionModal from './components/AttributionModal';
 import ExamSelectModal from './components/ExamSelectModal';
 import BottomNav from './components/BottomNav';
@@ -84,8 +84,6 @@ export default function App() {
     };
   });
 
-  const [showRound1CompleteModal, setShowRound1CompleteModal] = useState(false);
-  const [round1ExamId, setRound1ExamId] = useState(null);
   const [isExamSelectOpen, setIsExamSelectOpen] = useState(false);
 
   const handleOpenAdmin = () => {
@@ -99,7 +97,7 @@ export default function App() {
   const [wiringExamId, setWiringExamId] = useState(null);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isAttributionOpen, setIsAttributionOpen] = useState(false);
-  const [levelUpData, setLevelUpData] = useState(null); // { oldLevel, newLevel }
+
 
   // Sound toggle handler
   const handleToggleSound = () => {
@@ -122,23 +120,7 @@ export default function App() {
 
     setState(result.nextState);
 
-    // Milestone celebration: User completed all 50 questions for the first time!
-    if (result.didCompleteRound1) {
-      setRound1ExamId(examId);
-      setShowRound1CompleteModal(true);
-      confetti({
-        particleCount: 75,
-        spread: 90,
-        origin: { y: 0.6 }
-      });
-    }
 
-    if (result.didLevelUp) {
-      setLevelUpData({
-        oldLevel: result.oldLevel,
-        newLevel: result.newLevel
-      });
-    }
   };
 
   const resetScrollToTop = () => {
@@ -224,7 +206,7 @@ export default function App() {
   // Record mock exam multiple answers（回答した問題だけを学習記録に残す。未回答は記録しない）
   const handleRecordExamResults = (examDetails) => {
     let curState = state;
-    let completedRound1 = false;
+
     examDetails
       .filter(item => item.userAnswer !== undefined && item.userAnswer !== null)
       .forEach(item => {
@@ -237,10 +219,10 @@ export default function App() {
           totalQuestions: questionsData.length
         });
         curState = res.nextState;
-        if (res.didCompleteRound1) completedRound1 = true;
+
       });
     setState(curState);
-    if (completedRound1) setShowRound1CompleteModal(true);
+
   };
 
   // Exam Selection Handler
@@ -315,7 +297,12 @@ export default function App() {
       />
 
       {/* Main Content Area (Mobile Container) */}
-      <main className="flex-1 w-full max-w-md mx-auto px-3 pt-3">
+      <main className="flex-1 w-full max-w-md mx-auto px-3 pt-3 pb-24">
+        {currentMode === 'quiz' && <section className="mb-3 rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs" aria-label="今日の学習">
+          <div className="flex justify-between items-center gap-2"><strong>今日の目安：10問</strong><span>{Math.min(10, getTodayCount(state))} / 10問</span></div>
+          <p className="text-slate-400 mt-2">{getTodayCount(state) >= 10 ? '10問おつかれさまでした。解説を確認したら、復習するか今日はここまで。' : '答えを選んだら、解説で根拠を確認しましょう。'}</p>
+          {reviewQuestionsCount > 0 && <button className="mt-2 min-h-[44px] text-sky-300 underline" onClick={() => setCurrentMode('review')}>要復習 {reviewQuestionsCount}問を解く</button>}
+        </section>}
         {currentMode === 'quiz' && (
           <QuizCard
             key={`${currentExamId}_${currentQuestion.id}`}
@@ -416,22 +403,7 @@ export default function App() {
         state={state}
       />
 
-      {/* Level Up Celebration Modal */}
-      <LevelUpModal
-        isOpen={!!levelUpData}
-        onClose={() => setLevelUpData(null)}
-        oldLevel={levelUpData?.oldLevel}
-        newLevel={levelUpData?.newLevel}
-      />
 
-      {/* Round 1 (50 Questions) Completion Modal */}
-      <Round1CompleteModal
-        isOpen={showRound1CompleteModal}
-        onClose={() => setShowRound1CompleteModal(false)}
-        reviewCount={reviewQuestionsCount}
-        examName={getExamMeta(round1ExamId || currentExamId)?.name}
-        totalQuestions={questionsData.length}
-      />
     </div>
   );
 }

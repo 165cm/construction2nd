@@ -246,30 +246,11 @@ export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpe
       state.maxStreak = state.streak;
     }
 
-    // EXP Calculation: Base + Combo Bonus + Speed Bonus
-    earnedExp += 100;
-    if (state.streak >= 2) {
-      earnedExp += Math.min(state.streak * 20, 150); // combo bonus
-    }
-    if (timeSpentSec <= 8) {
-      earnedExp += 30; // speed bonus
-    }
+    earnedExp += 100; // 記録互換用。速度や連続正解では加点しない
 
     // Badge triggers
     if (!state.badges.includes('first_spark')) {
       newBadges.push('first_spark');
-    }
-    if (timeSpentSec <= 8 && !state.badges.includes('speedy')) {
-      newBadges.push('speedy');
-    }
-    if (state.streak >= 3 && !state.badges.includes('combo_3')) {
-      newBadges.push('combo_3');
-    }
-    if (state.streak >= 5 && !state.badges.includes('combo_5')) {
-      newBadges.push('combo_5');
-    }
-    if (state.streak >= 10 && !state.badges.includes('combo_10')) {
-      newBadges.push('combo_10');
     }
     if (wasReview && !state.badges.includes('revenge')) {
       newBadges.push('revenge');

@@ -86,6 +86,16 @@ try {
   assert.doesNotMatch(fs.readFileSync('index.html', 'utf8'), /user-scalable=no|maximum-scale=1/);
   const floorQuestion = ['r6_1','r6_2','r7_1','r7_2','r8_1'].flatMap(getSharedExamQuestions).find(q => q.visualChoices && q.id >= 31 && getQuestionDiagram(q)?.floorPlan);
   assert.ok(floorQuestion, '配線図の独立した画像は保持');
+  const { recordAnswer, getInitialState } = await server.ssrLoadModule('/src/utils/storage.js');
+  const attempt = { examId: 'r8_1', questionId: 1, isCorrect: true, category: '電気理論・計算' };
+  const fast = recordAnswer(getInitialState(), { ...attempt, timeSpentSec: 3 });
+  const slow = recordAnswer(getInitialState(), { ...attempt, timeSpentSec: 60 });
+  assert.equal(fast.earnedExp, slow.earnedExp, '速さで学習評価を変えない');
+  assert.ok(!fast.newBadges.includes('speedy'));
+  const { default: StatsModal } = await server.ssrLoadModule('/src/components/StatsModal.jsx');
+  const statsHtml = renderToStaticMarkup(React.createElement(StatsModal, { isOpen: true, state: getInitialState(), allQuestions: getSharedExamQuestions('r8_1') }));
+  assert.match(statsHtml, /この年度の学習状況/);
+  assert.doesNotMatch(statsHtml, /推定残り時間|最高連勝記録|獲得バッジ/);
   assert.equal(count, 250); assert.equal(visuals, 62);
   for (const ids of Object.values(QUESTION_CHEATSHEET_MAP)) for (const id of ids) assert.ok(CHEATSHEETS[id], id);
   assert.equal(getAutoAdvanceMode(), 'off');

@@ -115,3 +115,10 @@
 - `VisualChoices` を通常・復習・模試で共用。拡大・原本ページへの導線を持ち、画像を読めない場合は原本への案内を表示する。配線図の切り抜きは併用できる。
 - 管理者調整済み `cropOverrides.json` は今回変更していない。端末独自の問題修正は既存の優先順位を維持する。
 - 点検資料：`docs/audits/2026-10-14-learning-text.md`。`npm test` で250問の公式解答・解答前表示などを確認する。
+
+## 有料化前の表示修正（2026-10-15）
+
+- `questionDiagram.js` が設問に必要な図と選択肢画像を区別。`visualChoices.json` の `stemBox` は独立した回路図の範囲で、生成先は `public/choices/<exam>/<id>-stem.webp`。
+- 模試結果詳細は `ExamResultDetails` で原本選択肢も表示する。
+- 復習対象と件数は `reviewFilter.js` の `needsReview` を共用。
+- 有料化は未実装。設計案は `MONETIZATION_PLAN.md`、残課題は `audits/2026-10-15-prepaid-readiness.md`。

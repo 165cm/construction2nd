@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, BookOpen, Shuffle, HelpCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound';
-import { cropKeyForDiagram, isCropFromFloorPlan } from '../utils/customCrops';
+import { getQuestionDiagram } from '../utils/questionDiagram';
 import { getShuffleChoicesSetting, setShuffleChoicesSetting, getAutoAdvanceMode, setAutoAdvanceMode, AUTO_ADVANCE_MODES } from '../utils/settings';
 import CropImage from './CropImage';
 import VisualChoices from './VisualChoices';
@@ -32,6 +32,7 @@ export default function QuizCard({
   onOpenAttribution,
   currentExamMeta
 }) {
+  const diagram = getQuestionDiagram(question, currentExamMeta);
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const isUnknownAnswer = selectedChoice === UNKNOWN_CHOICE;
@@ -380,12 +381,9 @@ export default function QuizCard({
         </h2>
 
         {/* Diagram Image if available */}
-        {(question.diagram && !(question.visualChoices && question.id >= 31) || (question.diagram && question.visualChoices && question.id >= 31 && isCropFromFloorPlan(cropKeyForDiagram(question.id, question.diagram, question.examId), currentExamMeta?.floorPlanPage || 15))) && (
+        {diagram && (
           <div className="mt-3 relative group">
-            {question.wiringMark && isCropFromFloorPlan(
-              cropKeyForDiagram(question.id, question.diagram, question.examId || currentExamMeta?.id),
-              currentExamMeta?.floorPlanPage || 15
-            ) && (
+            {question.wiringMark && diagram.floorPlan && (
               <div className="absolute top-2 left-2 z-10 bg-slate-900/90 backdrop-blur border border-amber-500/50 text-amber-300 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-md">
                 <span>🎯 対象箇所:</span>
                 <span className="text-amber-400 font-black">{question.wiringMark} 周辺拡大</span>
@@ -396,8 +394,8 @@ export default function QuizCard({
               className="bg-white rounded-xl p-2 cursor-pointer flex items-center justify-center border border-slate-600 shadow-inner overflow-hidden min-h-[120px] max-h-56"
             >
               <CropImage
-                cropKey={cropKeyForDiagram(question.id, question.diagram, question.examId || currentExamMeta?.id)}
-                defaultPath={question.diagram}
+                cropKey={diagram.cropKey}
+                defaultPath={diagram.path}
                 alt="問題の図・写真"
                 className="max-h-52 object-contain"
               />
@@ -661,15 +659,15 @@ export default function QuizCard({
       )}
 
       {/* Image Zoom Modal */}
-      {showImageZoom && question.diagram && (
+      {showImageZoom && diagram && (
         <div
           onClick={() => setShowImageZoom(false)}
           className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4"
         >
           <div className="max-w-md w-full bg-white p-3 rounded-2xl shadow-2xl relative">
             <CropImage
-              cropKey={cropKeyForDiagram(question.id, question.diagram, question.examId || currentExamMeta?.id)}
-              defaultPath={question.diagram}
+              cropKey={diagram.cropKey}
+              defaultPath={diagram.path}
               alt="拡大図"
               className="w-full object-contain max-h-[75vh]"
             />

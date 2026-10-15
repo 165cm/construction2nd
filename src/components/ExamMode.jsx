@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playCorrect, playLevelUp, playClick, triggerHaptic } from '../utils/sound';
-import { cropKeyForDiagram, isCropFromFloorPlan } from '../utils/customCrops';
+import { getQuestionDiagram } from '../utils/questionDiagram';
 import { getShuffleChoicesSetting } from '../utils/settings';
 import CropImage from './CropImage';
 import VisualChoices from './VisualChoices';
 import ExamInstructions from './ExamInstructions';
-import ExplanationRenderer from './ExplanationRenderer';
+import ExamResultDetails from './ExamResultDetails';
 import { getShortSourceLabel } from '../data/attribution';
 
 const EXAM_DURATION_SEC = 120 * 60;
@@ -193,6 +193,7 @@ export default function ExamMode({
   };
 
   const activeQ = allQuestions[currentIdx];
+  const diagram = getQuestionDiagram(activeQ, currentExamMeta);
 
   // Start Screen
   if (!examStarted) {
@@ -362,22 +363,7 @@ export default function ExamMode({
                 </div>
 
                 {/* Expanded explanation view */}
-                {isExpanded && (
-                  <div className="mt-3 pt-3 border-t border-slate-700/60 animate-pop">
-                    <p className="text-xs text-slate-200 font-semibold mb-2 leading-relaxed">
-                      {item.question.question}
-                    </p>
-                    <ExplanationRenderer
-                      explanation={item.question.explanation}
-                      answerChoice={item.question.answer}
-                    />
-                    {item.question.keyPoint && (
-                      <div className="mt-2.5 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 text-[11px]">
-                        💡 {item.question.keyPoint}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {isExpanded && <ExamResultDetails question={item.question} />}
               </div>
             );
           })}
@@ -477,17 +463,17 @@ export default function ExamMode({
           {activeQ.question}
         </h3>
 
-        {(activeQ.diagram && !(activeQ.visualChoices && activeQ.id >= 31) || (activeQ.diagram && activeQ.visualChoices && activeQ.id >= 31 && isCropFromFloorPlan(cropKeyForDiagram(activeQ.id, activeQ.diagram, activeQ.examId), currentExamMeta?.floorPlanPage || 15))) && (
+        {diagram && (
           <div className="bg-white rounded-xl p-2 my-2 relative flex items-center justify-center max-h-52 overflow-hidden border border-slate-600">
-            {activeQ.wiringMark && isCropFromFloorPlan(cropKeyForDiagram(activeQ.id, activeQ.diagram, activeQ.examId), currentExamMeta?.floorPlanPage || 15) && (
+            {activeQ.wiringMark && diagram.floorPlan && (
               <div className="absolute top-2 left-2 z-10 bg-slate-900/90 backdrop-blur border border-amber-500/50 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-md">
                 <span>🎯 対象箇所:</span>
                 <span className="text-amber-400 font-black">{activeQ.wiringMark} 周辺拡大</span>
               </div>
             )}
             <CropImage
-              cropKey={cropKeyForDiagram(activeQ.id, activeQ.diagram, activeQ.examId)}
-              defaultPath={activeQ.diagram}
+              cropKey={diagram.cropKey}
+              defaultPath={diagram.path}
               alt="問題図"
               className="max-h-48 object-contain"
             />

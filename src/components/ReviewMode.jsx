@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Flame, Star, ArrowRight, Sparkles } from 'lucide-react';
 import QuizCard from './QuizCard';
+import { needsReview } from '../utils/reviewFilter';
 import { getExamMeta } from '../data/examLoader';
 
 const CATEGORIES = [
@@ -49,7 +50,7 @@ export default function ReviewMode({
       return !rec || rec.status !== 'mastered';
     }
     // default 'review': wrong count > 0 or status === 'review'
-    return !!rec && (rec.status === 'review' || (rec.wrong > 0 && rec.status !== 'mastered'));
+    return needsReview(rec);
   };
   const computeIds = (s, filter, c) => scopedQuestions(s, c).filter(q => matchesFilter(q, filter)).map(q => q.globalId);
 
@@ -97,7 +98,7 @@ export default function ReviewMode({
 
   // ボタンに出す件数（いまの対象範囲・分野での件数）
   const pool = scopedQuestions(scope, category);
-  const reviewCount = pool.filter(q => recOf(q)?.status === 'review').length;
+  const reviewCount = pool.filter(q => needsReview(recOf(q))).length;
   const bookmarkCount = pool.filter(q => bookmarks.includes(q.globalId)).length;
   const unmasteredCount = pool.filter(q => recOf(q)?.status !== 'mastered').length;
 

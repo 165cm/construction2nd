@@ -11,6 +11,10 @@ try {
   const { getSharedExamQuestions } = await server.ssrLoadModule('/src/data/examLoader.js');
   const { default: QuizCard } = await server.ssrLoadModule('/src/components/QuizCard.jsx');
   const { default: ExamMode } = await server.ssrLoadModule('/src/components/ExamMode.jsx');
+  const { getQuestionDiagram } = await server.ssrLoadModule('/src/utils/questionDiagram.js');
+  const { default: ReviewMode } = await server.ssrLoadModule('/src/components/ReviewMode.jsx');
+  const { default: ResultDetails } = await server.ssrLoadModule('/src/components/ExamResultDetails.jsx');
+  const { needsReview } = await server.ssrLoadModule('/src/utils/reviewFilter.js');
   const { default: Explanation } = await server.ssrLoadModule('/src/components/ExplanationRenderer.jsx');
   const { CHEATSHEETS, QUESTION_CHEATSHEET_MAP, getCheatsheetsForQuestion } = await server.ssrLoadModule('/src/data/cheatsheets.js');
   const { getAutoAdvanceMode } = await server.ssrLoadModule('/src/utils/settings.js');
@@ -44,6 +48,22 @@ try {
       }
       if (q.visualChoices) {
         visuals++;
+        const resultHtml = renderToStaticMarkup(React.createElement(ResultDetails, { question: q }));
+        assert.match(resultHtml, new RegExp(`choices/${exam}/${q.id}.webp`), `${q.globalId}: result choices`);
+        assert.equal((before.match(/alt="原本の選択肢イ・ロ・ハ・ニ"/g) || []).length, 1);
+        if (q.id < 31) {
+          const diagram = getQuestionDiagram(q, { id: exam });
+          if (q.id === 4) {
+            assert.match(diagram.path, /4-stem.webp$/);
+            assert.ok(fs.existsSync('public' + diagram.path));
+            assert.match(before, /4-stem.webp/);
+            assert.match(examHtml, /4-stem.webp/);
+          } else {
+            assert.equal(diagram, null);
+            assert.doesNotMatch(before, /alt="問題の図・写真"/);
+            assert.doesNotMatch(examHtml, /alt="問題図"/);
+          }
+        }
         assert.deepEqual(q.choices.map(c => c.text), ['図のイ','図のロ','図のハ','図のニ']);
         assert.ok(fs.existsSync(`public/choices/${exam}/${q.id}.webp`));
         assert.match(before, new RegExp(`choices/${exam}/${q.id}.webp`));
@@ -51,6 +71,20 @@ try {
       for (const sheet of getCheatsheetsForQuestion(q)) assert.ok(CHEATSHEETS[sheet.id]);
     }
   }
+  assert.equal(needsReview({ status: 'review', wrong: 1 }), true);
+  assert.equal(needsReview({ status: 'correct', wrong: 1, consecutiveCorrect: 1 }), true);
+  assert.equal(needsReview({ status: 'mastered', wrong: 1, consecutiveCorrect: 2 }), false);
+  assert.equal(needsReview({ status: 'correct', wrong: 0 }), false);
+  assert.equal(needsReview(undefined), false);
+  const reviewQuestion = getSharedExamQuestions('r8_1')[0];
+  const reviewHtml = renderToStaticMarkup(React.createElement(ReviewMode, {
+    allExamQuestions: [reviewQuestion], currentExamId: 'r8_1',
+    fullState: { records: { [reviewQuestion.globalId]: { status: 'correct', wrong: 1, consecutiveCorrect: 1 } }, bookmarks: [] }
+  }));
+  assert.match(reviewHtml, /要復習 \(1\)/, '復習対象と表示件数を一致させる');
+  assert.doesNotMatch(fs.readFileSync('index.html', 'utf8'), /user-scalable=no|maximum-scale=1/);
+  const floorQuestion = ['r6_1','r6_2','r7_1','r7_2','r8_1'].flatMap(getSharedExamQuestions).find(q => q.visualChoices && q.id >= 31 && getQuestionDiagram(q)?.floorPlan);
+  assert.ok(floorQuestion, '配線図の独立した画像は保持');
   assert.equal(count, 250); assert.equal(visuals, 62);
   for (const ids of Object.values(QUESTION_CHEATSHEET_MAP)) for (const id of ids) assert.ok(CHEATSHEETS[id], id);
   assert.equal(getAutoAdvanceMode(), 'off');

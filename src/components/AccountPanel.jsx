@@ -1,3 +1,4 @@
+import BillingPanel from './BillingPanel';
 import React, { useEffect, useState } from 'react';
 import { observeAccount, loginGoogle, logoutAccount, readCloudBackup, writeCloudBackup } from '../services/cloudBackup';
 import { createLearningBackup, inspectLearningBackup, restoreLearningBackup } from '../utils/backup';
@@ -53,6 +54,7 @@ export default function AccountPanel() {
         </div>
       </>}
     </>}
+    {account && <BillingPanel key={account.uid} uid={account.uid} />}
     {confirmation && <div className="border border-amber-500 rounded-lg p-3 text-xs" role="alert">
       <p>{confirmation === 'upload' ? '表示中のアカウントのクラウド記録を、この端末の記録で置き換えます。' : 'この端末の記録と設定を、クラウドの記録で置き換えます。必要なら先にファイルへ書き出してください。'}よろしいですか？</p>
       <div className="flex gap-2 mt-2"><button disabled={busy} className={button} onClick={() => perform(confirmAction)}>置き換える</button><button disabled={busy} className={button} onClick={() => setConfirmation(null)}>戻る</button></div>

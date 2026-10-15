@@ -1,4 +1,5 @@
 // Storage and gamification state manager
+import { writeStoredJSON } from './saveRecovery';
 import { updateSpacedRepetitionRecord } from './spacedRepetition';
 
 const STORAGE_KEY = 'denkou2_mastery_state_v1';
@@ -41,6 +42,7 @@ export const getTitleForLevel = (level) => {
 
 export const getInitialState = () => {
   return {
+    examResults: {}, // 年度ごとに最新10件の模試結果
     records: {}, // questionId -> { attempts, correct, wrong, consecutiveCorrect, status, box, interval, ... }
     bookmarks: [],
     exp: 0,
@@ -181,13 +183,7 @@ export const loadState = () => {
   }
 };
 
-export const saveState = (state) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) {
-    console.error('Failed to save state:', e);
-  }
-};
+export const saveState = (state) => writeStoredJSON(STORAGE_KEY, state);
 
 export const saveCurrentQuizPosition = (state, { examId, questionId, index, round }) => {
   const prev = (state.examProgress || {})[examId] || {};
@@ -214,7 +210,7 @@ export const calculateExpForLevel = (level) => {
 
 // Record an answer and compute gamification updates with Leitner / SRS integration
 // examId と questionId（問題番号）から年度付きキーで記録する。totalQuestions はその年度の問題数。
-export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpentSec, category, totalQuestions = 50 }) => {
+export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpentSec, category, totalQuestions = 50, persist = true }) => {
   const state = JSON.parse(JSON.stringify(prevState));
   const key = recordKey(examId, questionId);
   const examPrefix = `${examId}_`;
@@ -222,7 +218,8 @@ export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpe
   const wasReview = prevRecord.status === 'review';
 
   state.totalAnswered += 1;
-  state.totalTimeSpentSec += Math.round(timeSpentSec);
+  const measuredTime = Number.isFinite(timeSpentSec) && timeSpentSec >= 0;
+  if (measuredTime) state.totalTimeSpentSec += Math.round(timeSpentSec);
 
   // Update spaced repetition / Leitner record
   const currentRecord = updateSpacedRepetitionRecord(
@@ -234,7 +231,7 @@ export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpe
   );
 
   // Keep last 30 response times for rolling average
-  state.responseTimes = [...(state.responseTimes || []).slice(-29), Math.max(2, Math.round(timeSpentSec))];
+  if (measuredTime) state.responseTimes = [...(state.responseTimes || []).slice(-29), Math.max(2, Math.round(timeSpentSec))];
 
   let earnedExp = 0;
   let newBadges = [];
@@ -327,7 +324,7 @@ export const recordAnswer = (prevState, { examId, questionId, isCorrect, timeSpe
     ...(state.recentHistory || []).slice(0, 19)
   ];
 
-  saveState(state);
+  if (persist) saveState(state);
 
   return {
     nextState: state,

@@ -8,6 +8,8 @@ import { prefetchHdPage, getActiveCropCoords, cropKeyForDiagram } from './utils/
 
 
 import { needsReview } from './utils/reviewFilter';
+import SaveWarning from './components/SaveWarning';
+import { recordExamResult } from './utils/examResults';
 import Header from './components/Header';
 import QuizCard from './components/QuizCard';
 import ReviewMode from './components/ReviewMode';
@@ -204,25 +206,10 @@ export default function App() {
   };
 
   // Record mock exam multiple answers（回答した問題だけを学習記録に残す。未回答は記録しない）
-  const handleRecordExamResults = (examDetails) => {
-    let curState = state;
-
-    examDetails
-      .filter(item => item.userAnswer !== undefined && item.userAnswer !== null)
-      .forEach(item => {
-        const res = recordAnswer(curState, {
-          examId: currentExamId,
-          questionId: item.question.id,
-          isCorrect: item.isCorrect,
-          timeSpentSec: 20,
-          category: item.question.category,
-          totalQuestions: questionsData.length
-        });
-        curState = res.nextState;
-
-      });
-    setState(curState);
-
+  const handleRecordExamResults = (result) => {
+    const update = recordExamResult(state, currentExamId, result);
+    setState(update.nextState);
+    return update.saved;
   };
 
   // Exam Selection Handler
@@ -296,6 +283,8 @@ export default function App() {
         onOpenExamSelect={() => { playClick(); setIsExamSelectOpen(true); }}
       />
 
+      <SaveWarning />
+
       {/* Main Content Area (Mobile Container) */}
       <main className="flex-1 w-full max-w-md mx-auto px-3 pt-3 pb-24">
         {currentMode === 'quiz' && <section className="mb-3 rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs" aria-label="今日の学習">
@@ -341,6 +330,7 @@ export default function App() {
             allQuestions={questionsData}
             onOpenWiringDiagram={handleOpenWiringDiagram}
             onRecordExamResults={handleRecordExamResults}
+            resultHistory={state.examResults?.[currentExamId] || []}
             onGoToReview={() => setCurrentMode('review')}
             onOpenAttribution={() => setIsAttributionOpen(true)}
             currentExamMeta={currentExamMeta}

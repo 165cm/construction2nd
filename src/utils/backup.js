@@ -49,6 +49,13 @@ const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArr
 // 学習記録として使える形か（読み込んだあとアプリが止まらないよう、使う項目の型を確かめる）
 const isValidMasteryState = (m) => {
   if (!isPlainObject(m)) return false;
+  if (m.examResults !== undefined && (!isPlainObject(m.examResults) || !Object.values(m.examResults).every(history =>
+    Array.isArray(history) && history.every(result => isPlainObject(result) && typeof result.id === 'string'
+      && Number.isFinite(result.finishedAt) && Number.isFinite(result.score) && Number.isFinite(result.timeSpent)
+      && Number.isFinite(result.totalCount) && Number.isFinite(result.correctCount)
+      && Array.isArray(result.details) && result.details.every(item => isPlainObject(item) && isPlainObject(item.question)
+        && typeof item.question.question === 'string' && typeof item.question.explanation === 'string'))
+  ))) return false;
   if (m.records !== undefined && (!isPlainObject(m.records) || !Object.values(m.records).every(isPlainObject))) return false;
   if (['badges', 'bookmarks', 'responseTimes', 'recentHistory'].some(k => m[k] !== undefined && !Array.isArray(m[k]))) return false;
   if (['examProgress', 'dailyLog'].some(k => m[k] !== undefined && !isPlainObject(m[k]))) return false;

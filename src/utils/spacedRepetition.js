@@ -33,7 +33,7 @@ export const updateSpacedRepetitionRecord = (prevRecord = {}, isCorrect, current
   if (isCorrect) {
     current.correct += 1;
     current.consecutiveCorrect += 1;
-    if (timeSpentSec < current.bestTimeSec) {
+    if (Number.isFinite(timeSpentSec) && timeSpentSec >= 0 && timeSpentSec < current.bestTimeSec) {
       current.bestTimeSec = Math.round(timeSpentSec * 10) / 10;
     }
 

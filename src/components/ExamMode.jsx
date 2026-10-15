@@ -1,3 +1,4 @@
+import { writeStoredJSON } from '../utils/saveRecovery';
 import React, { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
 
@@ -33,7 +34,7 @@ const saveExamSession = (examId, session) => {
     } else {
       delete all[examId];
     }
-    localStorage.setItem(EXAM_SESSION_STORAGE_KEY, JSON.stringify(all));
+    return writeStoredJSON(EXAM_SESSION_STORAGE_KEY, all);
   } catch (e) {
     console.error('Failed to save exam session:', e);
   }
@@ -63,24 +64,28 @@ export default function ExamMode({
   onRecordExamResults,
   onGoToReview,
   onOpenAttribution,
-  currentExamMeta
+  currentExamMeta,
+  resultHistory = []
 }) {
   const examId = currentExamMeta?.id || 'r8_1';
   const [savedSession] = useState(() => loadExamSession(examId));
-  const [examStarted, setExamStarted] = useState(!!savedSession);
+  const completedSession = savedSession && resultHistory.find(result => result.id === `${examId}:${savedSession.deadline}`);
+  const initialResult = completedSession || (!savedSession ? resultHistory[0] : null);
+  const [examStarted, setExamStarted] = useState(!!savedSession || !!initialResult);
   const [answers, setAnswers] = useState(() => savedSession?.answers || {}); // { [questionId]: choiceId }
   const [currentIdx, setCurrentIdx] = useState(() => savedSession?.currentIdx || 0);
   // 終了時刻（ミリ秒）。画面を離れていても本番同様に時間は進む
   const [deadline, setDeadline] = useState(() => savedSession?.deadline || null);
   const [timeLeft, setTimeLeft] = useState(() => (savedSession ? secondsUntil(savedSession.deadline) : EXAM_DURATION_SEC));
-  const [isFinished, setIsFinished] = useState(false);
-  const [resultData, setResultData] = useState(null);
+  const [isFinished, setIsFinished] = useState(!!initialResult);
+  const [resultData, setResultData] = useState(initialResult || null);
   const [expandedResultIdx, setExpandedResultIdx] = useState(null);
   // 本番と同じ並び（受験中は開始時の設定で固定）
   const [fixedOrder, setFixedOrder] = useState(() => savedSession?.fixedOrder ?? loadFixedOrderSetting());
   // マークシート（全問の解答欄）を開いているか
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const finishedRef = useRef(false);
+  const [confirmFinish, setConfirmFinish] = useState(false);
 
   // 受験中は解答・現在位置を自動保存
   useEffect(() => {
@@ -132,17 +137,15 @@ export default function ExamMode({
     });
   };
 
-  const handleFinishExam = ({ auto = false } = {}) => {
+  const handleFinishExam = ({ auto = false, confirmed = false } = {}) => {
     if (finishedRef.current) return;
     const unansweredCount = allQuestions.filter(q => answers[q.id] === undefined).length;
-    if (!auto && unansweredCount > 0) {
-      const ok = window.confirm(
-        `未回答の問題が ${unansweredCount} 問あります。\nこのまま採点しますか？\n（未回答は0点として採点し、学習記録には残しません）`
-      );
-      if (!ok) return;
+    if (!auto && !confirmed && unansweredCount > 0) {
+      setConfirmFinish(true);
+      return;
     }
+    setConfirmFinish(false);
     finishedRef.current = true;
-    saveExamSession(examId, null);
     playClick();
     let score = 0;
     let correctCount = 0;
@@ -166,19 +169,20 @@ export default function ExamMode({
     const timeSpent = Math.min(EXAM_DURATION_SEC, EXAM_DURATION_SEC - secondsUntil(deadline || Date.now()));
 
 
-    setResultData({
+    const result = {
+      id: `${examId}:${deadline}`,
+      finishedAt: Date.now(),
       score,
       correctCount,
       totalCount: allQuestions.length,
       isPassed,
       timeSpent,
       details
-    });
+    };
+    setResultData(result);
     setIsFinished(true);
-
-    if (onRecordExamResults) {
-      onRecordExamResults(details);
-    }
+    // 保存に失敗したときは途中記録を消さず、再試行できる状態を保つ。
+    if (onRecordExamResults?.(result)) saveExamSession(examId, null);
   };
 
   const formatTime = (secs) => {
@@ -251,6 +255,12 @@ export default function ExamMode({
   if (isFinished && resultData) {
     return (
       <div className="pb-24 animate-pop">
+        <p className="text-xs text-slate-400 mb-3">{new Date(resultData.finishedAt).toLocaleString('ja-JP')} の結果 · この端末に最新10件を保存</p>
+        {resultHistory.length > 1 && <label className="block text-xs mb-4">以前の結果
+          <select className="block w-full min-h-[44px] mt-1 p-2 bg-slate-800 rounded-lg" value={resultData.id} onChange={e => { setResultData(resultHistory.find(item => item.id === e.target.value)); setExpandedResultIdx(null); }}>
+            {resultHistory.map(item => <option key={item.id} value={item.id}>{new Date(item.finishedAt).toLocaleString('ja-JP')} · {item.score}点</option>)}
+          </select>
+        </label>}
         {/* Pass/Fail Header Card */}
         <div className={`p-6 rounded-3xl border text-center mb-6 shadow-2xl ${
           resultData.isPassed
@@ -401,6 +411,13 @@ export default function ExamMode({
         </button>
       </div>
 
+      {confirmFinish && <section role="alert" className="p-3 mb-4 rounded-xl border border-amber-400 bg-slate-900 text-sm">
+        <p>未回答が{allQuestions.filter(q => answers[q.id] === undefined).length}問あります。未回答は0点となり、学習記録の解答数には含めません。</p>
+        <div className="flex gap-2 mt-3">
+          <button onClick={() => setConfirmFinish(false)} className="min-h-[44px] px-3 rounded-lg bg-slate-700">解答に戻る</button>
+          <button onClick={() => handleFinishExam({ confirmed: true })} className="min-h-[44px] px-3 rounded-lg bg-emerald-700">未回答のまま採点する</button>
+        </div>
+      </section>}
       {/* Question Selector Slider */}
       <div className="flex overflow-x-auto space-x-1.5 py-1.5 mb-3 no-scrollbar">
         {allQuestions.map((q, idx) => {

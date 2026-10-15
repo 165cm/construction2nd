@@ -1,10 +1,10 @@
 // Spaced Repetition Engine based on Ebbinghaus Forgetting Curve & Leitner Box System
 
 export const BOX_LEVELS = {
-  1: { level: 1, name: '要復習', badge: '要復習 🔥', interval: 3, desc: '間違えた問題。最優先（3問以内）で再復習' },
+  1: { level: 1, name: '要復習', badge: '要復習 🔥', interval: 3, desc: '間違えた問題。復習モードで確認' },
   2: { level: 2, name: '初期定着', badge: '定着中 🌱', interval: 8, desc: '1回正解。約8問後に忘却防止チェック' },
   3: { level: 3, name: '中期定着', badge: '安定 🌿', interval: 20, desc: '2回連続正解。約20問後に長期定着確認' },
-  4: { level: 4, name: '完全マスター', badge: 'マスター 👑', interval: 50, desc: '3回連続正解。長期記憶へ定着完了' }
+  4: { level: 4, name: '3回以上連続正解', badge: 'マスター 👑', interval: 50, desc: '3回以上連続正解。日をあけて再確認' }
 };
 
 /**

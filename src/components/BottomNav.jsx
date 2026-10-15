@@ -4,11 +4,11 @@ import { playClick } from '../utils/sound';
 
 export default function BottomNav({ currentMode, onSelectMode, reviewCount, onOpenStats }) {
   const tabs = [
-    { id: 'quiz', label: '通常サクサク', icon: Zap },
-    { id: 'review', label: '弱点特訓', icon: Flame, badge: reviewCount },
-    { id: 'exam', label: '本番模試', icon: Clock },
+    { id: 'quiz', label: '学習', icon: Zap },
+    { id: 'review', label: '復習', icon: Flame, badge: reviewCount },
+    { id: 'exam', label: '模試', icon: Clock },
     { id: 'list', label: '問題一覧', icon: BookOpen },
-    { id: 'stats', label: '成績・実績', icon: Trophy, isAction: true },
+    { id: 'stats', label: '記録・設定', icon: Trophy, isAction: true },
   ];
 
   return (
@@ -29,14 +29,14 @@ export default function BottomNav({ currentMode, onSelectMode, reviewCount, onOp
                   onSelectMode(tab.id);
                 }
               }}
-              className={`flex-1 flex flex-col items-center justify-center py-1 relative transition active:scale-90 ${
+              className={`min-h-[44px] flex-1 flex flex-col items-center justify-center py-1 relative transition active:scale-90 ${
                 isActive ? 'text-sky-400 font-bold' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <div className="relative">
                 <Icon size={20} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
                 {tab.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full min-w-[14px] text-center animate-pulse">
+                  <span className="absolute -top-1.5 -right-2.5 bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full min-w-[14px] text-center">
                     {tab.badge}
                   </span>
                 )}

@@ -4,7 +4,7 @@ import { EXAM_LIST } from '../data/examList';
 import { playClick } from '../utils/sound';
 import { getExamView } from '../utils/storage';
 
-// 年度ごとの進み具合（解いた問題数・マスター数・正答率）
+// 年度ごとの進み具合（解いた問題数・2回連続正解数・正答率）
 const summarizeExam = (state, exam) => {
   const view = getExamView(state || {}, exam.id);
   const recs = Object.values(view.records || {});
@@ -48,7 +48,7 @@ export default function ExamSelectModal({
             <span className="text-xl">📚</span>
             <div>
               <h2 className="text-sm font-bold text-slate-100">過去問の年度を選択</h2>
-              <p className="text-[11px] text-slate-400">直近の学科筆記試験 全50問を収録</p>
+              <p className="text-[11px] text-slate-400">5回分・各50問を収録</p>
             </div>
           </div>
           <button
@@ -63,7 +63,7 @@ export default function ExamSelectModal({
         {/* Exam List Body */}
         <div className="p-4 space-y-3 overflow-y-auto">
           <div className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider px-1">
-            収録過去問（全問無料サクサク学習）
+            収録過去問
           </div>
 
           {EXAM_LIST.map((exam) => {
@@ -118,7 +118,7 @@ export default function ExamSelectModal({
                         ) : (
                           <span>
                             解いた <strong className="text-sky-300">{progress.attempted}</strong>/{progress.total}問
-                            ・マスター <strong className="text-emerald-300">{progress.mastered}</strong>問
+                            ・2回連続正解 <strong className="text-emerald-300">{progress.mastered}</strong>問
                             {progress.accuracy !== null && <>・正答率 <strong className="text-slate-200">{progress.accuracy}%</strong></>}
                           </span>
                         )}
@@ -138,16 +138,7 @@ export default function ExamSelectModal({
             );
           })}
 
-          {/* Premium Upcoming Notice */}
-          <div className="mt-4 p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
-            <div className="flex items-center space-x-2 text-amber-300 text-xs font-bold mb-1">
-              <Sparkles size={14} className="text-amber-400" />
-              <span>直近5回分 プレミアムパッケージ（準備中）</span>
-            </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              令和7年度・令和5年度を含む直近5回分の完全網羅版＆弱点AI自動克服モードを順次追加予定！
-            </p>
-          </div>
+
         </div>
 
         {/* Footer */}

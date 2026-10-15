@@ -1,7 +1,7 @@
 // Web Audio API based sound synthesizer for zero-latency, lightweight gamification audio
 
 let audioCtx = null;
-let soundEnabled = true;
+let soundEnabled = false;
 
 function getAudioContext() {
   if (typeof window === 'undefined') return null;
@@ -163,17 +163,5 @@ export const playLevelUp = () => {
 };
 
 // Mobile vibration support
-export const triggerHaptic = (pattern = 'light') => {
-  if (typeof window === 'undefined' || !navigator.vibrate) return;
-  try {
-    if (pattern === 'light') {
-      navigator.vibrate(15);
-    } else if (pattern === 'success') {
-      navigator.vibrate([20, 40, 25]);
-    } else if (pattern === 'error') {
-      navigator.vibrate([50, 30, 60]);
-    } else if (pattern === 'levelup') {
-      navigator.vibrate([40, 50, 40, 50, 70]);
-    }
-  } catch (e) {}
-};
+// 学習中の振動演出は行わない。既存の呼び出しとの互換性を維持する。
+export const triggerHaptic = () => {};

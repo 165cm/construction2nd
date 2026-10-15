@@ -25,11 +25,11 @@
 | `src/components/ReviewMode.jsx` | 弱点特訓画面（要復習・ブックマーク・未マスターの抽出と周回） |
 | `src/components/ExamMode.jsx` | 本番模擬試験（120分タイマー・マークシート解答・60点合否判定） |
 | `src/components/WiringDiagramModal.jsx` | 配線図（15頁 平面図・分電盤図）ズーム＆パン操作ビューア |
-| `src/components/Header.jsx` | レベル・EXPバー・コンボ・残り推計時間バナー |
-| `src/components/StatsModal.jsx` | 残り時間推計・分野別進捗率・実績バッジギャラリー |
+| `src/components/Header.jsx` | 年度・今日解いた数・記録/音声設定 |
+| `src/components/StatsModal.jsx` | 分野別の記録・復習件数・学習設定 |
 | `src/components/BottomNav.jsx` | スマホ下部固定ナビゲーション（5タブ） |
 | `src/utils/sound.js` | Web Audio APIシンセサイザー（正解・不正解・コンボ・ファンファーレ・タップ） |
-| `src/utils/spacedRepetition.js` | 科学的忘却曲線（ライトナーBox）間隔反復エンジン・中断再開ロジック |
+| `src/utils/spacedRepetition.js` | 解答履歴（ライトナーBox）による出題エンジン・中断再開ロジック |
 | `src/utils/storage.js` | 理解度・平均解答速度・残りプレイ時間算出・実績判定ロジック |
 | `src/components/Round1CompleteModal.jsx` | 第1巡（全50問）走破達成＆SRS復習移行アナウンスモーダル |
 | `src/data/cropOverrides.json` | 共有トリミング座標（リポジトリ管理・全端末共通反映） |

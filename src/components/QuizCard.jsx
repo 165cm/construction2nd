@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Star, FileText, CheckCircle2, XCircle, ArrowRight, RotateCcw, ZoomIn, Sparkles, BookOpen, Shuffle, HelpCircle } from 'lucide-react';
-import confetti from 'canvas-confetti';
+
 import { playCorrect, playWrong, playClick, triggerHaptic } from '../utils/sound';
 import { getQuestionDiagram } from '../utils/questionDiagram';
 import { getShuffleChoicesSetting, setShuffleChoicesSetting, getAutoAdvanceMode, setAutoAdvanceMode, AUTO_ADVANCE_MODES } from '../utils/settings';
@@ -213,19 +213,15 @@ export default function QuizCard({
     
     setSelectedChoice(choiceId);
     setIsAnswered(true);
-    setShowPopup(true);
+    setShowPopup(autoAdvanceMode === 'always' || (autoAdvanceMode === 'correct_only' && isCorrect));
+    requestAnimationFrame(() => explanationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     setTimeLeftMs(AUTO_ADVANCE_TIME_MS);
     setIsCountingDown(autoAdvanceMode === 'always' || (autoAdvanceMode === 'correct_only' && isCorrect));
 
     if (isCorrect) {
       playCorrect();
       triggerHaptic('success');
-      confetti({
-        particleCount: 40,
-        spread: 60,
-        origin: { y: 0.8 },
-        colors: ['#38bdf8', '#0ea5e9', '#facc15', '#ffffff']
-      });
+
     } else if (!isUnknown) {
       playWrong();
       triggerHaptic('error');
@@ -248,15 +244,15 @@ export default function QuizCard({
       return <span className="bg-slate-700/60 text-slate-300 text-[10px] px-2 py-0.5 rounded font-medium">未挑戦</span>;
     }
     if (record.status === 'mastered' || record.box === 4) {
-      return <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded font-bold">2回連続正解 👑</span>;
+      return <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded font-bold">2回連続正解</span>;
     }
     if (record.status === 'review' || record.box === 1) {
-      return <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded font-bold animate-pulse">要復習 🔥</span>;
+      return <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded font-bold">要復習</span>;
     }
     if (record.box === 3) {
-      return <span className="bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] px-2 py-0.5 rounded font-medium">安定 🌿</span>;
+      return <span className="bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] px-2 py-0.5 rounded font-medium">連続正解</span>;
     }
-    return <span className="bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10px] px-2 py-0.5 rounded font-medium">定着中 🌱</span>;
+    return <span className="bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10px] px-2 py-0.5 rounded font-medium">正解済</span>;
   };
 
   const areChoicesShort = question.choices.every(
@@ -359,7 +355,7 @@ export default function QuizCard({
             playClick();
             onOpenWiringDiagram(question.wiringMark, question.examId);
           }}
-          className="mb-3 py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-between shadow-lg shadow-sky-900/40 active:scale-[0.98] transition border border-sky-400/40 animate-pulseGlow"
+          className="mb-3 py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-between shadow-lg shadow-sky-900/40 active:scale-[0.98] transition border border-sky-400/40"
         >
           <div className="flex items-center space-x-2">
             <FileText size={15} />
@@ -487,7 +483,7 @@ export default function QuizCard({
       {isAnswered && (
         <div
           ref={explanationRef}
-          className="rounded-2xl border p-4 mb-4 animate-pop bg-slate-800/95 border-slate-700/80 shadow-xl"
+          className="scroll-mt-20 rounded-2xl border p-4 mb-4 animate-pop bg-slate-800/95 border-slate-700/80 shadow-xl"
         >
           {/* Result Banner */}
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-700/70">

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2, Brain, BookOpen, Table } from 'lucide-react';
-import { BADGES_DEF, getTitleForLevel, calculateExpForLevel, computeRemainingPlayTime, getTodayCount, getStudyStreakDays } from '../utils/storage';
+import { getTodayCount, getStudyStreakDays } from '../utils/storage';
 import { downloadLearningBackup, inspectLearningBackup, restoreLearningBackup } from '../utils/backup';
-import { getLeitnerBoxCounts } from '../utils/spacedRepetition';
+import { needsReview } from '../utils/reviewFilter';
 import { playClick } from '../utils/sound';
 import { getShuffleChoicesSetting, setShuffleChoicesSetting, getAutoAdvanceMode, setAutoAdvanceMode, AUTO_ADVANCE_MODES } from '../utils/settings';
 import { CHEATSHEETS } from '../data/cheatsheets';
@@ -29,10 +29,8 @@ export default function StatsModal({
 
   if (!isOpen) return null;
 
-  const levelTitle = getTitleForLevel(state.level);
-  const expRequired = calculateExpForLevel(state.level);
-  const timeEstimate = computeRemainingPlayTime(state, allQuestions.length);
-  const boxCounts = getLeitnerBoxCounts(allQuestions, state);
+  const attempted = allQuestions.filter(q => state.records[q.id]?.attempts > 0).length;
+  const reviewCount = allQuestions.filter(q => needsReview(state.records[q.id])).length;
 
   const accuracy = state.totalAnswered > 0
     ? Math.round((state.totalCorrect / state.totalAnswered) * 100)
@@ -79,11 +77,11 @@ export default function StatsModal({
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800 bg-slate-800/50 shrink-0">
           <div className="flex items-center space-x-2">
             <Trophy className="text-amber-400" size={20} />
-            <h3 className="font-black text-sm text-white">成績分析 ＆ 暗記早見表</h3>
+            <h3 className="font-black text-sm text-white">学習記録・設定</h3>
           </div>
           <button
             onClick={() => { playClick(); onClose(); }}
-            className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-lg"
+            aria-label="閉じる" className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 bg-slate-800 rounded-lg"
           >
             <X size={18} />
           </button>
@@ -126,7 +124,7 @@ export default function StatsModal({
               <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-950/40 to-slate-900 border border-amber-500/30">
                 <div className="flex items-center gap-1.5 text-xs font-black text-amber-300 mb-1">
                   <BookOpen size={14} />
-                  <span>試験直前！丸暗記チートシート集</span>
+                  <span>試験前に確認する公式・数値</span>
                 </div>
                 <p className="text-[11px] text-slate-300 leading-relaxed">
                   第二種電気工事士の筆記試験で合否を分ける重要数値・公式・分類ルールの一覧です。気になる項目をタップして確認しましょう。
@@ -138,84 +136,10 @@ export default function StatsModal({
           ) : (
             /* Stats Tab */
             <>
-              {/* Estimated Play Time Card (Highlighted) */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-sky-950/90 to-slate-800 border border-sky-500/40 shadow-lg">
-                <div className="flex items-center space-x-2 text-sky-400 text-xs font-bold mb-1">
-                  <Clock size={16} />
-                  <span>全問正答までに必要な推定残り時間</span>
-                </div>
-                
-                <div className="text-2xl font-black text-white my-1 flex items-baseline gap-2">
-                  <span className="text-volt-electric">{timeEstimate.formattedText}</span>
-                </div>
-
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden my-2 border border-slate-700">
-                  <div
-                    className="bg-gradient-to-r from-sky-500 to-volt-electric h-full transition-all duration-500"
-                    style={{ width: `${timeEstimate.progressPercent}%` }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-700/60 text-center text-xs">
-                  <div>
-                    <span className="text-[10px] text-slate-400">マスター済</span>
-                    <div className="font-black text-emerald-400 text-sm">
-                      {timeEstimate.masteredCount} / {allQuestions.length}問
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400">残り未マスター</span>
-                    <div className="font-black text-rose-400 text-sm">
-                      {timeEstimate.remainingCount} 問
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400">あなたの平均速度</span>
-                    <div className="font-black text-sky-400 text-sm">
-                      {timeEstimate.avgSeconds}秒/問
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Leitner Box Progress Card */}
-              <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/70">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-200">
-                    <Brain size={15} className="text-purple-400" />
-                    <span>定着度ステップ（ライトナーBox）</span>
-                  </div>
-                  <span className="text-[10px] text-purple-300 font-bold bg-purple-950/80 px-2 py-0.5 rounded border border-purple-500/30">
-                    解答履歴から出題
-                  </span>
-                </div>
-
-                <p className="text-[11px] text-slate-400 leading-tight mb-3">
-                  連続正解すると出題間隔が伸びます。マスターは2回連続正解の目印です。日をあけても根拠を思い出せるか確認しましょう。
-                </p>
-
-                <div className="grid grid-cols-4 gap-1.5 text-center">
-                  <div className="p-2 rounded-xl bg-slate-900/80 border border-rose-500/30">
-                    <div className="text-[10px] text-rose-400 font-bold leading-tight">要復習🔥</div>
-                    <div className="text-base font-black text-white mt-1">{boxCounts[1] || 0}</div>
-                    <div className="text-[9px] text-slate-400 mt-0.5">3問以内</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-slate-900/80 border border-sky-500/30">
-                    <div className="text-[10px] text-sky-400 font-bold leading-tight">定着中🌱</div>
-                    <div className="text-base font-black text-white mt-1">{boxCounts[2] || 0}</div>
-                    <div className="text-[9px] text-slate-400 mt-0.5">約8問後</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-slate-900/80 border border-teal-500/30">
-                    <div className="text-[10px] text-teal-300 font-bold leading-tight">安定🌿</div>
-                    <div className="text-base font-black text-white mt-1">{boxCounts[3] || 0}</div>
-                    <div className="text-[9px] text-slate-400 mt-0.5">約20問後</div>
-                  </div>
-                  <div className="p-2 rounded-xl bg-slate-900/80 border border-emerald-500/40 bg-emerald-950/20">
-                    <div className="text-[10px] text-emerald-300 font-bold leading-tight">マスター👑</div>
-                    <div className="text-base font-black text-emerald-400 mt-1">{boxCounts[4] || 0}</div>
-                    <div className="text-[9px] text-emerald-300/70 mt-0.5">完了</div>
-                  </div>
-                </div>
+              <div className="p-4 rounded-2xl bg-slate-800 border border-slate-700">
+                <h4 className="font-bold text-sm">この年度の学習状況</h4>
+                <p className="mt-2 text-sm text-slate-200">解いた問題 {attempted} / {allQuestions.length}問 · 要復習 {reviewCount}問</p>
+                <p className="mt-2 text-xs text-slate-400">2回連続正解は記録上の目印です。日をあけて、根拠を思い出せるか確認しましょう。</p>
               </div>
 
               {/* Overall Summary Stats */}
@@ -248,13 +172,6 @@ export default function StatsModal({
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/70">
-                  <div className="text-xs text-slate-400">最高連勝記録</div>
-                  <div className="text-xl font-black text-amber-400 mt-1 flex items-center gap-1">
-                    <Flame size={18} className="fill-amber-400" />
-                    <span>{state.maxStreak}</span>
-                  </div>
-                </div>
 
                 <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/70">
                   <div className="text-xs text-slate-400">ブックマーク</div>
@@ -268,7 +185,7 @@ export default function StatsModal({
               <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/70 space-y-3">
                 <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-200">
                   <BarChart3 size={15} className="text-sky-400" />
-                  <span>分野別・習得度</span>
+                  <span>分野別の学習記録</span>
                 </div>
 
                 <div className="space-y-2.5">
@@ -277,7 +194,7 @@ export default function StatsModal({
                       <div className="flex justify-between text-xs">
                         <span className="text-slate-300 font-medium">{cat.name}</span>
                         <span className="text-slate-400 text-[11px]">
-                          正答率 <strong className="text-sky-400">{cat.rate}%</strong> ({cat.mastered}/{cat.total}問習得)
+                          正答率 <strong className="text-sky-400">{cat.rate}%</strong> ({cat.mastered}/{cat.total}問が2回連続正解)
                         </span>
                       </div>
                       <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
@@ -288,45 +205,6 @@ export default function StatsModal({
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              {/* Achievements / Badges Section */}
-              <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/70 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-200">
-                    <Award size={15} className="text-amber-400" />
-                    <span>獲得バッジ・実績</span>
-                  </div>
-                  <span className="text-[11px] font-bold text-amber-400">
-                    {state.badges.length} / {BADGES_DEF.length} 達成
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {BADGES_DEF.map(badge => {
-                    const isUnlocked = state.badges.includes(badge.id);
-                    return (
-                      <div
-                        key={badge.id}
-                        className={`p-2.5 rounded-xl border flex items-start space-x-2 transition ${
-                          isUnlocked
-                            ? 'bg-amber-500/10 border-amber-500/40 text-slate-200'
-                            : 'bg-slate-800/30 border-slate-800 text-slate-500 opacity-60'
-                        }`}
-                      >
-                        <span className="text-xl shrink-0">{badge.icon}</span>
-                        <div className="min-w-0">
-                          <div className={`text-xs font-bold leading-tight ${isUnlocked ? 'text-amber-300' : 'text-slate-400'}`}>
-                            {badge.name}
-                          </div>
-                          <div className="text-[10px] text-slate-400 leading-tight mt-0.5 truncate">
-                            {badge.desc}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
                 </div>
               </div>
 

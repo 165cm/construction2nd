@@ -26,3 +26,9 @@ dist-ssr
 # Cache
 .cache
 
+
+# Firebase・決済のローカル設定
+.env
+.env.*
+.firebase
+service-account*.json

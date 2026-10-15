@@ -269,7 +269,7 @@ export default function QuizCard({
         <div className="mb-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-900/90 to-sky-950/60 border border-sky-500/30 flex items-center justify-between text-xs">
           <div className="flex items-center space-x-1.5">
             <span className="text-sky-400 font-black">第1巡（全問走破中）</span>
-            <span className="text-slate-400 text-[10px]">| 自動保存</span>
+            <span className="text-slate-400 text-[10px]">| 端末に記録</span>
           </div>
           <span className="font-mono font-black text-sky-300 bg-sky-950/80 border border-sky-400/40 px-2 py-0.5 rounded-lg text-xs">
             {quizStep?.progressText || `${currentIndex + 1} / ${totalQuestions} 問`}

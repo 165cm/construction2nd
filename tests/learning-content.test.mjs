@@ -57,6 +57,7 @@ try {
             assert.match(diagram.path, /4-stem.webp$/);
             assert.ok(fs.existsSync('public' + diagram.path));
             assert.match(before, /4-stem.webp/);
+            assert.match(resultHtml, /4-stem.webp/);
             assert.match(examHtml, /4-stem.webp/);
           } else {
             assert.equal(diagram, null);

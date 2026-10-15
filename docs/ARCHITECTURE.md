@@ -136,3 +136,7 @@
 - `services/firebaseConfig.js` の公開環境変数がすべてある場合のみ、記録画面の `AccountPanel` を有効にする。
 - `users/{uid}/learning/backup` にJSON文字列・更新版・サーバー時刻を保存。更新はFirestore transactionで版を照合する。既存端末記録とクラウド記録は自動では混ぜない。
 - `firebase/firestore.rules` が本人だけの読み書きと利用権のクライアント書込禁止を保証。未定義のパスは拒否。Firebaseプロジェクト作成後に本番へ反映が必要。
+
+## 決済サーバー（準備段階）
+
+`functions/index.js` が認証付き購入・契約管理・Stripe署名検証通知を処理し、`billingPolicy.js` が価格・期限・利用権を判定する。設定と未検証範囲は `BILLING_SETUP.md`。購入受付は既定で無効、一般画面と有料データ配信への接続は未実装。

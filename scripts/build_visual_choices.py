@@ -16,4 +16,9 @@ for exam, questions in manifest.items():
             assert 0 <= box[0] < box[2] <= source.width
             assert 0 <= box[1] < box[3] <= source.height
             source.crop(box).save(output_dir / f'{number}.webp', quality=92)
+            if 'stemBox' in entry:
+                stem = tuple(round(v * scale) for v in entry['stemBox'])
+                assert 0 <= stem[0] < stem[2] <= source.width
+                assert 0 <= stem[1] < stem[3] <= source.height
+                source.crop(stem).save(output_dir / f'{number}-stem.webp', quality=92)
 print(f"Generated {sum(map(len, manifest.values()))} choice images")

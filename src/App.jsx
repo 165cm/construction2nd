@@ -7,6 +7,7 @@ import { isSoundEnabled, setSoundEnabled, playClick } from './utils/sound';
 import { prefetchHdPage, getActiveCropCoords, cropKeyForDiagram } from './utils/customCrops';
 import confetti from 'canvas-confetti';
 
+import { needsReview } from './utils/reviewFilter';
 import Header from './components/Header';
 import QuizCard from './components/QuizCard';
 import ReviewMode from './components/ReviewMode';
@@ -278,7 +279,7 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [currentQuestion, currentExamMeta, currentExamId, questionsData, quizStep.index]);
 
-  const reviewQuestionsCount = questionsData.filter(q => examState.records[q.id]?.status === 'review' || (examState.records[q.id]?.wrong > 0 && examState.records[q.id]?.status !== 'mastered')).length;
+  const reviewQuestionsCount = questionsData.filter(q => needsReview(examState.records[q.id])).length;
 
   if (currentMode === 'admin') {
     return (

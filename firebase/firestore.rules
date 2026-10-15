@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    match /users/{uid}/learning/backup {
+      allow read: if owner(uid);
+      allow create: if owner(uid) && validBackup() && request.resource.data.revision == 1;
+      allow update: if owner(uid) && validBackup() && request.resource.data.revision == resource.data.revision + 1;
+      function validBackup() {
+        return request.resource.data.keys().hasOnly(['payload', 'revision', 'updatedAt'])
+          && request.resource.data.payload is string && request.resource.data.payload.size() <= 800000
+          && request.resource.data.revision is int && request.resource.data.updatedAt == request.time;
+      }
+    }
+    // 利用権は本人が読むだけ。Stripeを確認するサーバー以外は変更不可。
+    match /users/{uid}/entitlements/{grant} { allow read: if owner(uid); allow write: if false; }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

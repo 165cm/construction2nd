@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2, Brain, BookOpen, Table } from 'lucide-react';
 import { getTodayCount, getStudyStreakDays } from '../utils/storage';
 import { downloadLearningBackup, inspectLearningBackup, restoreLearningBackup } from '../utils/backup';
@@ -6,6 +6,8 @@ import { needsReview } from '../utils/reviewFilter';
 import { playClick } from '../utils/sound';
 import { getShuffleChoicesSetting, setShuffleChoicesSetting, getAutoAdvanceMode, setAutoAdvanceMode, AUTO_ADVANCE_MODES } from '../utils/settings';
 import { CHEATSHEETS } from '../data/cheatsheets';
+import { firebaseEnabled } from '../services/firebaseConfig';
+const AccountPanel = lazy(() => import('./AccountPanel'));
 import CheatsheetAccordion from './CheatsheetAccordion';
 
 export default function StatsModal({
@@ -208,6 +210,7 @@ export default function StatsModal({
                 </div>
               </div>
 
+              {firebaseEnabled && <Suspense fallback={<p className="text-xs">アカウント設定を読み込み中…</p>}><AccountPanel /></Suspense>}
               {/* Learning Settings & Options */}
               <div className="pt-3 border-t border-slate-700/60 flex flex-col gap-2">
                 <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80 flex items-center justify-between">

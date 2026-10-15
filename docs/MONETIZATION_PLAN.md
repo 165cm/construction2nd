@@ -1,7 +1,7 @@
 # 有料化の実装方針案（2026-10-15）
 
 ユーザー指定：最新版の過去問は無料、それ以前は有料。月額480円と自動更新なし3か月980円。980円を主に案内する。
-準備状況：Stripeアカウントあり、独自ドメインなし、Supabaseアカウントあり。Firebaseを候補として検討中。料金は税込表示を想定し、公開前に運営者が確定する。
+準備状況：Stripeアカウントあり、独自ドメインなし、Supabaseアカウントあり。Firebaseを使用する方針。プロジェクトは未作成。料金は税込表示を想定し、公開前に運営者が確定する。
 
 ## 料金と導線
 
@@ -57,3 +57,7 @@ Firebase Authentication（ログイン）、Firestore（学習記録）、Cloud 
 - Stripe Google Pay：https://docs.stripe.com/google-pay
 - Supabase Googleログイン：https://supabase.com/docs/guides/auth/social-login/auth-google
 - 消費者庁・通信販売の表示：https://www.no-trouble.caa.go.jp/what/mailorder/guidelines.html
+
+## 実装状況（2026-10-16）
+
+ログイン・手動クラウドバックアップはPR #54、決済サーバーは別の下書きPRで準備。接続と購入受付は未有効化。`BILLING_SETUP.md` に検証済みの範囲と残作業を記載。料金画面と有料データ配信は後続。

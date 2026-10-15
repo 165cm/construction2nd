@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/learning-content.test.mjs && node tests/save-recovery.test.mjs",
+    "test": "node tests/learning-content.test.mjs && node tests/save-recovery.test.mjs && node tests/pricing.test.mjs",
     "test:firebase": "firebase emulators:exec --only firestore --project demo-construction2nd \"node tests/firebase-rules.test.mjs\""
   },
   "keywords": [],

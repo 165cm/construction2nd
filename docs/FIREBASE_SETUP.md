@@ -52,3 +52,9 @@ SDKのNode用通信依存 `@grpc/grpc-js` は修正版1.14.6に固定。開発�
 - https://firebase.google.com/docs/auth/web/google-signin
 - https://firebase.google.com/docs/firestore/manage-data/transactions
 - https://firebase.google.com/docs/rules/unit-tests
+
+## 最初に準備する範囲（2026-10-16）
+
+まず専用プロジェクトを作成し、プロジェクトIDだけ共有する。Google Analyticsは今回は任意でオフのままでよい。請求先の登録・Firestore作成・秘密鍵の設定は続く手順で行う。Functionsを公開する段階ではBlazeプランが必要だが、プロジェクト作成だけなら先に進められる。
+
+公式手順：https://firebase.google.com/docs/web/setup ／ https://firebase.google.com/docs/functions/get-started

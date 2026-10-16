@@ -1,3 +1,4 @@
+import { clearPrivateStudy } from './privateStudyStore';
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer, runTransaction, serverTimestamp } from 'firebase/firestore';
@@ -15,7 +16,7 @@ function getClient() {
 }
 export const observeAccount = (listener) => onAuthStateChanged(getClient().auth, listener);
 export const loginGoogle = () => signInWithPopup(getClient().auth, new GoogleAuthProvider());
-export const logoutAccount = () => signOut(getClient().auth);
+export const logoutAccount = () => { clearPrivateStudy(); return signOut(getClient().auth); };
 function requireUser(uid) {
   if (!uid || getClient().auth.currentUser?.uid !== uid) throw new Error('ログイン状態が変わりました。画面を開き直してください');
 }

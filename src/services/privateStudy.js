@@ -1,7 +1,7 @@
 import { getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { firebaseConfig, firebaseEnabled } from './firebaseConfig';
-import { getPrivateExam, privateGeneration, publishPrivateExam, isPaidExam } from './privateStudyStore';
+import { getPrivateExam, privateGeneration, publishPrivateExam, isPaidExam, renewPrivateLease, clearPrivateStudy } from './privateStudyStore';
 
 export async function loadPaidExam(examId, { report = () => {}, fetcher = fetch } = {}) {
   if (!isPaidExam(examId)) throw new Error('収録されていない年度です');
@@ -18,11 +18,14 @@ export async function loadPaidExam(examId, { report = () => {}, fetcher = fetch 
     ensureCurrent();
     const query = new URLSearchParams({ exam: examId });
     if (asset) query.set('asset', asset);
+    const startedAt = performance.now();
     const response = await fetcher(`/api/content?${query}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
     ensureCurrent();
+    if (response.status === 401 || response.status === 403) clearPrivateStudy();
     if (response.status === 401) throw new Error('ログインし直してください');
     if (response.status === 403) throw new Error('有料プランの利用期間を確認してください。記録・設定でプランを確認できます');
     if (!response.ok) throw new Error('教材を取得できませんでした。通信を確認して再試行してください');
+    if (!renewPrivateLease(Number(response.headers.get('X-Access-Expires-At')), Number(response.headers.get('X-Server-Time')), startedAt)) throw new Error('利用期間を再確認してください');
     return response;
   }
   // 再選択時もサーバーへ確認し、端末内の有無だけで利用を許可しない。

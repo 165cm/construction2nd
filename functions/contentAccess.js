@@ -22,7 +22,11 @@ export function contentHandler({ enabled, verifyToken, getGrants, readContent, n
     let user;
     try { user = await verifyToken(match[1]); } catch { return res.status(401).send('Sign in required'); }
     try {
-      if (!user?.uid || !accessSummary(await getGrants(user.uid), now()).hasAccess) return res.status(403).send('Access expired');
+      const checkedAt = now();
+      const access = user?.uid && accessSummary(await getGrants(user.uid), checkedAt);
+      if (!access?.hasAccess) return res.status(403).send('Access expired');
+      res.set('X-Access-Expires-At', String(access.expiresAt));
+      res.set('X-Server-Time', String(checkedAt));
       const content = await readContent(key);
       if (!content) return res.status(404).send('Not found');
       res.set('Content-Type', key.endsWith('.json') ? 'application/json; charset=utf-8' : key.endsWith('.webp') ? 'image/webp' : 'image/png');

@@ -31,7 +31,7 @@ async function grants(uid) { return (await grantsRef(uid).where('expiresAt', '>'
 
 export const billingAccess = onCall({ region, maxInstances: 3 }, async request => {
   const uid = uidOf(request);
-  return { ...accessSummary(await grants(uid)), billingEnabled: billingEnabled.value() };
+  return { ...accessSummary(await grants(uid)), serverNow: Date.now(), billingEnabled: billingEnabled.value() };
 });
 
 export const createCheckout = onCall(options, async request => {

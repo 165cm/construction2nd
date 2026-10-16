@@ -1,4 +1,4 @@
-import { privateContentMode, getPrivateCrops } from '../services/privateStudyStore';
+import { privateContentMode, getPrivateCrops, privateGeneration, subscribePrivateStudy } from '../services/privateStudyStore';
 // Storage helper for user-adjusted custom image crops
 //
 // トリミング設定は2か所に保存される:
@@ -250,6 +250,16 @@ export const getDisplayImageUrl = (key, defaultPath) => {
 const renderedCache = new Map(); // signature -> objectURL
 const pendingRenders = new Map(); // signature -> Promise
 
+if (privateContentMode) {
+  let lastGeneration = privateGeneration();
+  subscribePrivateStudy(() => {
+    if (lastGeneration === privateGeneration()) return;
+    lastGeneration = privateGeneration();
+    renderedCache.forEach(url => URL.revokeObjectURL(url));
+    renderedCache.clear(); pendingRenders.clear(); prefetched.clear();
+  });
+}
+
 export const cropSignature = (c) => `hd:${c.pageDir || ''}:${c.page}:${c.x}:${c.y}:${c.w}:${c.h}`;
 
 // 切り抜き位置（x, y, w, h）は、管理画面で使う縮めたページ画像（高さ 1200px の PNG）が基準。
@@ -278,6 +288,7 @@ export const prefetchHdPage = (pageDir, page) => {
 export const getCachedCropUrl = (coords) => renderedCache.get(cropSignature(coords)) || null;
 
 export const renderCropFromPage = (coords) => {
+  const generation = privateGeneration();
   const sig = cropSignature(coords);
   if (renderedCache.has(sig)) return Promise.resolve(renderedCache.get(sig));
   if (pendingRenders.has(sig)) return pendingRenders.get(sig);
@@ -303,6 +314,7 @@ export const renderCropFromPage = (coords) => {
       ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
 
       canvas.toBlob((blob) => {
+        if (privateContentMode && generation !== privateGeneration()) { reject(new Error('利用状態が変わりました')); return; }
         if (!blob) {
           reject(new Error('切り抜き画像の生成に失敗しました'));
           return;

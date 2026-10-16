@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/learning-content.test.mjs && node tests/save-recovery.test.mjs && node tests/pricing.test.mjs",
+    "test": "node tests/learning-content.test.mjs && node tests/save-recovery.test.mjs && node tests/pricing.test.mjs && node tests/private-study.test.mjs && node tests/paid-history.test.mjs",
     "test:firebase": "firebase emulators:exec --only firestore --project demo-construction2nd \"node tests/firebase-rules.test.mjs\"",
     "build:private-staging": "node scripts/build-private-content.mjs",
     "test:private-staging": "npm run build:private-staging && node tests/private-build.test.mjs"

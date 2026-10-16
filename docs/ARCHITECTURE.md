@@ -144,3 +144,7 @@
 ## 有料データの分離準備
 
 `build:private-staging` はサーバー専用の問題/画像と公開側の検証用出力を分離生成する。`functions/privateContent.js` は毎回認証・利用権を確認する。通常の公開ビルドは変更しない。アプリ側の接続は未対応で検証用出力は本番公開不可。詳細は `PRIVATE_CONTENT.md`。
+
+## 有料版の模試履歴（2026-10-17）
+
+`paidHistory.js` は有料年度の結果を問題番号と解答・正誤・点数等に限定して保存する。`ExamMode` は取得済みの現在の教材から振り返りを復元し、`ExamHistorySummary` は利用権に関係なく点数の履歴を表示する。移行は有料版のみ。詳細・現在の接続状況は `PRIVATE_CONTENT.md` を参照。

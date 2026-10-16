@@ -1,6 +1,6 @@
 # Firebase接続の準備
 
-2026-10-16：ユーザーがプロジェクト `construction2nd` とWebアプリを作成。受領した公開設定をGit対象外の `.env.local` に保存し、ビルド成功。Googleログインはユーザーが有効化済み。サポートアドレスは `construction2nd-support@googlegroups.com`。Firestoreはユーザーより作成済みの連絡。CLIで実環境を確認済み：`(default)` / Standard / Firestore Native / `asia-northeast1`。ルール適用・アプリでの実ログイン確認は未実施。本番サイトの設定・デプロイは未実施。購入受付は引き続き無効。
+2026-10-16：ユーザーがプロジェクト `construction2nd` とWebアプリを作成。受領した公開設定をGit対象外の `.env.local` に保存し、ビルド成功。Googleログインはユーザーが有効化済み。サポートアドレスは `construction2nd-support@googlegroups.com`。Firestoreはユーザーより作成済みの連絡。CLIで実環境を確認済み：`(default)` / Standard / Firestore Native / `asia-northeast1`。ユーザー承認後、本人限定Firestoreルールを実環境へ反映済み。アプリでの実ログイン・本人の保存/復元確認は未実施。本番サイトの設定・デプロイは未実施。購入受付は引き続き無効。
 
 ## このPRで用意したもの
 
@@ -61,4 +61,6 @@ SDKのNode用通信依存 `@grpc/grpc-js` は修正版1.14.6に固定。開発�
 
 ## 次の接続作業
 
-Firebase CLIログイン済み。`firestore:databases:list --project construction2nd` で対象DBの構成を読み取り確認した。次は `firebase/firestore.rules` の本人限定ルールの適用承認。Firestoreルールだけを反映し、サイト・Functions・課金の有効化は別に扱う。
+Firebase CLIログイン済み。`firestore:databases:list --project construction2nd` で対象DBの構成を読み取り確認した。ユーザーの承認を受け、`npx firebase deploy --only firestore:rules --project construction2nd --non-interactive` を実行。ルールのコンパイル・リリース・完了を確認。サイト・Functions・課金は変更していない。次は実アカウントのログインと本人の保存/復元確認。
+
+反映後、未ログインのFirestore REST読取がHTTP 403（PERMISSION_DENIED）となることを確認。検証でドキュメントは作成していない。本人アクセス/別ユーザーアクセスの実認証検証は次の段階。

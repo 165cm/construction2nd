@@ -25,6 +25,7 @@
    - ✅ PR G（#38 公開済み）：管理画面を開いた時だけ読み込む（一般の利用者の読み込みを軽く）
 
 ## 最近終わったこと（新しい順）
+- Firebase CLI認証を確認。実環境のDBは `(default)` / Standard / Native / 東京（asia-northeast1）で想定どおり。本人限定Firestoreルールの反映は承認待ち。サイト・決済は未公開のまま。
 - Firestore作成済みとのユーザー連絡を受領。実環境の構成・ルール適用は未確認。次は運営者によるFirebase CLIログイン→プロジェクト/DBの読取確認→本人限定ルールの適用確認。
 - ユーザーよりGoogleログイン有効化済みの連絡。サポートアドレスは `construction2nd-support@googlegroups.com`。次はFirestore Standard / (default) / 東京 / 本番モードの作成。実ログイン・保存確認は未実施。
 - Firebaseプロジェクト `construction2nd` とWebアプリの公開設定を受領。ローカル `.env.local` に保存（Git対象外）、ビルド確認。Googleログイン有効化・Firestore・実接続は次の手順。本番公開・購入受付は未実施。

@@ -1,3 +1,4 @@
+import ExamHistorySummary from './ExamHistorySummary';
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2, Brain, BookOpen, Table } from 'lucide-react';
 import { getTodayCount, getStudyStreakDays } from '../utils/storage';
@@ -210,6 +211,7 @@ export default function StatsModal({
                 </div>
               </div>
 
+              <ExamHistorySummary histories={state.examResults} />
               {firebaseEnabled && <Suspense fallback={<p className="text-xs">アカウント設定を読み込み中…</p>}><AccountPanel /></Suspense>}
               {/* Learning Settings & Options */}
               <div className="pt-3 border-t border-slate-700/60 flex flex-col gap-2">

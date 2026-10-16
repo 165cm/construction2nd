@@ -1,3 +1,4 @@
+import { hydrateExamResult } from '../utils/paidHistory';
 import { writeStoredJSON } from '../utils/saveRecovery';
 import React, { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
@@ -70,7 +71,7 @@ export default function ExamMode({
   const examId = currentExamMeta?.id || 'r8_1';
   const [savedSession] = useState(() => loadExamSession(examId));
   const completedSession = savedSession && resultHistory.find(result => result.id === `${examId}:${savedSession.deadline}`);
-  const initialResult = completedSession || (!savedSession ? resultHistory[0] : null);
+  const initialResult = hydrateExamResult(completedSession || (!savedSession ? resultHistory[0] : null), allQuestions);
   const [examStarted, setExamStarted] = useState(!!savedSession || !!initialResult);
   const [answers, setAnswers] = useState(() => savedSession?.answers || {}); // { [questionId]: choiceId }
   const [currentIdx, setCurrentIdx] = useState(() => savedSession?.currentIdx || 0);
@@ -257,10 +258,11 @@ export default function ExamMode({
       <div className="pb-24 animate-pop">
         <p className="text-xs text-slate-400 mb-3">{new Date(resultData.finishedAt).toLocaleString('ja-JP')} の結果 · この端末に最新10件を保存</p>
         {resultHistory.length > 1 && <label className="block text-xs mb-4">以前の結果
-          <select className="block w-full min-h-[44px] mt-1 p-2 bg-slate-800 rounded-lg" value={resultData.id} onChange={e => { setResultData(resultHistory.find(item => item.id === e.target.value)); setExpandedResultIdx(null); }}>
+          <select className="block w-full min-h-[44px] mt-1 p-2 bg-slate-800 rounded-lg" value={resultData.id} onChange={e => { setResultData(hydrateExamResult(resultHistory.find(item => item.id === e.target.value), allQuestions)); setExpandedResultIdx(null); }}>
             {resultHistory.map(item => <option key={item.id} value={item.id}>{new Date(item.finishedAt).toLocaleString('ja-JP')} · {item.score}点</option>)}
           </select>
         </label>}
+        {resultData.contentFormat === 'references-v1' && <p className="text-xs text-slate-400 mb-3">点数・正誤は受験当時の記録です。問題・解説は現在の教材を表示しています。</p>}
         {/* Pass/Fail Header Card */}
         <div className={`p-6 rounded-3xl border text-center mb-6 shadow-2xl ${
           resultData.isPassed

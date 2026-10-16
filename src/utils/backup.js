@@ -1,3 +1,4 @@
+import { sanitizeBackupValue } from './paidHistory';
 // 学習記録のバックアップ（ファイルへの書き出し・読み込み）
 // 機種変更やブラウザのデータ削除に備え、この端末に保存されている学習記録と設定をまとめて保存する。
 const BACKUP_APP_ID = 'denkou2-learning-backup';
@@ -18,7 +19,7 @@ export const createLearningBackup = () => {
   BACKUP_KEYS.forEach((key) => {
     try {
       const value = localStorage.getItem(key);
-      if (value !== null) data[key] = value;
+      if (value !== null) data[key] = sanitizeBackupValue(key, value);
     } catch (e) {
       // ignore
     }
@@ -54,7 +55,9 @@ const isValidMasteryState = (m) => {
       && Number.isFinite(result.finishedAt) && Number.isFinite(result.score) && Number.isFinite(result.timeSpent)
       && Number.isFinite(result.totalCount) && Number.isFinite(result.correctCount)
       && Array.isArray(result.details) && result.details.every(item => isPlainObject(item) && isPlainObject(item.question)
-        && typeof item.question.question === 'string' && typeof item.question.explanation === 'string'))
+        && (result.contentFormat === 'references-v1'
+          ? Number.isInteger(item.question.id) && item.question.id >= 1 && item.question.id <= 50
+          : typeof item.question.question === 'string' && typeof item.question.explanation === 'string')))
   ))) return false;
   if (m.records !== undefined && (!isPlainObject(m.records) || !Object.values(m.records).every(isPlainObject))) return false;
   if (['badges', 'bookmarks', 'responseTimes', 'recentHistory'].some(k => m[k] !== undefined && !Array.isArray(m[k]))) return false;
@@ -96,7 +99,7 @@ export const restoreLearningBackup = (backup) => {
   BACKUP_KEYS.forEach((key) => {
     const value = backup.data[key];
     if (typeof value === 'string') {
-      localStorage.setItem(key, value);
+      localStorage.setItem(key, sanitizeBackupValue(key, value));
     } else {
       localStorage.removeItem(key);
     }

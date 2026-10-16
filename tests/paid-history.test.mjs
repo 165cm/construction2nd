@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { createServer } from 'vite';
+const values = new Map();
+globalThis.localStorage = { getItem:key=>values.get(key)??null, setItem:(key,value)=>values.set(key,value), removeItem:key=>values.delete(key) };
+const server = await createServer({ define:{'import.meta.env.VITE_PRIVATE_CONTENT':JSON.stringify('true')}, server:{middlewareMode:true,hmr:false,ws:false},appType:'custom' });
+try {
+  const { compactExamResult, hydrateExamResult } = await server.ssrLoadModule('/src/utils/paidHistory.js');
+  const { getInitialState, loadState } = await server.ssrLoadModule('/src/utils/storage.js');
+  const { recordExamResult } = await server.ssrLoadModule('/src/utils/examResults.js');
+  const { createLearningBackup, inspectLearningBackup, restoreLearningBackup } = await server.ssrLoadModule('/src/utils/backup.js');
+  const { default: Summary } = await server.ssrLoadModule('/src/components/ExamHistorySummary.jsx');
+  const result = { id:'r7_2:test', finishedAt:1000, score:2, correctCount:1,totalCount:1,isPassed:false,timeSpent:30,details:[{question:{id:1,question:'SECRET_QUESTION',explanation:'SECRET_EXPLANATION',answer:'イ',choices:[{id:'イ',text:'SECRET_CHOICE'}],category:'電気理論・計算'},userAnswer:'イ',isCorrect:true}] };
+  const initial = {...getInitialState(), examResults:{r7_2:[result],r8_1:[{...result,id:'free',details:[{...result.details[0],question:{...result.details[0].question,question:'FREE_QUESTION',explanation:'FREE_EXPLANATION',choices:[]}}]}]}};
+  values.set('denkou2_mastery_state_v1',JSON.stringify(initial));
+  const migrated = loadState();
+  assert.doesNotMatch(JSON.stringify(migrated),/SECRET_QUESTION|SECRET_EXPLANATION|SECRET_CHOICE/);
+  assert.match(JSON.stringify(migrated),/FREE_QUESTION/);
+  assert.equal(migrated.examResults.r7_2[0].score,2);
+  assert.equal(migrated.examResults.r7_2[0].details[0].userAnswer,'イ');
+  assert.doesNotMatch(values.get('denkou2_mastery_state_v1'),/SECRET_/);
+  const saved = recordExamResult(getInitialState(),'r7_2',result);
+  assert.equal(saved.saved,true);
+  assert.equal(saved.nextState.totalAnswered,1);
+  assert.doesNotMatch(JSON.stringify(saved.nextState),/SECRET_/);
+  const again = recordExamResult(saved.nextState,'r7_2',result);
+  assert.equal(again.nextState.totalAnswered,1);
+  const current = {...result.details[0].question,explanation:'CURRENT_EXPLANATION'};
+  assert.equal(hydrateExamResult(compactExamResult(result),[current]).details[0].question.explanation,'CURRENT_EXPLANATION');
+  assert.equal(hydrateExamResult(compactExamResult(result),[]).details[0].question.explanation,'');
+  values.set('denkou2_mastery_state_v1',JSON.stringify(initial)); // 古いバックアップも出力時に本文を除去
+  const backup = createLearningBackup();
+  assert.doesNotMatch(JSON.stringify(backup),/SECRET_/);
+  assert.equal(inspectLearningBackup(JSON.stringify(backup)).ok,true);
+  restoreLearningBackup({data:{denkou2_mastery_state_v1:JSON.stringify(initial)}});
+  assert.doesNotMatch(values.get('denkou2_mastery_state_v1'),/SECRET_/);
+  const summary = renderToStaticMarkup(React.createElement(Summary,{histories:initial.examResults}));
+  assert.match(summary,/2点/);
+  assert.doesNotMatch(summary,/SECRET_|FREE_QUESTION/);
+  console.log('PASS: paid history migration, scoring/dedup preserved, backup import/export stripped, current-content hydration, summary without content');
+} finally { await server.close(); }

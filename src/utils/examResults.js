@@ -1,3 +1,4 @@
+import { storageSafeState } from './paidHistory';
 import { recordAnswer, saveState } from './storage';
 
 // 結果と問題ごとの解答記録を同じ保存値へまとめ、採点途中の部分保存を防ぐ。
@@ -18,5 +19,6 @@ export function recordExamResult(state, examId, result) {
     totalTimeSpentSec: nextState.totalTimeSpentSec + result.timeSpent,
     examResults: { ...nextState.examResults, [examId]: [result, ...history].slice(0, 10) }
   };
+  nextState = storageSafeState(nextState);
   return { nextState, saved: saveState(nextState) };
 }

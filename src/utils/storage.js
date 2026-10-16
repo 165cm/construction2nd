@@ -1,3 +1,4 @@
+import { storageSafeState } from './paidHistory';
 // Storage and gamification state manager
 import { writeStoredJSON } from './saveRecovery';
 import { updateSpacedRepetitionRecord } from './spacedRepetition';
@@ -174,16 +175,17 @@ export const loadState = () => {
     const state = { ...initial, ...parsed };
     state.records = state.records || {};
     state.examProgress = state.examProgress || {};
-    if (needsMigration) saveState(state);
+    const safe = storageSafeState(state);
+    if (needsMigration || JSON.stringify(safe) !== JSON.stringify(state)) saveState(safe);
 
-    return state;
+    return safe;
   } catch (e) {
     console.error('Failed to load state:', e);
     return getInitialState();
   }
 };
 
-export const saveState = (state) => writeStoredJSON(STORAGE_KEY, state);
+export const saveState = (state) => writeStoredJSON(STORAGE_KEY, storageSafeState(state));
 
 export const saveCurrentQuizPosition = (state, { examId, questionId, index, round }) => {
   const prev = (state.examProgress || {})[examId] || {};

@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "dist-private-site",
+    "ignore": ["firebase.private.json", "**/.*", "**/node_modules/**"],
+    "predeploy": ["npm run test:private-staging"],
+    "headers": [
+      { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "/index.html", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ],
+    "rewrites": [
+      { "source": "/api/content", "function": { "functionId": "privateContent", "region": "asia-northeast1" } },
+      { "source": "**", "destination": "/index.html" }
+    ]
+  },
+  "emulators": { "hosting": { "port": 5000 }, "ui": { "enabled": false } }
+}

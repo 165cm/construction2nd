@@ -1,4 +1,4 @@
-import { privateContentMode, isPaidExam, paidExamIds, getPrivateExam, subscribePrivateStudy, getPrivateVersion } from './services/privateStudyStore';
+import { privateContentMode, isPaidExam, paidExamIds, getPrivateExam, subscribePrivateStudy, getPrivateVersion, privateGeneration } from './services/privateStudyStore';
 import React, { useState, useEffect, useMemo, useRef, useSyncExternalStore, lazy, Suspense } from 'react';
 import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
 import { EXAM_LIST } from './data/examList';
@@ -31,6 +31,14 @@ export default function App() {
   const [contentBusy, setContentBusy] = useState(false);
   const [contentMessage, setContentMessage] = useState('');
   const selectionRequest = useRef(0);
+  useEffect(() => {
+    if (!privateContentMode) return;
+    let disposed = false, stop;
+    import('./services/privateStudyLifecycle').then(({ watchPrivateStudy }) => {
+      if (!disposed) stop = watchPrivateStudy();
+    }).catch(() => setContentMessage('ログイン接続を確認してください'));
+    return () => { disposed = true; stop?.(); };
+  }, []);
   const [currentExamId, setCurrentExamId] = useState(() => loadCurrentExamId());
   const currentExamMeta = useMemo(() => getExamMeta(currentExamId), [currentExamId]);
   // 管理画面で問題文を修正したら、再読み込みなしで反映する
@@ -261,6 +269,17 @@ export default function App() {
     finally { setContentBusy(false); }
   };
 
+  const accessLost = privateContentMode && isPaidExam(currentExamId) && !getPrivateExam(currentExamId);
+  useEffect(() => {
+    if (!accessLost) return;
+    selectionRequest.current++;
+    setIsWiringDiagramOpen(false);
+    setContentBusy(false);
+    setContentMessage('利用状態が変わりました。無料問題に戻りました。有料年度は再度選んで確認してください。');
+    setCurrentMode('quiz');
+    selectLoadedExam('r8_1');
+  }, [accessLost, privateVersion]);
+
   // 管理画面で問題を修正した時も、表示中の問題に最新の内容を使う
   const currentQuestion = questionsData.find(q => q.id === quizStep.question?.id) || quizStep.question || questionsData[0];
   // 高画質のページ画像を先に読み込んでおき、表示を速くする
@@ -300,6 +319,8 @@ export default function App() {
       </Suspense>
     );
   }
+
+  if (accessLost) return <div role="status" className="p-4 text-slate-200">利用状態を確認中…</div>;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
@@ -352,7 +373,7 @@ export default function App() {
 
         {currentMode === 'review' && (
           <ReviewMode
-            key={currentExamId}
+            key={`${currentExamId}:${privateGeneration()}`}
             allExamQuestions={allExamQuestions}
             fullState={state}
             currentExamId={currentExamId}
@@ -400,6 +421,7 @@ export default function App() {
 
       {/* Wiring Diagram Viewer Modal */}
       <WiringDiagramModal
+        key={privateGeneration()}
         isOpen={isWiringDiagramOpen}
         onClose={() => setIsWiringDiagramOpen(false)}
         highlightMarker={wiringHighlightMarker}

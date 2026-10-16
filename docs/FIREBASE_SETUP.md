@@ -1,6 +1,6 @@
 # Firebase接続の準備
 
-2026-10-15：プロジェクト未作成のため、本番接続はまだ行っていない。設定が空ならログイン画面もFirebase通信も有効にならない。既存の無料版はそのまま動く。
+2026-10-16：ユーザーがプロジェクト `construction2nd` とWebアプリを作成。受領した公開設定をGit対象外の `.env.local` に保存し、ビルド成功。Googleログインはユーザーが有効化済み。サポートアドレスは `construction2nd-support@googlegroups.com`。Firestoreはユーザーより作成済みの連絡。CLIで実環境を確認済み：`(default)` / Standard / Firestore Native / `asia-northeast1`。ユーザー承認後、本人限定Firestoreルールを実環境へ反映済み。アプリでの実ログイン・本人の保存/復元確認は未実施。本番サイトの設定・デプロイは未実施。購入受付は引き続き無効。
 
 ## このPRで用意したもの
 
@@ -58,3 +58,9 @@ SDKのNode用通信依存 `@grpc/grpc-js` は修正版1.14.6に固定。開発�
 まず専用プロジェクトを作成し、プロジェクトIDだけ共有する。Google Analyticsは今回は任意でオフのままでよい。請求先の登録・Firestore作成・秘密鍵の設定は続く手順で行う。Functionsを公開する段階ではBlazeプランが必要だが、プロジェクト作成だけなら先に進められる。
 
 公式手順：https://firebase.google.com/docs/web/setup ／ https://firebase.google.com/docs/functions/get-started
+
+## 次の接続作業
+
+Firebase CLIログイン済み。`firestore:databases:list --project construction2nd` で対象DBの構成を読み取り確認した。ユーザーの承認を受け、`npx firebase deploy --only firestore:rules --project construction2nd --non-interactive` を実行。ルールのコンパイル・リリース・完了を確認。サイト・Functions・課金は変更していない。次は実アカウントのログインと本人の保存/復元確認。
+
+反映後、未ログインのFirestore REST読取がHTTP 403（PERMISSION_DENIED）となることを確認。検証でドキュメントは作成していない。本人アクセス/別ユーザーアクセスの実認証検証は次の段階。

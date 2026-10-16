@@ -1,3 +1,4 @@
+import { privateContentMode, isPaidExam } from '../services/privateStudyStore';
 import React from 'react';
 import { X, CheckCircle2, Calendar, BookOpen, Sparkles, ChevronRight } from 'lucide-react';
 import { EXAM_LIST } from '../data/examList';
@@ -90,6 +91,7 @@ export default function ExamSelectModal({
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="font-bold text-sm text-slate-100">{exam.name}</span>
+                      {privateContentMode && <span className="text-xs text-amber-200">{isPaidExam(exam.id) ? '有料' : '無料'}</span>}
                       {isSelected && (
                         <span className="text-[10px] bg-sky-500/20 text-sky-300 border border-sky-400/30 px-1.5 py-0.2 rounded font-bold">
                           選択中

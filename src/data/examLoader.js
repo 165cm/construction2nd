@@ -1,3 +1,4 @@
+import { privateContentMode, isPaidExam, getPrivateExam } from '../services/privateStudyStore';
 import { EXAM_LIST, DEFAULT_EXAM_ID } from './examList';
 import r7_2 from './exams/r7_2.json';
 import r7_1 from './exams/r7_1.json';
@@ -88,6 +89,7 @@ export function getExamMeta(examId) {
 
 // 公開サイトの全端末で同じになる問題データ（元データ＋共有ファイルの修正。管理者のブラウザ内の修正は含まない）
 export function getSharedExamQuestions(examId) {
+  if (privateContentMode && isPaidExam(examId)) return getPrivateExam(examId)?.questions || [];
   const meta = getExamMeta(examId);
   const rawList = EXAM_DATA_MAP[examId] || EXAM_DATA_MAP[DEFAULT_EXAM_ID];
   
@@ -118,6 +120,7 @@ export function getSharedExamQuestions(examId) {
 }
 
 export function getExamQuestions(examId) {
+  if (privateContentMode && isPaidExam(examId)) return getSharedExamQuestions(examId);
   const meta = getExamMeta(examId);
   // 管理者画面等で保存されたローカルオーバーライド（この端末だけの手動修正）を合成反映
   const shared = getSharedExamQuestions(examId);
@@ -139,7 +142,7 @@ const STORAGE_EXAM_KEY = 'denkou2_current_exam_id';
 export function loadCurrentExamId() {
   try {
     const saved = localStorage.getItem(STORAGE_EXAM_KEY);
-    if (saved && EXAM_DATA_MAP[saved]) {
+    if (saved && EXAM_DATA_MAP[saved] && !(privateContentMode && isPaidExam(saved))) {
       return saved;
     }
   } catch (e) {

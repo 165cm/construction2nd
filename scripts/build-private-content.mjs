@@ -31,9 +31,15 @@ async function copyTree(source, destination, prefix, record = false) {
 for (const kind of ['pages', 'crops', 'choices']) for (const exam of paid) {
   await copyTree(`public/${kind}/${exam}`, `${out}/assets/${kind}/${exam}`, `assets/${kind}/${exam}`, true);
 }
+for (const exam of paid) {
+  const filename = `${out}/exams/${exam}.json`;
+  const data = JSON.parse(await fs.readFile(filename, 'utf8'));
+  data.assets = files.filter(key => key.startsWith('assets/') && key.split('/')[2] === exam).map(key => key.slice(7));
+  await fs.writeFile(filename, JSON.stringify(data));
+}
 await fs.writeFile(`${out}/manifest.json`, JSON.stringify(files.sort(), null, 2));
 // 公開側に有料JSONを取り込ませない。既存の通常ビルドは移行完了まで維持。
-await build({ publicDir: false, build: { outDir: site, emptyOutDir: true }, plugins: [{
+await build({ define: { 'import.meta.env.VITE_PRIVATE_CONTENT': JSON.stringify('true') }, publicDir: false, build: { outDir: site, emptyOutDir: true }, plugins: [{
   name: 'exclude-paid-material', enforce: 'pre',
   load(id) {
     const clean = id.split('?')[0].replaceAll('\\', '/');

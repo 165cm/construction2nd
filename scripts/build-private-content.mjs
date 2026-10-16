@@ -39,7 +39,7 @@ for (const exam of paid) {
 }
 await fs.writeFile(`${out}/manifest.json`, JSON.stringify(files.sort(), null, 2));
 // 公開側に有料JSONを取り込ませない。既存の通常ビルドは移行完了まで維持。
-await build({ define: { 'import.meta.env.VITE_PRIVATE_CONTENT': JSON.stringify('true') }, publicDir: false, build: { outDir: site, emptyOutDir: true }, plugins: [{
+await build({ base: '/', define: { 'import.meta.env.VITE_PRIVATE_CONTENT': JSON.stringify('true') }, publicDir: false, build: { outDir: site, emptyOutDir: true }, plugins: [{
   name: 'exclude-paid-material', enforce: 'pre',
   load(id) {
     const clean = id.split('?')[0].replaceAll('\\', '/');
@@ -58,4 +58,4 @@ for (const kind of ['pages', 'crops']) {
   for (const entry of await fs.readdir(`public/${kind}`, { withFileTypes: true })) if (entry.isFile()) await fs.copyFile(`public/${kind}/${entry.name}`, `${site}/${kind}/${entry.name}`);
 }
 await copyTree('public/choices/r8_1', `${site}/choices/r8_1`, '');
-console.log(`Private: ${files.length} files. Public staging output: ${site}. Not ready for deployment: client integration pending.`);
+console.log(`Private: ${files.length} files. Public staging output: ${site}. Deployment requires live integration tests and approval.`);

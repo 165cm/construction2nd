@@ -1,6 +1,6 @@
 # 決済サーバーの準備（未公開・受付停止）
 
-Firebaseプロジェクト未作成のため、実サービスへの接続・課金テストは未実施。コードの追加だけでは購入できない。`BILLING_ENABLED` は既定で false のままにする。有料問題の非公開配信、料金画面、契約表示は後続の実装。
+Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreルールは準備済み。2026-10-17時点でBlazeへの変更とStripeテスト価格は未準備。実サービスへの決済接続・課金テストは未実施。`BILLING_ENABLED` は既定で false のままにする。有料配信・料金画面・履歴移行のコードは下書きPRで準備済み。Hosting接続は `PRIVATE_HOSTING.md` を参照。
 
 ## 今回追加したもの
 

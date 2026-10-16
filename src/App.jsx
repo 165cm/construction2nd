@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { privateContentMode, isPaidExam, paidExamIds, getPrivateExam, subscribePrivateStudy, getPrivateVersion } from './services/privateStudyStore';
+import React, { useState, useEffect, useMemo, useRef, useSyncExternalStore, lazy, Suspense } from 'react';
 import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
 import { EXAM_LIST } from './data/examList';
 import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition, getExamView, recordKey, getTodayCount } from './utils/storage';
@@ -26,6 +27,10 @@ import BottomNav from './components/BottomNav';
 const AdminHub = lazy(() => import('./components/AdminHub'));
 
 export default function App() {
+  const privateVersion = useSyncExternalStore(subscribePrivateStudy, getPrivateVersion, getPrivateVersion);
+  const [contentBusy, setContentBusy] = useState(false);
+  const [contentMessage, setContentMessage] = useState('');
+  const selectionRequest = useRef(0);
   const [currentExamId, setCurrentExamId] = useState(() => loadCurrentExamId());
   const currentExamMeta = useMemo(() => getExamMeta(currentExamId), [currentExamId]);
   // 管理画面で問題文を修正したら、再読み込みなしで反映する
@@ -38,14 +43,14 @@ export default function App() {
   const questionsData = useMemo(
     () => getExamQuestions(currentExamId),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentExamId, overridesVersion]
+    [currentExamId, overridesVersion, privateVersion]
   );
 
   // 全年度の問題（弱点特訓の「全年度まとめて」で使う）
   const allExamQuestions = useMemo(
     () => EXAM_LIST.flatMap(e => getExamQuestions(e.id)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [overridesVersion]
+    [overridesVersion, privateVersion]
   );
 
   const [state, setState] = useState(() => loadState());
@@ -213,7 +218,7 @@ export default function App() {
   };
 
   // Exam Selection Handler
-  const handleSelectExam = (examId) => {
+  const selectLoadedExam = (examId) => {
     saveCurrentExamId(examId);
     setCurrentExamId(examId);
     const newQuestions = getExamQuestions(examId);
@@ -227,6 +232,33 @@ export default function App() {
       progressText: `1 / ${newQuestions.length} 問`
     });
     resetScrollToTop();
+  };
+
+  const handleSelectExam = async (examId) => {
+    const requestId = ++selectionRequest.current;
+    setContentMessage('');
+    if (privateContentMode && isPaidExam(examId)) {
+      setContentBusy(true);
+      try {
+        const { loadPaidExam } = await import('./services/privateStudy');
+        await loadPaidExam(examId, { report: (done, total) => {
+          if (requestId === selectionRequest.current) setContentMessage(`教材画像を準備中… ${done}/${total}`);
+        } });
+      } catch (error) { if (requestId === selectionRequest.current) setContentMessage(error.message); return; }
+      finally { if (requestId === selectionRequest.current) setContentBusy(false); }
+    } else setContentBusy(false);
+    if (requestId !== selectionRequest.current) return;
+    setContentMessage('');
+    selectLoadedExam(examId);
+  };
+  const loadAllPaidExams = async () => {
+    setContentBusy(true); setContentMessage('全年度の教材を読み込み中…');
+    try {
+      const { loadPaidExam } = await import('./services/privateStudy');
+      for (const id of paidExamIds) await loadPaidExam(id);
+      setContentMessage('全年度の復習を利用できます');
+    } catch (error) { setContentMessage(error.message); }
+    finally { setContentBusy(false); }
   };
 
   // 管理画面で問題を修正した時も、表示中の問題に最新の内容を使う
@@ -250,7 +282,7 @@ export default function App() {
 
   const reviewQuestionsCount = questionsData.filter(q => needsReview(examState.records[q.id])).length;
 
-  if (currentMode === 'admin') {
+  if (currentMode === 'admin' && !privateContentMode) {
     return (
       <Suspense fallback={
         <div className="min-h-screen bg-slate-950 text-slate-300 flex items-center justify-center text-sm">
@@ -284,6 +316,14 @@ export default function App() {
       />
 
       <SaveWarning />
+      {privateContentMode && <div className="w-full max-w-md mx-auto px-3 pt-2 text-xs">
+        {contentMessage && <p role="status" className="p-3 rounded-xl bg-slate-800 text-amber-200">{contentMessage}</p>}
+        <button className="min-h-[44px] text-sky-300 underline" onClick={() => setIsStatsOpen(true)}>ログイン・料金・利用期限を確認</button>
+        {currentMode === 'review' && paidExamIds.some(id => !getPrivateExam(id)) && <div>
+          <p className="text-slate-400">全年度の復習には、有料教材の読み込みが必要です。画像のため通信量が多くなります。</p>
+          <button disabled={contentBusy} className="min-h-[44px] text-sky-300 underline disabled:opacity-50" onClick={loadAllPaidExams}>全年度の教材を読み込む</button>
+        </div>}
+      </div>}
 
       {/* Main Content Area (Mobile Container) */}
       <main className="flex-1 w-full max-w-md mx-auto px-3 pt-3 pb-24">

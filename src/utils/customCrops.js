@@ -1,3 +1,4 @@
+import { privateContentMode, getPrivateCrops } from '../services/privateStudyStore';
 // Storage helper for user-adjusted custom image crops
 //
 // トリミング設定は2か所に保存される:
@@ -94,7 +95,7 @@ export const getCustomCrops = () => {
   }
 };
 
-export const getSharedOverrides = () => sharedOverrides || {};
+export const getSharedOverrides = () => privateContentMode ? { ...sharedOverrides, ...getPrivateCrops() } : sharedOverrides || {};
 
 // 座標データのみを保存（dataUrlを保存しないため、LocalStorage容量制限5MBに絶対に引っかからない）
 export const saveCustomCrop = (key, cropData) => {

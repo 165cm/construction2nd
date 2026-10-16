@@ -178,3 +178,5 @@ export const stripeWebhook = onRequest({ ...options, secrets: [stripeKey, webhoo
     return res.status(500).send('Retry later');
   }
 });
+
+export { privateContent } from './privateContent.js';

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'denkou2-pwa-cache-v2';
+const CACHE_NAME = 'denkou2-pwa-cache-v3';
 
 const PRECACHE_URLS = [
   './',
@@ -39,6 +39,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   const url = new URL(request.url);
+  // 認証・決済・有料データはキャッシュしない。失効後のオフライン再表示を防ぐ。
+  if (url.origin !== self.location.origin || request.headers.has('Authorization')
+    || url.pathname.includes('/api/')) return;
   const isImage =
     url.pathname.includes('/crops/') ||
     url.pathname.includes('/pages/') ||
@@ -51,7 +54,7 @@ self.addEventListener('fetch', (event) => {
         cache.match(request).then((cached) => {
           const networkFetch = fetch(request)
             .then((response) => {
-              if (response && response.status === 200) {
+              if (response && response.status === 200 && !/no-store|private/i.test(response.headers.get('Cache-Control') || '')) {
                 cache.put(request, response.clone());
               }
               return response;
@@ -67,7 +70,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(request)
       .then((response) => {
-        if (response && response.status === 200) {
+        if (response && response.status === 200 && !/no-store|private/i.test(response.headers.get('Cache-Control') || '')) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }

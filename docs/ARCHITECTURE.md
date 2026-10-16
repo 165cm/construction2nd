@@ -140,3 +140,7 @@
 ## 決済サーバー（準備段階）
 
 `functions/index.js` が認証付き購入・契約管理・Stripe署名検証通知を処理し、`billingPolicy.js` が価格・期限・利用権を判定する。設定と未検証範囲は `BILLING_SETUP.md`。購入受付は既定で無効、一般画面と有料データ配信への接続は未実装。
+
+## 有料データの分離準備
+
+`build:private-staging` はサーバー専用の問題/画像と公開側の検証用出力を分離生成する。`functions/privateContent.js` は毎回認証・利用権を確認する。通常の公開ビルドは変更しない。アプリ側の接続は未対応で検証用出力は本番公開不可。詳細は `PRIVATE_CONTENT.md`。

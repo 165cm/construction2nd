@@ -1,6 +1,6 @@
 # Firebase接続の準備
 
-2026-10-16：ユーザーがプロジェクト `construction2nd` とWebアプリを作成。受領した公開設定をGit対象外の `.env.local` に保存し、ビルド成功。Googleログインはユーザーが有効化済み。サポートアドレスは `construction2nd-support@googlegroups.com`。Firestore作成・実ログイン確認は未確認。本番サイトの設定・デプロイは未実施。購入受付は引き続き無効。
+2026-10-16：ユーザーがプロジェクト `construction2nd` とWebアプリを作成。受領した公開設定をGit対象外の `.env.local` に保存し、ビルド成功。Googleログインはユーザーが有効化済み。サポートアドレスは `construction2nd-support@googlegroups.com`。Firestoreはユーザーより作成済みの連絡。実環境の構成・ルール適用・実ログイン確認は未確認。本番サイトの設定・デプロイは未実施。購入受付は引き続き無効。
 
 ## このPRで用意したもの
 
@@ -58,3 +58,7 @@ SDKのNode用通信依存 `@grpc/grpc-js` は修正版1.14.6に固定。開発�
 まず専用プロジェクトを作成し、プロジェクトIDだけ共有する。Google Analyticsは今回は任意でオフのままでよい。請求先の登録・Firestore作成・秘密鍵の設定は続く手順で行う。Functionsを公開する段階ではBlazeプランが必要だが、プロジェクト作成だけなら先に進められる。
 
 公式手順：https://firebase.google.com/docs/web/setup ／ https://firebase.google.com/docs/functions/get-started
+
+## 次の接続作業
+
+Firebase CLIはこの端末で未ログイン（前回SDK設定取得時に認証エラー）。運営者がプロジェクトを管理するGoogleアカウントで `npx firebase login` を実行する。認証コード・トークンはチャットへ共有しない。ログイン後に対象プロジェクトとデータベースを読み取り確認し、用意済みルールの適用前に確認する。CLIログインだけではデプロイや課金の有効化を行わない。

@@ -1,6 +1,6 @@
 # Firebase接続の準備
 
-2026-10-16：ユーザーがプロジェクト `construction2nd` とWebアプリを作成。受領した公開設定をGit対象外の `.env.local` に保存し、ビルド成功。Googleログインの有効化・Firestore作成・実ログイン確認は未確認。本番サイトの設定・デプロイは未実施。購入受付は引き続き無効。
+2026-10-16：ユーザーがプロジェクト `construction2nd` とWebアプリを作成。受領した公開設定をGit対象外の `.env.local` に保存し、ビルド成功。Googleログインはユーザーが有効化済み。サポートアドレスは `construction2nd-support@googlegroups.com`。Firestore作成・実ログイン確認は未確認。本番サイトの設定・デプロイは未実施。購入受付は引き続き無効。
 
 ## このPRで用意したもの
 

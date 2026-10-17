@@ -50,24 +50,25 @@ export default function App() {
   const examState = useMemo(() => getExamView(state, currentExamId), [state, currentExamId]);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
   const [currentMode, setCurrentMode] = useState(() => {
-    if (typeof window !== 'undefined' && (window.location.hash === '#admin' || window.location.search.includes('admin'))) {
-      return 'admin';
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '');
+      if (['exam', 'review', 'list', 'admin'].includes(hash)) return hash;
+      if (window.location.search.includes('admin')) return 'admin';
     }
     return 'quiz';
   }); // 'quiz' | 'review' | 'exam' | 'list' | 'admin'
 
-  // URLハッシュ（#admin）の同期
+  // URLハッシュ同期
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === '#admin') {
-        setCurrentMode('admin');
-      } else if (currentMode === 'admin') {
-        setCurrentMode('quiz');
+      const hash = window.location.hash.replace('#', '');
+      if (['quiz', 'exam', 'review', 'list', 'admin'].includes(hash)) {
+        setCurrentMode(hash);
       }
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [currentMode]);
+  }, []);
 
   // Quiz position state: auto-resumes where user left off
   const [quizStep, setQuizStep] = useState(() => {

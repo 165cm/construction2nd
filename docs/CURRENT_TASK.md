@@ -120,3 +120,7 @@
 - 学習記録 LocalStorageキー名: `denkou2_mastery_state_v1`（中身は `schemaVersion: 3` で年度付きキー。旧形式は読み込み時に自動で引き継ぐ）
 - 模擬試験の途中保存 LocalStorageキー名: `denkou2_exam_session_v1`
 - トリミング調整 LocalStorageキー名: `denkou_custom_crops_v1`
+
+## 接続準備の更新（2026-10-18）
+
+ユーザー承認でStripe通知受信サーバーのみ反映成功。GET405・無署名POST400を確認。サンドボックス通知は無効、購入受付・有料配信は停止。次はStripe実通知の署名確認、ビルド成果物の保持方針、他関数と検証サイトの準備。詳しくは BILLING_SETUP.md の実接続状況。サイト公開・PRマージは未実施。

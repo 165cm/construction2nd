@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Scale, ExternalLink, ShieldCheck, BookOpen } from 'lucide-react';
+import { X, Scale, ExternalLink, ShieldCheck, BookOpen, Sparkles } from 'lucide-react';
 import { getAttributionConfig } from '../data/attribution';
 import { playClick } from '../utils/sound';
 
@@ -93,6 +93,22 @@ export default function AttributionModal({ isOpen, onClose, currentExamMeta }) {
                 <BookOpen size={14} />
                 <span className="font-bold text-[11px]">
                   電気技術者試験センター 公式サイト（Q&A・利用留意事項）
+                </span>
+              </div>
+              <ExternalLink size={13} className="shrink-0" />
+            </a>
+          </div>
+
+          {/* LP Guide Link */}
+          <div className="pt-1">
+            <a
+              href="./lp/"
+              className="p-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 flex items-center justify-between text-amber-300 hover:text-amber-200 transition"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles size={14} />
+                <span className="font-bold text-[11px]">
+                  アプリの特徴・使い方ガイド（LPを見る）
                 </span>
               </div>
               <ExternalLink size={13} className="shrink-0" />

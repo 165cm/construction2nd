@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二種電気工事士 過去問サクサク道場 | 完全無料・登録不要のWeb問題集</title>
+  <meta name="description" content="第二種電気工事士 学科試験対策の決定版！最新・過去5回分（250問）を完全収録。288dpi超高精細ピンチズーム配線図、忘却曲線自動復習、120分本番模試モード。完全無料・登録不要ですぐに学習開始できます。">
+  
+  <!-- OGP / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://165cm.github.io/construction2nd/lp/">
+  <meta property="og:title" content="第二種電気工事士 過去問サクサク道場 | 完全無料・登録不要">
+  <meta property="og:description" content="重い参考書は卒業！スキマ時間5分で合格ライン突破。超高精細配線図ビューアー＆ライトナー忘却曲線復習搭載。">
+  <meta property="og:image" content="https://165cm.github.io/construction2nd/lp/hero-electrician.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  
+  <!-- KaTeX for formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans JP"', 'sans-serif'],
+            en: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fefce8',
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+            },
+            electric: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            slateDark: '#0f172a',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .gradient-text {
+      background: linear-gradient(135deg, #2563eb 0%, #0284c7 50%, #0d9488 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-glow {
+      background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.12) 0%, rgba(254, 240, 138, 0.15) 50%, transparent 80%);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans flex flex-col min-h-screen">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="../" class="flex items-center gap-2.5 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-slate-900 shadow-sm shadow-amber-500/20 group-hover:scale-105 transition-transform">
+          <svg class="w-5 h-5 text-slate-900" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-amber-600 tracking-wider">第二種電気工事士</span>
+          <span class="text-base font-extrabold text-slate-900 leading-tight">過去問サクサク道場</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
+        <a href="#features" class="hover:text-electric-600 transition-colors">6つの特長</a>
+        <a href="#screens" class="hover:text-electric-600 transition-colors">画面紹介</a>
+        <a href="#try-mini-quiz" class="hover:text-electric-600 transition-colors">3秒お試し</a>
+        <a href="#faq" class="hover:text-electric-600 transition-colors">よくある質問</a>
+      </nav>
+
+      <!-- CTA Button -->
+      <div class="flex items-center gap-3">
+        <a href="../" class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 transition-all">
+          <span>今すぐ解く</span>
+          <span class="hidden sm:inline text-xs bg-white/20 px-1.5 py-0.5 rounded text-white font-medium">無料</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow">
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="relative pt-10 sm:pt-16 pb-16 sm:pb-24 overflow-hidden hero-glow">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <!-- Left Text Column -->
+          <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <!-- Badges -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100/90 border border-amber-300/80 text-amber-900 text-xs sm:text-sm font-bold shadow-sm">
+              <span class="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+              <span>完全無料・会員登録不要ですぐ使える！</span>
+            </div>
+
+            <!-- Main Catchphrase -->
+            <h1 class="text-3xl sm:text-5xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.25]">
+              重い過去問集は、もう卒業。<br>
+              <span class="gradient-text">スキマ時間5分</span>で合格ライン突破！
+            </h1>
+
+            <p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              最新5回分（全250問）の公式正答に完全準拠。<br class="hidden sm:inline">
+              スマホでもくっきり読める<strong class="text-slate-800 font-bold">288dpi超高精細配線図</strong>、忘却曲線を応用した<strong class="text-slate-800 font-bold">自動弱点復習</strong>、本番の臨場感を再現する<strong class="text-slate-800 font-bold">120分模試</strong>まで、合格に必要なすべてをブラウザ1つに凝縮しました。
+            </p>
+
+            <!-- CTA Actions -->
+            <div class="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <a href="../" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg font-extrabold shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 active:scale-[0.98] transition-all transform hover:-translate-y-0.5">
+                <svg class="w-6 h-6 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                <span>今すぐ無料で学習をはじめる</span>
+              </a>
+              <a href="#features" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-300 shadow-sm transition-colors">
+                <span>特長を詳しく見る</span>
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </a>
+            </div>
+
+            <!-- Trust Points -->
+            <div class="pt-3 flex flex-wrap items-center justify-center lg:justify-start gap-y-2 gap-x-6 text-xs sm:text-sm text-slate-500 font-medium">
+              <div class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>メールアドレス登録不要</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>スマホ・PC・タブレット対応</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>オフラインPWA対応</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Hero Visual Column -->
+          <div class="lg:col-span-5 relative">
+            <div class="relative mx-auto max-w-sm sm:max-w-md">
+              <!-- Decorative Backdrop -->
+              <div class="absolute -inset-2 bg-gradient-to-tr from-amber-300 via-blue-400 to-indigo-500 rounded-3xl opacity-30 blur-2xl transform rotate-1"></div>
+              
+              <!-- Card Container -->
+              <div class="relative bg-white p-3 sm:p-4 rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden">
+                <!-- Generated Hero Mascot -->
+                <img src="./hero-electrician.jpg" alt="第二種電気工事士 合格学習イメージ" class="w-full h-auto rounded-2xl object-cover shadow-sm" loading="eager">
+
+                <!-- Floating Micro Cards -->
+                <div class="absolute top-7 left-6 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-lg border border-slate-100 flex items-center gap-2 transform -rotate-2 hover:rotate-0 transition-transform">
+                  <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-sm">
+                    ✓
+                  </div>
+                  <div class="text-left">
+                    <p class="text-[10px] text-slate-400 font-semibold leading-tight">即時判定</p>
+                    <p class="text-xs font-bold text-slate-800">5秒で要点解説！</p>
+                  </div>
+                </div>
+
+                <div class="absolute bottom-8 right-6 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-xl shadow-lg border border-slate-100 flex items-center gap-2.5 transform rotate-2 hover:rotate-0 transition-transform">
+                  <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                  <div class="text-left">
+                    <p class="text-[10px] text-slate-400 font-semibold leading-tight">超高精細288dpi</p>
+                    <p class="text-xs font-bold text-slate-800">配線図ピンチズーム</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== STATS NUMBERS ==================== -->
+    <section class="border-y border-slate-200 bg-white py-10">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div class="p-3">
+            <p class="text-3xl sm:text-4xl font-extrabold text-blue-600 font-en tracking-tight">250<span class="text-lg font-bold text-slate-700 ml-1">問</span></p>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">最新5回分（R8上期〜R6下期）</p>
+          </div>
+          <div class="p-3">
+            <p class="text-3xl sm:text-4xl font-extrabold text-amber-500 font-en tracking-tight">0<span class="text-lg font-bold text-slate-700 ml-1">円</span></p>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">完全無料・広告登録なし</p>
+          </div>
+          <div class="p-3">
+            <p class="text-3xl sm:text-4xl font-extrabold text-emerald-600 font-en tracking-tight">288<span class="text-lg font-bold text-slate-700 ml-1">dpi</span></p>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">拡大しても潰れない高精細図面</p>
+          </div>
+          <div class="p-3">
+            <p class="text-3xl sm:text-4xl font-extrabold text-indigo-600 font-en tracking-tight">16<span class="text-lg font-bold text-slate-700 ml-1">種</span></p>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">直前要点チートシート収録</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PAIN POINTS (BEFORE vs AFTER) ==================== -->
+    <section class="py-16 sm:py-20 bg-slate-50">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+          <span class="text-xs font-bold text-blue-600 tracking-wider uppercase">受験生のリアルな悩み</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">こんな「過去問あるある」で挫折していませんか？</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Traditional Problems -->
+          <div class="bg-red-50/60 rounded-3xl p-6 sm:p-8 border border-red-200/80 space-y-4">
+            <div class="flex items-center gap-2 text-red-600 font-bold text-base">
+              <span class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-sm font-black">✕</span>
+              <span>従来の紙の参考書・無料PDF</span>
+            </div>
+            <ul class="space-y-3.5 text-sm text-slate-700">
+              <li class="flex items-start gap-2.5">
+                <span class="text-red-500 font-bold">・</span>
+                <span>重くてかさばり、通勤電車やカフェで広げられない</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-red-500 font-bold">・</span>
+                <span>スマホ画面だと配線図の文字や材料写真が小さくて読めない</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-red-500 font-bold">・</span>
+                <span>間違えた問題のふせん貼りや抽出復習に時間ばかり取られる</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-red-500 font-bold">・</span>
+                <span>本番（120分50問）のペース配分やマークシートの感覚がつかめない</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Solution with App -->
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50/80 rounded-3xl p-6 sm:p-8 border border-blue-200/90 shadow-sm space-y-4">
+            <div class="flex items-center gap-2 text-blue-700 font-bold text-base">
+              <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-black">◎</span>
+              <span>過去問サクサク道場なら！</span>
+            </div>
+            <ul class="space-y-3.5 text-sm text-slate-800">
+              <li class="flex items-start gap-2.5">
+                <span class="text-blue-600 font-bold">✓</span>
+                <span><strong>スマホ1台で片手操作！</strong> 通勤・昼休みの1問5分でいつでも即再開</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-blue-600 font-bold">✓</span>
+                <span><strong>288dpiピンチズーム配線図！</strong> 器具番号も指先で鮮明に拡大</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-blue-600 font-bold">✓</span>
+                <span><strong>忘却曲線エンジンが自動出題！</strong> 苦手な問題だけが自然と優先復習される</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-blue-600 font-bold">✓</span>
+                <span><strong>120分カウントダウン模試＆マークシート！</strong> 本番そっくりの実戦形式</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Visual Badges banner -->
+        <div class="mt-8 rounded-2xl overflow-hidden shadow-md border border-slate-200 bg-white p-2">
+          <img src="./features-badge.jpg" alt="完全無料、配線図ズーム、忘却曲線暗記" class="w-full h-auto rounded-xl object-contain max-h-56 mx-auto">
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 6 KEY FEATURES ==================== -->
+    <section id="features" class="py-16 sm:py-24 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+          <span class="text-xs font-bold text-blue-600 tracking-wider uppercase">こだわり抜いた機能</span>
+          <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-2">合格を最短ルートへ導く6つの特長</h2>
+          <p class="text-slate-600 text-sm sm:text-base mt-3">電気工事士の試験特性を徹底分析し、独学合格に必要な機能だけを磨き上げました。</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          
+          <!-- Feature 1 -->
+          <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200/80 hover:shadow-xl hover:border-blue-300 transition-all group flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-black text-lg mb-4 group-hover:scale-110 transition-transform">
+                01
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">最新5回分（全250問）完全網羅</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                令和8年上期〜令和6年下期までの公式試験問題を完全収録。本番と全く同一の出題順・図面・選択肢で実戦感覚が身につきます。
+              </p>
+            </div>
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+              <img src="./screenshots/screen-quiz-mobile.png" alt="問題演習画面" class="w-full h-48 object-cover object-top" loading="lazy">
+            </div>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200/80 hover:shadow-xl hover:border-blue-300 transition-all group flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-black text-lg mb-4 group-hover:scale-110 transition-transform">
+                02
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">288dpi 超高精細ピンチズーム配線図</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                「配線図の文字が小さくて読めない」問題を完全解決。問31〜50の配線図をワンタップで拡大。スマホでもクッキリ鮮明に確認できます。
+              </p>
+            </div>
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white p-3 flex items-center justify-center bg-gradient-to-tr from-slate-900 to-slate-800 text-white text-xs h-48">
+              <div class="text-center space-y-2">
+                <span class="inline-block px-3 py-1 bg-amber-400 text-slate-900 font-extrabold rounded-full text-xs">特許級の鮮明さ</span>
+                <p class="font-bold text-sm">288dpi ベクターレンダリング</p>
+                <p class="text-[11px] text-slate-300">ピンチ＆ドラッグで自由自在に拡大縮小</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200/80 hover:shadow-xl hover:border-blue-300 transition-all group flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-lg mb-4 group-hover:scale-110 transition-transform">
+                03
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">ライトナー忘却曲線（SRS）自動復習</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                間違えた問題や自信のない問題を自動判別。脳の記憶定着タイミングに合わせて出題頻度を最適化し、無駄な復習を徹底排除します。
+              </p>
+            </div>
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+              <img src="./screenshots/screen-review-mobile.png" alt="復習モード画面" class="w-full h-48 object-cover object-top" loading="lazy">
+            </div>
+          </div>
+
+          <!-- Feature 4 -->
+          <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200/80 hover:shadow-xl hover:border-blue-300 transition-all group flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-lg mb-4 group-hover:scale-110 transition-transform">
+                04
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">直前用16種 要点早見表チートシート</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                「電線の許容電流」「リングスリーブ刻印」「接地工事の区分」など、試験で必ず問われる暗記事項をコンパクトな表形式で全網羅。
+              </p>
+            </div>
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+              <img src="./screenshots/screen-pc-review.png" alt="要点チートシート" class="w-full h-48 object-cover object-top" loading="lazy">
+            </div>
+          </div>
+
+          <!-- Feature 5 -->
+          <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200/80 hover:shadow-xl hover:border-blue-300 transition-all group flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-black text-lg mb-4 group-hover:scale-110 transition-transform">
+                05
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">120分 本番模試＆マークシート</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                120分のカウントダウンタイマーと50問のマークシート一覧を搭載。本番さながらの緊張感と時間配分シミュレーションが可能です。
+              </p>
+            </div>
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+              <img src="./screenshots/screen-exam-mobile.png" alt="模試モード画面" class="w-full h-48 object-cover object-top" loading="lazy">
+            </div>
+          </div>
+
+          <!-- Feature 6 -->
+          <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200/80 hover:shadow-xl hover:border-blue-300 transition-all group flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-black text-lg mb-4 group-hover:scale-110 transition-transform">
+                06
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">登録不要・完全ローカル保存・PWA</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                学習データはお使いの端末に暗号化保存され、個人情報収集はゼロ。ホーム画面に追加すれば電波の届きにくい地下鉄でもサクサク動きます。
+              </p>
+            </div>
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+              <img src="./screenshots/screen-list-mobile.png" alt="問題一覧画面" class="w-full h-48 object-cover object-top" loading="lazy">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN GALLERY / TEST PLAY ==================== -->
+    <section id="screens" class="py-16 sm:py-24 bg-slate-900 text-white overflow-hidden">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+          <span class="text-xs font-bold text-amber-400 tracking-wider uppercase">実機スクリーンショット</span>
+          <h2 class="text-3xl sm:text-4xl font-black mt-2">実際の学習画面をご覧ください</h2>
+          <p class="text-slate-400 text-sm sm:text-base mt-2">無駄な装飾を排し、問題に全集中できるクリーンなインターフェースです。</p>
+        </div>
+
+        <!-- Gallery Tabs -->
+        <div class="flex justify-center gap-2 mb-8 flex-wrap">
+          <button onclick="switchScreen('quiz')" id="tab-quiz" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white transition-all shadow-md">
+            ① 問題演習画面
+          </button>
+          <button onclick="switchScreen('exam')" id="tab-exam" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+            ② 120分模試・マークシート
+          </button>
+          <button onclick="switchScreen('review')" id="tab-review" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+            ③ 弱点特訓＆チートシート
+          </button>
+          <button onclick="switchScreen('pc')" id="tab-pc" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+            ④ PC・タブレット大画面
+          </button>
+        </div>
+
+        <!-- Screen Preview Container -->
+        <div class="relative max-w-4xl mx-auto bg-slate-950 p-4 sm:p-6 rounded-3xl border border-slate-800 shadow-2xl flex items-center justify-center min-h-[460px]">
+          
+          <!-- Screen 1: Quiz -->
+          <div id="screen-quiz" class="screen-view transition-opacity duration-300 max-w-xs sm:max-w-sm mx-auto text-center">
+            <img src="./screenshots/screen-quiz-mobile.png" alt="問題演習画面" class="rounded-2xl border border-slate-700 shadow-xl mx-auto max-h-[600px]">
+            <p class="text-slate-400 text-xs mt-3">一問一答でサクサク回答。選択肢をタップした瞬間に判定と解説が表示されます。</p>
+          </div>
+
+          <!-- Screen 2: Exam -->
+          <div id="screen-exam" class="screen-view transition-opacity duration-300 max-w-xs sm:max-w-sm mx-auto text-center hidden">
+            <img src="./screenshots/screen-exam-mobile.png" alt="120分模試画面" class="rounded-2xl border border-slate-700 shadow-xl mx-auto max-h-[600px]">
+            <p class="text-slate-400 text-xs mt-3">本番と同じ50問マークシート形式。残り時間タイマーで本番さながらの訓練が可能。</p>
+          </div>
+
+          <!-- Screen 3: Review -->
+          <div id="screen-review" class="screen-view transition-opacity duration-300 max-w-xs sm:max-w-sm mx-auto text-center hidden">
+            <img src="./screenshots/screen-review-mobile.png" alt="弱点特訓画面" class="rounded-2xl border border-slate-700 shadow-xl mx-auto max-h-[600px]">
+            <p class="text-slate-400 text-xs mt-3">間違えた問題・ブックマークした問題だけを一括特訓。直前チートシートも閲覧可能。</p>
+          </div>
+
+          <!-- Screen 4: PC -->
+          <div id="screen-pc" class="screen-view transition-opacity duration-300 max-w-3xl mx-auto text-center hidden">
+            <img src="./screenshots/screen-pc-quiz.png" alt="PC大画面" class="rounded-2xl border border-slate-700 shadow-xl mx-auto max-h-[500px]">
+            <p class="text-slate-400 text-xs mt-3">PCやiPadの大画面にも完全最適化。キーボードショートカットや広々とした図面確認ができます。</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== INTERACTIVE MINI-QUIZ (3秒お試し) ==================== -->
+    <section id="try-mini-quiz" class="py-16 sm:py-24 bg-gradient-to-b from-blue-50 to-white">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
+            <span>⚡️ インタラクティブ体験</span>
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">実際の過去問を1問解いてみよう！</h2>
+          <p class="text-slate-600 text-sm mt-1">タップするだけでサクサク動く快感を今すぐ体験できます。</p>
+        </div>
+
+        <!-- Interactive Quiz Card -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/90 relative">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">令和8年度 上期 問1</span>
+            <span class="text-xs text-slate-400 font-medium">一般問題 / 電気理論</span>
+          </div>
+
+          <p class="text-base sm:text-lg font-bold text-slate-800 mb-6 leading-relaxed">
+            図のような回路において、抵抗 4 Ω と誘導性リアクタンス 3 Ω が直列に接続され、電源電圧 100 V が加わっている。回路のインピーダンス \(Z\) [Ω] の値として、正しいものはどれか。
+          </p>
+
+          <!-- Choices -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="mini-quiz-choices">
+            <button onclick="handleChoice(1, false)" class="choice-btn text-left p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 font-medium text-sm text-slate-700 transition-all flex items-center justify-between">
+              <span>イ. 1</span>
+              <span class="choice-badge text-xs px-2 py-0.5 rounded font-bold"></span>
+            </button>
+            <button onclick="handleChoice(2, false)" class="choice-btn text-left p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 font-medium text-sm text-slate-700 transition-all flex items-center justify-between">
+              <span>ロ. 3.5</span>
+              <span class="choice-badge text-xs px-2 py-0.5 rounded font-bold"></span>
+            </button>
+            <button onclick="handleChoice(3, true)" class="choice-btn text-left p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 font-medium text-sm text-slate-700 transition-all flex items-center justify-between">
+              <span>ハ. 5</span>
+              <span class="choice-badge text-xs px-2 py-0.5 rounded font-bold"></span>
+            </button>
+            <button onclick="handleChoice(4, false)" class="choice-btn text-left p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 font-medium text-sm text-slate-700 transition-all flex items-center justify-between">
+              <span>ニ. 7</span>
+              <span class="choice-badge text-xs px-2 py-0.5 rounded font-bold"></span>
+            </button>
+          </div>
+
+          <!-- Result Explanation (Hidden initially) -->
+          <div id="quiz-result" class="hidden mt-6 pt-5 border-t border-slate-100">
+            <div id="result-status-box" class="p-4 rounded-2xl mb-4 font-bold flex items-center gap-3">
+              <!-- Dynamically populated -->
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl text-xs sm:text-sm text-slate-700 space-y-2 border border-slate-200/80">
+              <p class="font-bold text-slate-900">💡 5秒要点解説：</p>
+              <p>直列回路のインピーダンスは、抵抗 \(R\) とリアクタンス \(X\) のベクトル合成で求めます。</p>
+              <p class="font-mono bg-white p-2.5 rounded-lg border border-slate-200 text-slate-800">
+                \(Z = \sqrt{R^2 + X^2} = \sqrt{4^2 + 3^2} = \sqrt{16 + 9} = \sqrt{25} = 5\ [\Omega]\)
+              </p>
+              <p class="text-slate-500">（3:4:5 の直角三角形の比率を覚えておくと計算不要で瞬殺できます！）</p>
+            </div>
+            <div class="mt-5 text-center">
+              <a href="../" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all">
+                <span>アプリを開いて全問に挑戦する</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== FAQ ==================== -->
+    <section id="faq" class="py-16 sm:py-20 bg-slate-50">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-12">
+          <span class="text-xs font-bold text-blue-600 tracking-wider uppercase">安心・明瞭</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">よくある質問</h2>
+        </div>
+
+        <div class="space-y-4">
+          <!-- FAQ 1 -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <button onclick="toggleFaq(1)" class="w-full text-left px-6 py-4 font-bold text-slate-800 flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+              <span>Q. 本当に完全無料ですか？後から課金されませんか？</span>
+              <svg id="faq-icon-1" class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-1" class="hidden px-6 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+              はい、完全無料です。すべての過去問・解説・機能をご利用いただけます。有料プランや課金要素は一切ございません。
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <button onclick="toggleFaq(2)" class="w-full text-left px-6 py-4 font-bold text-slate-800 flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+              <span>Q. アカウント登録やメールアドレスの入力は必要ですか？</span>
+              <svg id="faq-icon-2" class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-2" class="hidden px-6 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+              一切不要です。サイトを開いた瞬間に学習を開始できます。学習進捗はお使いのブラウザ（LocalStorage）に自動保存されます。
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <button onclick="toggleFaq(3)" class="w-full text-left px-6 py-4 font-bold text-slate-800 flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+              <span>Q. スマートフォンとパソコンの両方で使えますか？</span>
+              <svg id="faq-icon-3" class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-3" class="hidden px-6 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+              iPhone、Android、iPad、PC（Windows/Mac）すべての最新ブラウザでご利用いただけます。スマートフォンでは「ホーム画面に追加」を行うことで、アプリのように全画面で起動できます。
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <button onclick="toggleFaq(4)" class="w-full text-left px-6 py-4 font-bold text-slate-800 flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+              <span>Q. 電波が悪い場所やオフラインでも使えますか？</span>
+              <svg id="faq-icon-4" class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="faq-content-4" class="hidden px-6 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+              PWA（Progressive Web App）キャッシュ技術に対応しており、一度アクセスすれば地下鉄などの通信環境が不安定な場所でも問題なく演習を継続できます。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== FINAL CTA ==================== -->
+    <section class="py-16 sm:py-24 bg-gradient-to-tr from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
+      <!-- Glow background -->
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent"></div>
+      
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10 space-y-8">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-amber-300 text-xs sm:text-sm font-bold border border-white/10 backdrop-blur-md">
+          <span>合格への最短チケットはここにあります</span>
+        </div>
+
+        <h2 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+          さあ、今日から。<br class="hidden sm:inline">
+          サクサク過去問を解き進めよう！
+        </h2>
+
+        <p class="text-slate-300 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+          登録不要・完全無料。いまこの瞬間からすぐにスタートできます。
+        </p>
+
+        <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="../" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 text-lg font-black shadow-xl shadow-yellow-500/20 active:scale-95 transition-all">
+            <svg class="w-6 h-6 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+            <span>完全無料で過去問を解く（登録不要）</span>
+          </a>
+        </div>
+
+        <p class="text-xs text-slate-400">
+          ※ 電気技術者試験センターの公式公表過去問（令和8年上期〜令和6年下期）に基づき制作しています。
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-slate-950 text-slate-400 border-t border-slate-800/80 py-8 text-xs">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-5 h-5 rounded bg-amber-400 flex items-center justify-center text-slate-950 font-bold text-[10px]">電</span>
+        <span class="font-bold text-slate-200">第二種電気工事士 過去問サクサク道場</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="../" class="hover:text-white transition-colors">アプリを開く</a>
+        <a href="https://github.com/165cm/construction2nd" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">GitHub Repository</a>
+      </div>
+      <div class="text-slate-500">
+        © 2026 第二種電気工事士 過去問サクサク道場. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== STICKY FLOATING CTA BAR ==================== -->
+  <aside id="sticky-cta" class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 py-3 px-4 shadow-2xl transform translate-y-full transition-transform duration-300 flex items-center justify-between max-w-2xl mx-auto rounded-t-2xl sm:bottom-4 sm:rounded-2xl sm:border">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center text-slate-900 font-black text-sm shadow-sm">
+        ⚡️
+      </div>
+      <div class="hidden sm:block">
+        <p class="text-xs font-bold text-slate-900">第二種電気工事士 過去問サクサク道場</p>
+        <p class="text-[11px] text-slate-500">全250問・登録不要で即スタート</p>
+      </div>
+    </div>
+    <a href="../" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-md active:scale-95 transition-all">
+      <span>今すぐ解く（無料）</span>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+      </svg>
+    </a>
+  </aside>
+
+  <!-- Interactive Scripts -->
+  <script>
+    // Screen switcher for gallery
+    function switchScreen(screenKey) {
+      const screens = ['quiz', 'exam', 'review', 'pc'];
+      screens.forEach(key => {
+        const el = document.getElementById(`screen-${key}`);
+        const tab = document.getElementById(`tab-${key}`);
+        if (key === screenKey) {
+          el.classList.remove('hidden');
+          tab.classList.remove('bg-slate-800', 'text-slate-300');
+          tab.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+        } else {
+          el.classList.add('hidden');
+          tab.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+          tab.classList.add('bg-slate-800', 'text-slate-300');
+        }
+      });
+    }
+
+    // Mini quiz handler
+    let quizAnswered = false;
+    function handleChoice(choiceNum, isCorrect) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+
+      const buttons = document.querySelectorAll('#mini-quiz-choices button');
+      buttons.forEach((btn, idx) => {
+        btn.classList.add('cursor-not-allowed', 'opacity-60');
+        const badge = btn.querySelector('.choice-badge');
+        if (idx === 2) { // correct choice (ハ. 5)
+          btn.classList.remove('opacity-60');
+          btn.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900');
+          badge.textContent = '正解';
+          badge.classList.add('bg-emerald-500', 'text-white');
+        } else if (idx === choiceNum - 1 && !isCorrect) {
+          btn.classList.remove('opacity-60');
+          btn.classList.add('bg-red-50', 'border-red-400', 'text-red-900');
+          badge.textContent = '不正解';
+          badge.classList.add('bg-red-500', 'text-white');
+        }
+      });
+
+      const resultBox = document.getElementById('quiz-result');
+      const statusBox = document.getElementById('result-status-box');
+      resultBox.classList.remove('hidden');
+
+      if (isCorrect) {
+        statusBox.className = 'p-4 rounded-2xl mb-4 font-bold flex items-center gap-3 bg-emerald-100 text-emerald-800 border border-emerald-300';
+        statusBox.innerHTML = `
+          <span class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black">✓</span>
+          <div>
+            <p class="text-sm sm:text-base font-extrabold">正解！お見事です！</p>
+            <p class="text-xs font-normal text-emerald-700">三平方の定理（3:4:5）で瞬時に解ける定番問題です。</p>
+          </div>
+        `;
+      } else {
+        statusBox.className = 'p-4 rounded-2xl mb-4 font-bold flex items-center gap-3 bg-red-100 text-red-800 border border-red-300';
+        statusBox.innerHTML = `
+          <span class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-black">✕</span>
+          <div>
+            <p class="text-sm sm:text-base font-extrabold">惜しい！正解は「ハ. 5」です</p>
+            <p class="text-xs font-normal text-red-700">直列インピーダンスは単純な足し算（4+3=7）ではなくベクトル合成します。</p>
+          </div>
+        `;
+      }
+    }
+
+    // FAQ Accordion
+    function toggleFaq(num) {
+      const content = document.getElementById(`faq-content-${num}`);
+      const icon = document.getElementById(`faq-icon-${num}`);
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+
+    // Sticky CTA scroll detection
+    window.addEventListener('scroll', () => {
+      const stickyCta = document.getElementById('sticky-cta');
+      if (window.scrollY > 400) {
+        stickyCta.classList.remove('translate-y-full');
+      } else {
+        stickyCta.classList.add('translate-y-full');
+      }
+    });
+  </script>
+</body>
+</html>

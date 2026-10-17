@@ -81,5 +81,14 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        lp: fileURLToPath(new URL('./lp/index.html', import.meta.url))
+      }
+    }
   }
 })
+

@@ -65,3 +65,9 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 順次作業の依頼を受けサンドボックス通知先を有効化。個人情報なしの専用テスト顧客と0円請求書を作成・確定し、Stripe自身の `invoice.paid` を発生させた。請求書 `in_1URsZXEVrGT4ZD0cDnhn8IP5`、イベント `evt_1URsZYEVrGT4ZD0cltW9MGqq`、livemode=false、pending_webhooks=0を確認。受信側の同時刻ログに処理エラーなし。通知の疎通を確認したが、0円かつアプリ利用者と未対応のため利用権付与・有償プラン購入の検証ではない。テスト記録は追跡用に保持。通知先は現在有効、購入受付は停止のまま。
 
 次の反映予定は `billingAccess`、`createCheckout`、`createBillingPortal`、`privateContent` の4関数（東京）。BILLING_ENABLED=false / PRIVATE_CONTENT_ENABLED=falseを維持し、未認証拒否を検証する。サイトは有料教材を除去した検証出力で `construction2nd.web.app` に配置予定。公開前にユーザー承認が必要。GitHub PagesとPRのマージは対象外。
+
+### 検証サイトと残り関数（2026-10-18）
+
+ユーザー承認で `billingAccess` / `createCheckout` / `createBillingPortal` / `privateContent` を東京へ反映成功。前3つは未認証POSTに401 UNAUTHENTICATED。有料配信は停止設定により503、private/no-storeを確認。
+
+`firebase.private.json` でHostingを反映し、https://construction2nd.web.app を検証用として公開。事前の有料200問分離・画像除外テスト成功。ブラウザで無料最新年度の問題・ログイン導線・Googleログインボタンを確認。Hosting経由 `/api/content?exam=r7_2` も503/no-store。購入受付と有料配信は引き続き無効。Google本人ログイン・クラウド保存/復元はユーザー確認待ち。GitHub Pages・PRマージは変更なし。

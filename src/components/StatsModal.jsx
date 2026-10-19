@@ -1,3 +1,4 @@
+import HelpTip from './HelpTip';
 import ExamHistorySummary from './ExamHistorySummary';
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2, Brain, BookOpen, Table } from 'lucide-react';
@@ -142,7 +143,7 @@ export default function StatsModal({
               <div className="p-4 rounded-2xl bg-slate-800 border border-slate-700">
                 <h4 className="font-bold text-sm">この年度の学習状況</h4>
                 <p className="mt-2 text-sm text-slate-200">解いた問題 {attempted} / {allQuestions.length}問 · 要復習 {reviewCount}問</p>
-                <p className="mt-2 text-xs text-slate-400">2回連続正解は記録上の目印です。日をあけて、根拠を思い出せるか確認しましょう。</p>
+                <HelpTip label="学習状況の目印について">2回連続正解は記録上の目印です。日をあけて、根拠を思い出せるか確認しましょう。</HelpTip>
               </div>
 
               {/* Overall Summary Stats */}
@@ -223,11 +224,10 @@ export default function StatsModal({
                         {isShuffle ? 'ON（推奨）' : 'OFF'}
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      選択肢の位置（並び順）をランダム化し、位置覚えを防いで実戦力をつけます。
-                    </p>
+                    <HelpTip label="選択肢シャッフルについて">選択肢の並び順を変え、位置だけで答えを覚えるのを防ぎます。</HelpTip>
                   </div>
                   <button
+                    aria-label="選択肢シャッフル" aria-pressed={isShuffle}
                     onClick={() => {
                       playClick();
                       const next = !isShuffle;
@@ -267,17 +267,13 @@ export default function StatsModal({
                       </button>
                     ))}
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1.5">
-                    {AUTO_ADVANCE_MODES.find(m => m.id === autoAdvance)?.desc}
-                  </p>
+                  <HelpTip label="自動送りについて">{AUTO_ADVANCE_MODES.find(m => m.id === autoAdvance)?.desc}</HelpTip>
                 </div>
 
                 {/* 学習記録のバックアップ */}
                 <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80">
                   <div className="text-xs font-bold text-white">💾 学習記録のバックアップ</div>
-                  <p className="text-[10px] text-slate-400 mt-0.5">
-                    機種変更やブラウザのデータ削除に備えて、ファイルに保存できます。
-                  </p>
+                  <HelpTip label="ファイルバックアップについて">機種変更やブラウザのデータ削除に備えて、学習記録をファイルに保存できます。読み込み時は、この端末の記録を置き換えます。</HelpTip>
                   <div className="grid grid-cols-2 gap-1.5 mt-2">
                     <button
                       onClick={() => { playClick(); downloadLearningBackup(); }}

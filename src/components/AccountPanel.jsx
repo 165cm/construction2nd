@@ -43,7 +43,7 @@ export default function AccountPanel() {
       <button disabled={busy} className={button} onClick={() => perform(loginGoogle)}>Googleでログイン</button>
     </> : <>
       <p className="text-xs break-all">{account.email || account.displayName || 'ログイン中'}</p>
-      
+
       <div className="flex flex-wrap gap-2">
         <button disabled={busy} className={button} onClick={() => perform(refresh, '保存状況を確認中…')}>クラウドの状態を再確認</button>
         <button disabled={busy} className={button} onClick={() => perform(logoutAccount)}>ログアウト</button>

@@ -45,7 +45,7 @@ export default function ExamSelectModal({
         
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-slate-800/80 border-b border-slate-700/60">
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xl">📚</span>
             <div>
               <h2 className="text-sm font-bold text-slate-100">過去問の年度を選択</h2>
@@ -89,9 +89,9 @@ export default function ExamSelectModal({
                     {exam.badge}
                   </div>
                   <div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-bold text-sm text-slate-100">{exam.name}</span>
-                      {privateContentMode && <span className="text-xs text-amber-200">{isPaidExam(exam.id) ? '有料' : '無料'}</span>}
+                      {privateContentMode && <span className="text-xs text-amber-200">{isPaidExam(exam.id) ? '🔒 有料プラン対象' : '無料'}</span>}
                       {isSelected && (
                         <span className="text-[10px] bg-sky-500/20 text-sky-300 border border-sky-400/30 px-1.5 py-0.2 rounded font-bold">
                           選択中

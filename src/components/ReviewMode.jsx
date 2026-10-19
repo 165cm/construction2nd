@@ -26,7 +26,9 @@ export default function ReviewMode({
   onToggleBookmark,
   onOpenWiringDiagram,
   onSwitchToQuick,
-  onOpenAttribution
+  onOpenAttribution,
+  allYearsReady = true,
+  onLoadAllYears
 }) {
   const [scope, setScope] = useState('exam'); // 'exam' | 'all'
   const [filterType, setFilterType] = useState('review'); // 'review' | 'bookmark' | 'unmastered'
@@ -136,7 +138,7 @@ export default function ReviewMode({
           <button onClick={() => applySelection('exam', filterType, category)} className={scopeBtn(scope === 'exam')}>
             📘 この年度（{getExamMeta(currentExamId).badge}）
           </button>
-          <button onClick={() => applySelection('all', filterType, category)} className={scopeBtn(scope === 'all')}>
+          <button onClick={() => allYearsReady ? applySelection('all', filterType, category) : onLoadAllYears?.()} className={scopeBtn(scope === 'all')}>
             📚 全年度まとめて
           </button>
         </div>

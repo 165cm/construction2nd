@@ -6,6 +6,15 @@ const server = await createServer({ server: { middlewareMode: true, hmr: false, 
 try {
   const { default: PricingPlans } = await server.ssrLoadModule('/src/components/PricingPlans.jsx');
   const { default: BillingPanel } = await server.ssrLoadModule('/src/components/BillingPanel.jsx');
+  const { default: PaidAccessDialog } = await server.ssrLoadModule('/src/components/PaidAccessDialog.jsx');
+  const gate = kind => renderToStaticMarkup(React.createElement(PaidAccessDialog, { kind, title: '令和7年度 下期' }));
+  assert.match(gate('login-required'), /購入に使ったアカウントでログイン/);
+  assert.match(gate('plan-required'), /980円/);
+  assert.match(gate('plan-required'), /480円/);
+  assert.match(gate('plan-required'), /無料の最新問題を続ける/);
+  assert.match(gate('retry'), /追加購入せず/);
+  assert.match(gate('retry'), /再試行/);
+  assert.doesNotMatch(gate('retry'), /980円|480円/);
   const { openStripeUrl } = await server.ssrLoadModule('/src/services/billing.js');
   const pending = renderToStaticMarkup(React.createElement(PricingPlans));
   assert.equal((pending.match(/disabled=""/g) || []).length, 2);

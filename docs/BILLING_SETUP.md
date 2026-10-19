@@ -90,3 +90,6 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 操作：ログイン → 「支払い・利用期限を再確認」 → 「3か月パックの内容を確認」 → 「Stripeでテスト決済に進む」。支払い後はアプリへ戻り再確認し、利用期限と過去年度の取得を確認する。月額テストはパック利用権の重複購入防止があるため別手順で行う。
 
 5関数・Hosting反映成功。BILLING_SANDBOX=true、指定UID1件、BILLING_ENABLED / PRIVATE_CONTENT_ENABLED / VITE_BILLING_READY=true。実購入・利用権付与は本人の操作待ち。本番Stripeへの切替とPRマージは未実施。
+
+### 2026-10-20 実購入と案内改善
+ユーザーが980円パックのテスト購入、期限表示、有料問題取得を確認。Stripeでも指定UIDの購入1件が980 JPY / paid / livemode=false / 未返金であることを確認。学習画面の案内改善（PR #68）は承認により検証サイトへ反映。次は対象のテスト決済の返金と利用権失効、続いて月額プランの検証。返金は未実施。

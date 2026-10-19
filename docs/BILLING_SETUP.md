@@ -71,3 +71,15 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 ユーザー承認で `billingAccess` / `createCheckout` / `createBillingPortal` / `privateContent` を東京へ反映成功。前3つは未認証POSTに401 UNAUTHENTICATED。有料配信は停止設定により503、private/no-storeを確認。
 
 `firebase.private.json` でHostingを反映し、https://construction2nd.web.app を検証用として公開。事前の有料200問分離・画像除外テスト成功。ブラウザで無料最新年度の問題・ログイン導線・Googleログインボタンを確認。Hosting経由 `/api/content?exam=r7_2` も503/no-store。購入受付と有料配信は引き続き無効。Google本人ログイン・クラウド保存/復元はユーザー確認待ち。GitHub Pages・PRマージは変更なし。
+
+## 指定アカウントでのサンドボックス検証（2026-10-19）
+
+- `BILLING_SANDBOX=true` が既定値。`BILLING_TESTER_UIDS` にFirebase Authenticationの対象UIDをカンマ区切りで設定する。空なら全員の購入・契約管理・有料教材取得を拒否し、利用権確認も権利なしを返す。
+- `BILLING_ENABLED`、`PRIVATE_CONTENT_ENABLED`、画面の `VITE_BILLING_READY` は別の停止スイッチで、現在は無効。許可リスト設定だけで販売開始しない。
+- サンドボックスは `sandboxBillingCustomers`（購入予約を含む）、`sandboxBillingRevocations`、`users/{uid}/sandboxEntitlements` を使う。本番は従来の `billingCustomers`、`billingRevocations`、`users/{uid}/entitlements`。学習バックアップには影響しない。
+- サンドボックスの利用権はクライアントから直接読み書きせず、認証付きAPIで参照する。既存Firestoreルールの既定拒否が適用される。
+- Stripe秘密鍵は環境に合う接頭辞を確認し、署名済み通知の `livemode` も確認する。環境が不一致なら処理しない。
+- 許可対象から外れた利用者の既存決済についても通知を処理する（返金などを取りこぼさない）。購入・利用権表示・配信は許可リストで拒否する。
+- 過去に共通保存先へ作られたテストデータを本番へ引き継がない。本番切替時は旧データ有無の点検も必要。今回以前の実接続確認はアプリ利用者と紐づかない0円通知だけで、有料利用権の付与検証は未実施。
+
+次の手順：対象UIDを設定 → 画面にテスト決済である旨を明示 → 検証サイトへの反映 → サンドボックス購入・解約・返金・期限の確認。本番の秘密鍵・価格・通知設定への切替は別作業とする。

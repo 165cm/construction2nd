@@ -1,6 +1,6 @@
 # 決済サーバーの準備（未公開・受付停止）
 
-Firebaseプロジェクト未作成のため、実サービスへの接続・課金テストは未実施。コードの追加だけでは購入できない。`BILLING_ENABLED` は既定で false のままにする。有料問題の非公開配信、料金画面、契約表示は後続の実装。
+Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreルールは準備済み。2026-10-17時点でBlazeへの変更とStripeテスト価格は未準備。実サービスへの決済接続・課金テストは未実施。`BILLING_ENABLED` は既定で false のままにする。有料配信・料金画面・履歴移行のコードは下書きPRで準備済み。Hosting接続は `PRIVATE_HOSTING.md` を参照。
 
 ## 今回追加したもの
 
@@ -45,3 +45,29 @@ Firebaseプロジェクト未作成のため、実サービスへの接続・課
 アカウント画面に2プランの比較、利用期限再確認、契約管理、Stripeへの遷移を追加。`VITE_BILLING_READY` が true で、かつサーバーの `BILLING_ENABLED` が true の場合だけ購入ボタンを有効にする。両方とも現段階では有効化しない。認証情報が未設定ならアカウント画面自体を表示しない。
 
 一般画面への料金導線、有料データ配信、特商法・返金条件等へのリンクはまだ未実装。料金表示は用意した部品単体でスマホ縦横・PCを確認（`audits/2026-10-16-pricing.png`）。実アカウントの購入や契約管理は未確認。支払成功URLだけで利用権を解放せず、サーバーの回答を再確認する。
+
+## 実接続の状況（2026-10-18）
+
+ユーザーよりBlaze設定完了。サンドボックスの480円/月・980円単発価格をAPIで確認し、承認を受け税込設定へ変更、料金検証成功。期間末解約・プラン変更不可のPortal設定も確認済み。秘密値2種は運営者がFirebaseに登録した。
+
+ユーザー承認により `functions:billing:stripeWebhook` のみ `construction2nd` / 東京へ反映成功。GETは405、署名なしPOSTは400で拒否を確認。Stripe通知先は `we_1URhB4EVrGT4ZD0cOKG6IVCY`、API版2024-06-20、無効のまま。実Stripe通知と署名用秘密値の一致は未検証。
+
+購入受付と有料配信はfalse。Hosting・購入開始・契約管理・利用権照会の関数は未デプロイ。SITE_URLは将来のHosting URL `https://construction2nd.web.app` を設定（サイトは未公開）。Functions作成は成功したが、ビルド成果物の自動削除ポリシーが未設定でCLI終了コードはエラー。自動削除はまだ実施せず、保管費用対策として設定方針を確認する。
+
+### ビルド成果物の保管費用対策（2026-10-18）
+
+ユーザーの費用削減依頼を受け、`functions:artifacts:setpolicy --project construction2nd --location asia-northeast1 --days 1 --force --non-interactive` を実行し成功。`gcf-artifacts` に1日を過ぎたコンテナイメージの自動削除ポリシーを設定した。稼働中の関数はデプロイ時のコピーを保持するため、この保管物の削除で停止しない（Firebase公式の標準設定）。教材原本・学習データ・秘密値は対象外。設定後も通知URLの無署名POSTは400で拒否。実際の削除はバックグラウンド処理であり、削除済み容量・削減額は未計測。上記の未設定警告は解消した。
+
+公式資料：https://firebase.google.com/docs/functions/manage-functions
+
+### Stripe実通知の疎通（2026-10-18）
+
+順次作業の依頼を受けサンドボックス通知先を有効化。個人情報なしの専用テスト顧客と0円請求書を作成・確定し、Stripe自身の `invoice.paid` を発生させた。請求書 `in_1URsZXEVrGT4ZD0cDnhn8IP5`、イベント `evt_1URsZYEVrGT4ZD0cltW9MGqq`、livemode=false、pending_webhooks=0を確認。受信側の同時刻ログに処理エラーなし。通知の疎通を確認したが、0円かつアプリ利用者と未対応のため利用権付与・有償プラン購入の検証ではない。テスト記録は追跡用に保持。通知先は現在有効、購入受付は停止のまま。
+
+次の反映予定は `billingAccess`、`createCheckout`、`createBillingPortal`、`privateContent` の4関数（東京）。BILLING_ENABLED=false / PRIVATE_CONTENT_ENABLED=falseを維持し、未認証拒否を検証する。サイトは有料教材を除去した検証出力で `construction2nd.web.app` に配置予定。公開前にユーザー承認が必要。GitHub PagesとPRのマージは対象外。
+
+### 検証サイトと残り関数（2026-10-18）
+
+ユーザー承認で `billingAccess` / `createCheckout` / `createBillingPortal` / `privateContent` を東京へ反映成功。前3つは未認証POSTに401 UNAUTHENTICATED。有料配信は停止設定により503、private/no-storeを確認。
+
+`firebase.private.json` でHostingを反映し、https://construction2nd.web.app を検証用として公開。事前の有料200問分離・画像除外テスト成功。ブラウザで無料最新年度の問題・ログイン導線・Googleログインボタンを確認。Hosting経由 `/api/content?exam=r7_2` も503/no-store。購入受付と有料配信は引き続き無効。Google本人ログイン・クラウド保存/復元はユーザー確認待ち。GitHub Pages・PRマージは変更なし。

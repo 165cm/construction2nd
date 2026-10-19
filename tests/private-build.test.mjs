@@ -4,6 +4,17 @@ import vm from 'node:vm';
 const paid = ['r7_2', 'r7_1', 'r6_2', 'r6_1'];
 const manifest = JSON.parse(await fs.readFile('functions/private-content/manifest.json','utf8'));
 const site = 'dist-private-site';
+// Hostingのルート公開でも、生成された参照先が実在すること。
+const html = await fs.readFile(`${site}/index.html`, 'utf8');
+assert.ok(!html.includes('/construction2nd/'), 'GitHub Pagesのパスが有料版HTMLに残っている');
+for (const match of html.matchAll(/(?:src|href)="(\/[^"?#]+)"/g)) {
+  await fs.access(`${site}${match[1]}`);
+}
+const hosting = JSON.parse(await fs.readFile('firebase.private.json', 'utf8')).hosting;
+assert.equal(hosting.public, site);
+assert.deepEqual(hosting.rewrites[0], { source: '/api/content', function: { functionId: 'privateContent', region: 'asia-northeast1' } });
+assert.equal(hosting.rewrites.at(-1).destination, '/index.html');
+assert.ok(!JSON.parse(await fs.readFile('firebase.json', 'utf8')).hosting, '既定の公開設定は変更しない');
 const js = (await Promise.all((await fs.readdir(`${site}/assets`)).filter(name=>name.endsWith('.js')).map(name=>fs.readFile(`${site}/assets/${name}`,'utf8')))).join('\n');
 const free = JSON.parse(await fs.readFile('src/data/exams/r8_1.json','utf8'));
 let count=0;

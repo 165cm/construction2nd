@@ -4,6 +4,8 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import { defineSecret, defineString, defineBoolean } from 'firebase-functions/params';
 import Stripe from 'stripe';
+import { assertStripeEnvironment } from './billingEnvironment.js';
+import { billingSandbox, allowedBillingUser, currentBillingPaths } from './billingEnvironmentConfig.js';
 import { requirePlan, checkoutParams, assertConfiguredPrice, packGrant, monthlyGrant, mergeGrant, accessSummary } from './billingPolicy.js';
 
 initializeApp();
@@ -19,24 +21,29 @@ const billingEnabled = defineBoolean('BILLING_ENABLED', { default: false });
 const region = 'asia-northeast1';
 const options = { region, secrets: [stripeKey], maxInstances: 3 };
 // invoice.charge / invoice.subscription / lines.price の契約を固定。Webhookも同じ版を設定する。
-const stripeClient = () => new Stripe(stripeKey.value(), { apiVersion: '2024-06-20', maxNetworkRetries: 2 });
+const stripeClient = () => {
+  const key = stripeKey.value();
+  assertStripeEnvironment(key, billingSandbox.value());
+  return new Stripe(key, { apiVersion: '2024-06-20', maxNetworkRetries: 2 });
+};
 const priceFor = planId => planId === 'monthly' ? monthlyPrice.value() : packPrice.value();
 const uidOf = request => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'ログインしてください');
   return request.auth.uid;
 };
-const customerRef = uid => db.doc(`billingCustomers/${uid}`);
-const grantsRef = uid => db.collection(`users/${uid}/entitlements`);
+const customerRef = uid => db.doc(`${currentBillingPaths(uid).customers}/${uid}`);
+const grantsRef = uid => db.collection(currentBillingPaths(uid).grants);
 async function grants(uid) { return (await grantsRef(uid).where('expiresAt', '>', Date.now()).get()).docs.map(d => d.data()); }
 
 export const billingAccess = onCall({ region, maxInstances: 3 }, async request => {
   const uid = uidOf(request);
-  return { ...accessSummary(await grants(uid)), serverNow: Date.now(), billingEnabled: billingEnabled.value() };
+  return { ...accessSummary(allowedBillingUser(uid) ? await grants(uid) : []), serverNow: Date.now(), billingEnabled: billingEnabled.value() && allowedBillingUser(uid), sandbox: billingSandbox.value() };
 });
 
 export const createCheckout = onCall(options, async request => {
   const uid = uidOf(request);
   if (!billingEnabled.value()) throw new HttpsError('failed-precondition', '購入の受付はまだ開始していません');
+  if (!allowedBillingUser(uid)) throw new HttpsError('permission-denied', '現在は指定アカウントでのみテストできます');
   const planId = request.data?.planId;
   try { requirePlan(planId); } catch { throw new HttpsError('invalid-argument', 'プランを選んでください'); }
   const stripe = stripeClient();
@@ -106,6 +113,7 @@ export const createCheckout = onCall(options, async request => {
 
 export const createBillingPortal = onCall(options, async request => {
   const uid = uidOf(request);
+  if (!allowedBillingUser(uid)) throw new HttpsError('permission-denied', '現在は指定アカウントでのみテストできます');
   const customer = (await customerRef(uid).get()).data()?.customerId;
   if (!customer) throw new HttpsError('not-found', '契約はまだありません');
   const stripe = stripeClient();
@@ -124,13 +132,13 @@ export const createBillingPortal = onCall(options, async request => {
 async function ownerFor(customerId) {
   if (typeof customerId !== 'string') customerId = customerId?.id;
   if (!customerId) return null;
-  const result = await db.collection('billingCustomers').where('customerId', '==', customerId).limit(1).get();
+  const result = await db.collection(currentBillingPaths().customers).where('customerId', '==', customerId).limit(1).get();
   return result.empty ? null : result.docs[0].id;
 }
 async function saveGrant(uid, grant) {
   const ref = grantsRef(uid).doc(grant.id);
   await db.runTransaction(async tx => {
-    const [old, revoked] = await Promise.all([tx.get(ref), tx.get(db.doc(`billingRevocations/${grant.chargeId}`))]);
+    const [old, revoked] = await Promise.all([tx.get(ref), tx.get(db.doc(`${currentBillingPaths().revocations}/${grant.chargeId}`))]);
     tx.set(ref, mergeGrant(old.data(), grant, revoked.exists));
     // checkout予約と同じ文書を更新し、並行する購入判定と競合させる。
     tx.set(customerRef(uid), { updatedAt: Date.now() }, { merge: true });
@@ -138,7 +146,7 @@ async function saveGrant(uid, grant) {
 }
 async function revokeCharge(chargeId, customerId) {
   // 解放イベントより先に返金が届いても、後から解放しない。
-  await db.doc(`billingRevocations/${chargeId}`).set({ revoked: true });
+  await db.doc(`${currentBillingPaths().revocations}/${chargeId}`).set({ revoked: true });
   const uid = await ownerFor(customerId);
   if (!uid) return;
   const matches = await grantsRef(uid).where('chargeId', '==', chargeId).get();
@@ -153,6 +161,7 @@ export const stripeWebhook = onRequest({ ...options, secrets: [stripeKey, webhoo
   let event;
   try { event = stripe.webhooks.constructEvent(req.rawBody, req.headers['stripe-signature'], webhookSecret.value()); }
   catch { return res.status(400).send('Invalid signature'); }
+  if (event.livemode !== !billingSandbox.value()) return res.status(400).send('Environment mismatch');
   try {
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       const session = await stripe.checkout.sessions.retrieve(event.data.object.id, { expand: ['line_items', 'payment_intent.latest_charge'] });

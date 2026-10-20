@@ -126,3 +126,9 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 専用架空UIDと個人情報なしの専用顧客で、980円パックのサンドボックスCheckoutを作成（cs_test_a1z5MqwDG0LWBi2UbkFGFT5nvXP8wOx3oFJYL9BWS1c76wYIQEhKBQP3Gx）。本人の月額権利は変更していない。Checkout URLはGitに保存せず、ローカル専用 /tmp/construction-checkout-ui-state.json に保存。初回URLの期限は2026-10-20 20:19:29（日本時間）。
 
 料金・戻り先・metadataは本アプリのcheckoutParamsを使用。createCheckoutの購入予約・認証ガードを経由しないため、これはStripe Checkoutの表示と通知連携の検証用であり、アプリの重複購入防止や入口認証の検証には含めない。まず公式の拒否カードで画面を確認し、その後追加認証を検証予定。画面操作は本人確認待ち。
+
+### Checkout画面と通知再送の結果（2026-10-20）
+本人が拒否カードのエラー、3DS FAILによる認証失敗表示、同じ画面で再支払い→COMPLETE→アプリ復帰を確認。
+Stripe APIで上記専用sessionのcomplete/paid、980 JPY、livemode=false、PaymentIntent succeeded、3DS authenticatedを確認。charge `ch_3USaFVEVrGT4ZD0c1W5wbgwP`。専用架空UIDのpack利用権とcharge一致をFirestoreで確認（開始1792492188000、終了1800440988000、revoked=false）。本人の既存月額権利には付与していない。
+
+続いて実イベント `evt_1USaIjEVrGT4ZD0cpc7Nh4vb` のJSONをAPIで取得し、既存Webhook署名秘密値で新しい署名を付け、既存受信先へ計4回POST。すべてHTTP200。Firestoreの項目順序を除外して前後比較し利用権1件、開始/終了時刻を含む全項目不変を確認。これは受信処理の再送・重複検証で、Stripe配信基盤の再送スケジュール自体の試験ではない。

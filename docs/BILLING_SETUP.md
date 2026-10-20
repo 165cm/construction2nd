@@ -1,4 +1,8 @@
-# 決済サーバーの準備（未公開・受付停止）
+# 決済サーバーの設定と検証記録
+
+**現在（2026-10-21）**：Firebase検証サイトでは指定UID1件限定のStripeサンドボックス購入を稼働中。本人の購入/解約/返金と専用テストの結果は追記に記録済み。一般販売・本番Stripe切替・main統合は未実施。最新の残項目は [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)、停止・復旧と監視の点検結果は [並列運用監査](audits/2026-10-21-release-operations.md)。
+
+## 初期準備時の記録（2026-10-17、現在値ではない）
 
 Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreルールは準備済み。2026-10-17時点でBlazeへの変更とStripeテスト価格は未準備。実サービスへの決済接続・課金テストは未実施。`BILLING_ENABLED` は既定で false のままにする。有料配信・料金画面・履歴移行のコードは下書きPRで準備済み。Hosting接続は `PRIVATE_HOSTING.md` を参照。
 

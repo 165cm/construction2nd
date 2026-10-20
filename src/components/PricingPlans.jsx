@@ -33,7 +33,7 @@ export default function PricingPlans({ enabled = false, busy = false, hasAccess 
     <p className="text-xs text-slate-400">どちらも学習機能は同じです。期限後も学習記録は残り、最新の無料問題を続けられます。</p>
     <div className="flex flex-wrap gap-2">
       {onRefresh && <button disabled={busy} className="min-h-[44px] px-3 text-xs rounded-lg bg-slate-700" onClick={onRefresh}>支払い・利用期限を再確認</button>}
-      {enabled && onManage && <button disabled={busy} className="min-h-[44px] px-3 text-xs rounded-lg bg-slate-700" onClick={onManage}>契約管理・月額の解約</button>}
+      {onManage && <button disabled={busy} className="min-h-[44px] px-3 text-xs rounded-lg bg-slate-700" onClick={onManage}>契約管理・月額の解約</button>}
     </div>
   </section>;
 }

@@ -90,3 +90,34 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 操作：ログイン → 「支払い・利用期限を再確認」 → 「3か月パックの内容を確認」 → 「Stripeでテスト決済に進む」。支払い後はアプリへ戻り再確認し、利用期限と過去年度の取得を確認する。月額テストはパック利用権の重複購入防止があるため別手順で行う。
 
 5関数・Hosting反映成功。BILLING_SANDBOX=true、指定UID1件、BILLING_ENABLED / PRIVATE_CONTENT_ENABLED / VITE_BILLING_READY=true。実購入・利用権付与は本人の操作待ち。本番Stripeへの切替とPRマージは未実施。
+
+### 2026-10-20 実購入と案内改善
+ユーザーが980円パックのテスト購入、期限表示、有料問題取得を確認。Stripeでも指定UIDの購入1件が980 JPY / paid / livemode=false / 未返金であることを確認。学習画面の案内改善（PR #68）は承認により検証サイトへ反映。次は対象のテスト決済の返金と利用権失効、続いて月額プランの検証。返金は未実施。
+
+### 返金・利用権失効の実接続検証（2026-10-20）
+ユーザー承認により980円パックのサンドボックス購入を全額返金。Stripeの返金成功と全額返金済みを確認。通知経由でsandboxBillingRevocationsの対象マーカーとsandboxEntitlementsの対象利用権がともにrevoked=trueとなったことをFirestore RESTの読み取りで確認。学習バックアップは変更していない。ブラウザ上の拒否表示は本人確認待ち。
+
+### アプリ側の期限切れ検証（2026-10-20）
+指定テスターの月額利用期限を約5分後へ一時変更。本人が開いたままの有料問題の表示終了、有料年度再取得時の拒否案内、無料問題利用、学習記録維持を確認。控えた元の期限2026-11-20 10:59:09（日本時間）へ復元しFirestore読取照合成功。Stripe側の時刻・契約は変更していないため、これはStripeの期間末終了・更新請求の実接続検証には含めない。復元後の教材再取得は本人確認待ち。
+
+### Stripeの更新・期間末終了（2026-10-20）
+専用サンドボックス顧客（個人情報なし）を新規作成し、test clock `clock_1USYMFEVrGT4ZD0cKo5alHZ8`、契約 `sub_1USYMIEVrGT4ZD0cHGvIi5BM` で検証。本人の既存契約・利用権は変更していない。
+
+- 初回 `in_1USYMIEVrGT4ZD0cqXlsmxhn`：paid、480円、subscription_create。
+- 時計を初回の期間末+2時間へ進め、ready後に `in_1USYMYEVrGT4ZD0cULZ49FAe`：paid、480円、subscription_cycle を確認。
+- 実際の2請求書（chargeを展開）を本アプリのmonthlyGrantへ渡し、両方で利用権の生成を確認。初回の終了時刻と更新分の開始時刻が一致。
+- 期間末解約を設定後、次の期間末+2時間まで進めてreadyを確認。契約はcanceled。請求書は2件で、3回目の請求は発生していない。
+
+専用顧客をアプリUIDへ紐づけていないため、これはStripe側の更新/終了と実請求書の判定の確認。更新通知からFirestoreへの利用権追加・画面の利用期限延長までの結合テストは別途必要。時間操作はStripeの時計だけで、アプリのサーバー時計は進めていない。検証オブジェクトは追跡用に保持、実際の請求はなし。
+
+公式手順：https://docs.stripe.com/billing/testing/test-clocks/simulate-subscriptions
+
+### 初回・更新の支払い失敗と復旧（2026-10-20）
+専用架空UID（Authenticationの利用者は作成せず、購入許可リストにも追加しない）とsandboxBillingCustomersを使用し、実Stripe通知→Firestoreまで確認。本人の契約・利用権は変更していない。
+
+- 初回失敗：`sub_1USYTHEVrGT4ZD0cNCvOE4nM` / `in_1USYTHEVrGT4ZD0c8QNYdngn`。公式のtok_chargeCustomerFailで請求を試みcard_declined。契約incomplete、請求書open、amount_paid=0、PaymentIntent requires_payment_method。monthlyGrant拒否、Firestore利用権0件。
+- 更新失敗：clock `clock_1USYTGEVrGT4ZD0c7h6zmdie` / 契約 `sub_1USYTJEVrGT4ZD0clOa2e28v`。初回請求 `in_1USYTJEVrGT4ZD0cqJfbYD9H` は480円paid、通知経由の利用権1件を確認。その後拒否カードへ切替、時計を期間末+2時間に進めreadyを確認。更新請求 `in_1USYU2EVrGT4ZD0ch82xLR7G` はopen、amount_paid=0、契約past_due、利用権は初回の1件のみで延長なし。シミュレーション時刻をaccessSummaryへ渡してhasAccess=false。
+- 復旧：正常カードへ戻し同じ未払い請求書を支払うと480円paid・契約active。実通知を経由して次期利用権がFirestoreへ追加され2件。初回終了と次期開始が一致し、シミュレーション時刻でhasAccess=true。
+- ブラウザのエラー表示、Checkoutでのカード拒否操作、3Dセキュアはこの検証に含めない。時間操作はStripeのみで、実サーバー時計は進めていない。本人画面での延長も未検証。専用契約は検証後に期間末解約へ設定済み。
+
+公式テストカード：https://docs.stripe.com/testing

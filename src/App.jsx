@@ -1,3 +1,4 @@
+import PaidAccessDialog from './components/PaidAccessDialog';
 import { privateContentMode, isPaidExam, paidExamIds, getPrivateExam, subscribePrivateStudy, getPrivateVersion, privateGeneration } from './services/privateStudyStore';
 import React, { useState, useEffect, useMemo, useRef, useSyncExternalStore, lazy, Suspense } from 'react';
 import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
@@ -242,6 +243,14 @@ export default function App() {
     resetScrollToTop();
   };
 
+  const [accessPrompt, setAccessPrompt] = useState(null);
+  const showAccessPrompt = (error, examId) => {
+    setContentMessage('');
+    setAccessPrompt({
+      kind: ['login-required', 'plan-required'].includes(error.code) ? error.code : 'retry',
+      examId
+    });
+  };
   const handleSelectExam = async (examId) => {
     const requestId = ++selectionRequest.current;
     setContentMessage('');
@@ -252,7 +261,7 @@ export default function App() {
         await loadPaidExam(examId, { report: (done, total) => {
           if (requestId === selectionRequest.current) setContentMessage(`教材画像を準備中… ${done}/${total}`);
         } });
-      } catch (error) { if (requestId === selectionRequest.current) setContentMessage(error.message); return; }
+      } catch (error) { if (requestId === selectionRequest.current) showAccessPrompt(error, examId); return; }
       finally { if (requestId === selectionRequest.current) setContentBusy(false); }
     } else setContentBusy(false);
     if (requestId !== selectionRequest.current) return;
@@ -260,12 +269,13 @@ export default function App() {
     selectLoadedExam(examId);
   };
   const loadAllPaidExams = async () => {
+    if (contentBusy) return;
     setContentBusy(true); setContentMessage('全年度の教材を読み込み中…');
     try {
       const { loadPaidExam } = await import('./services/privateStudy');
       for (const id of paidExamIds) await loadPaidExam(id);
       setContentMessage('全年度の復習を利用できます');
-    } catch (error) { setContentMessage(error.message); }
+    } catch (error) { showAccessPrompt(error, null); }
     finally { setContentBusy(false); }
   };
 
@@ -273,6 +283,7 @@ export default function App() {
   useEffect(() => {
     if (!accessLost) return;
     selectionRequest.current++;
+    setAccessPrompt({ kind: 'retry', examId: currentExamId });
     setIsWiringDiagramOpen(false);
     setContentBusy(false);
     setContentMessage('利用状態が変わりました。無料問題に戻りました。有料年度は再度選んで確認してください。');
@@ -374,6 +385,8 @@ export default function App() {
         {currentMode === 'review' && (
           <ReviewMode
             key={`${currentExamId}:${privateGeneration()}`}
+            allYearsReady={!privateContentMode || paidExamIds.every(id => getPrivateExam(id))}
+            onLoadAllYears={loadAllPaidExams}
             allExamQuestions={allExamQuestions}
             fullState={state}
             currentExamId={currentExamId}
@@ -447,6 +460,12 @@ export default function App() {
       />
 
       {/* Exam Selection Modal */}
+      {accessPrompt && <PaidAccessDialog kind={accessPrompt.kind}
+        title={accessPrompt.examId ? getExamMeta(accessPrompt.examId).name : '全年度の復習'}
+        onClose={() => setAccessPrompt(null)}
+        onFree={() => { setAccessPrompt(null); setCurrentMode('quiz'); handleSelectExam('r8_1'); }}
+        onRetry={() => { const target = accessPrompt.examId; setAccessPrompt(null); target ? handleSelectExam(target) : loadAllPaidExams(); }}
+      />}
       <ExamSelectModal
         isOpen={isExamSelectOpen}
         onClose={() => setIsExamSelectOpen(false)}

@@ -3,12 +3,14 @@ import { getAuth } from 'firebase/auth';
 import { firebaseConfig, firebaseEnabled } from './firebaseConfig';
 import { getPrivateExam, privateGeneration, publishPrivateExam, isPaidExam, renewPrivateLease, clearPrivateStudy } from './privateStudyStore';
 
+const accessError = (code, message) => Object.assign(new Error(message), { code });
+
 export async function loadPaidExam(examId, { report = () => {}, fetcher = fetch } = {}) {
   if (!isPaidExam(examId)) throw new Error('収録されていない年度です');
   if (!firebaseEnabled) throw new Error('アカウント接続を準備中です');
   const app = getApps()[0] || initializeApp(firebaseConfig);
   const user = getAuth(app).currentUser;
-  if (!user) throw new Error('記録・設定からGoogleでログインしてください');
+  if (!user) throw accessError('login-required', '購入済みの方はログインして利用状態を確認してください');
   const generation = privateGeneration();
   const token = await user.getIdToken();
   const ensureCurrent = () => {
@@ -22,8 +24,8 @@ export async function loadPaidExam(examId, { report = () => {}, fetcher = fetch 
     const response = await fetcher(`/api/content?${query}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
     ensureCurrent();
     if (response.status === 401 || response.status === 403) clearPrivateStudy();
-    if (response.status === 401) throw new Error('ログインし直してください');
-    if (response.status === 403) throw new Error('有料プランの利用期間を確認してください。記録・設定でプランを確認できます');
+    if (response.status === 401) throw accessError('login-required', 'ログインし直してください');
+    if (response.status === 403) throw accessError('plan-required', 'この年度は有料プランで学習できます');
     if (!response.ok) throw new Error('教材を取得できませんでした。通信を確認して再試行してください');
     if (!renewPrivateLease(Number(response.headers.get('X-Access-Expires-At')), Number(response.headers.get('X-Server-Time')), startedAt)) throw new Error('利用期間を再確認してください');
     return response;

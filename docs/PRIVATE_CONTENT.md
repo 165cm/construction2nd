@@ -94,3 +94,5 @@
 - 参照：[Firebase Auth.authStateReady](https://firebase.google.com/docs/reference/js/auth.auth#authauthstateready)。
 
 ユーザー承認でPR #73を検証サイトへ反映。有料分離テスト成功、配信HTML・年度復元/認証待機コードとビルドの一致を確認。本人によるスマホでの再確認は待ち。
+
+2026-10-20追記：本人スマホで、有料年度の同年度/同問題番号への再読込復帰、別有料年度へ切替後の復帰、最新無料年度を明示的に選択した後の選択保持を一括確認（全項目OK）。

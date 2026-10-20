@@ -207,3 +207,26 @@ node scripts/verify-billing-notifications.mjs --run-sandbox-check
 返金ID `re_3USaFVEVrGT4ZD0c1bPlAvvj`。専用テスト決済の返金総額は1円、残り979円もテスト上の金額であり実請求はない。対象利用権は意図どおり失効したまま保持し、復活や全額返金は行っていない。証跡は `/tmp/construction-pack-partial-20261020224935771.json`（所有者のみ読取可）。本人の契約・学習記録・許可UID設定・デプロイは変更なし。
 
 通知再送はStripeの実イベント本文へ新しい正規署名を付けた手動再送。Stripe基盤自身による長時間遅延/自動再送、購入予約との競合、本人の画面での部分返金後の取得拒否は別の検証として残る。部分返金でも対象支払いの利用権を全失効させる既存方針は変更していない。
+
+## 通知遅延・処理失敗と購入予約の競合（2026-10-21、専用エミュレータ）
+
+`scripts/verify-notification-reservation-race.mjs` を追加。実 `createCheckout` / `stripeWebhook` / `billingAccess` をローカル実行し、実Firestoreエミュレータでtransactionの確定/巻き戻し/同時処理を確認する。Stripeの価格・支払済みCheckout・冪等キーの応答・通知タイミングは模擬。通知署名の作成/検証はStripe SDKでローカル専用の秘密値を用いる。実Stripe、実Firestore、本人契約には接続しない。
+
+Java 21以降で次を実行する：
+
+```sh
+./node_modules/.bin/firebase emulators:exec --only firestore --project demo-construction2nd 'node scripts/verify-notification-reservation-race.mjs --run-emulator-check'
+```
+
+明示フラグ、localhostの `FIRESTORE_EMULATOR_HOST`、`GCLOUD_PROJECT=demo-construction2nd` をすべて必須とする。フラグなしでは接続しない。
+
+確認結果は5項目成功、通知処理4回、新規Checkout作成0件：
+1. 支払済み・通知未着で購入予約が有効な間、同一プランは支払い確認中、異プランは手続き中として再購入を拒否。利用権はまだ0件。
+2. 予約期限が過ぎても支払済みCheckoutの通知未着なら、どちらのプランも支払い確認中として拒否。新しい予約/Checkoutを作らない。
+3. 通知のtransactionが書込を準備した後・確定する前にエラーを注入。HTTP500で再送を要求し、利用権は0件のまま。再購入も拒否。
+4. 通知を再送すると同時に月額/パック計8件の購入要求。全購入要求が拒否、有効な利用権1件を保存、新規Checkoutは0件。
+5. 復旧後は有効利用権により両プランの購入を拒否。通知をさらに2回並行送信しても利用権の全項目不変。
+
+Functions13テスト、スクリプトの構文、フラグなし未接続、差分チェックも成功。アプリ・Functions本体の変更やデプロイは不要。
+
+範囲：これは実ハンドラー＋実Firestore transactionと制御可能なStripe模擬応答の結合確認。実Stripe側の冪等性そのもの、配信基盤の長時間遅延/自動再送、デプロイ済みCallableの認証と実複数タブ、実サービスで同じタイミングを作った競合は未確認。既存の実Stripe/Firestoreの購入予約9項目およびデプロイ済み通知先への再送検証と分けて記録する。

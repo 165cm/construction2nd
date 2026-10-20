@@ -15,7 +15,11 @@ function getClient() {
   return client;
 }
 export const observeAccount = (listener) => onAuthStateChanged(getClient().auth, listener);
-export const loginGoogle = () => signInWithPopup(getClient().auth, new GoogleAuthProvider());
+export const loginGoogle = () => {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  return signInWithPopup(getClient().auth, provider);
+};
 export const logoutAccount = () => { clearPrivateStudy(); return signOut(getClient().auth); };
 function requireUser(uid) {
   if (!uid || getClient().auth.currentUser?.uid !== uid) throw new Error('ログイン状態が変わりました。画面を開き直してください');

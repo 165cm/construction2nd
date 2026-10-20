@@ -5,6 +5,8 @@
 ## このPRで用意したもの
 
 - Googleログイン・ログアウト。Firebase SDKはアカウント画面を開いた時だけ読む。
+- アプリのログアウトとGoogle側のログイン状態は別。`loginGoogle` は `GoogleAuthProvider.setCustomParameters({ prompt: 'select_account' })` により毎回アカウント選択を要求する。スマホ版Braveでの切替実機確認は修正反映後に行う。
+  - 参照：[Firebaseのカスタムパラメータ](https://firebase.google.com/docs/auth/web/google-signin?hl=ja)、[Googleのアカウント選択指定](https://developers.google.com/identity/openid-connect/openid-connect#authenticationuriparameters)。
 - 明示的な操作でクラウドへバックアップ／端末へ復元。ログインだけでは端末の記録を送信しない。
 - 書き換え前の確認、他端末との更新競合検知、本人以外のアクセス拒否。
 - 利用権はクライアントから書込不可。決済・有料問題配信は別PR。

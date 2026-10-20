@@ -80,3 +80,5 @@
 - 自動テストで、visibilitychangeがなくblur/focusだけ届く場合、focus/pageshowだけの復帰、単調時計が進まず実時間だけ2分進む場合、端末時計側が遅れる場合を確認。実機修正確認は未実施。
 
 参考（Braveの現象の原因を断定する資料ではない）：https://developer.mozilla.org/en-US/docs/Web/API/Performance/now#ticking_during_sleep
+
+2026-10-20追記：PR #70反映後のスマホ版Braveで、別Webタブへ約2分移動→復帰時の案内→再試行による操作再開を本人確認。追加購入・再ログインなしで再開。案内のボタン選択に迷うとの報告も受領。

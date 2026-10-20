@@ -6,7 +6,7 @@ import { privateContentMode, getPrivateCrops, privateGeneration, subscribePrivat
 //   2. この端末の LocalStorage（denkou_custom_crops_v1。その端末・そのブラウザだけ）
 // 表示の優先順位: この端末の保存 > 共有ファイル > 初期画像（public/crops/）
 
-import { getAssetUrl } from './asset';
+import { getAssetUrl, resolveAssetUrl } from './asset';
 import sharedOverrides from '../data/cropOverrides.json';
 import { DEFAULT_CROPS } from '../data/cropsConfig';
 import { EXAM_LIST } from '../data/examList';
@@ -268,13 +268,16 @@ export const CROP_BASE_PAGE_HEIGHT = 1200;
 const pagePngPath = (c) => `${c.pageDir || '/pages'}/page_${c.page}.png`;
 export const hdPagePath = (pageDir, page) => `${pageDir || '/pages'}/page_${page}.webp`;
 
-const loadImage = (path) => new Promise((resolve, reject) => {
+const loadImage = async (path) => {
+ const source = await resolveAssetUrl(path);
+ return new Promise((resolve, reject) => {
   const img = new Image();
   img.decoding = 'async';
   img.onload = () => resolve(img);
   img.onerror = () => reject(new Error(`元ページ画像を読み込めません (${path})`));
-  img.src = getAssetUrl(path);
-});
+  img.src = source;
+ });
+};
 
 // 高画質の WebP を先に読み込んでおく（配線図の問題に近づいた時など。表示を速くするため）
 const prefetched = new Set();

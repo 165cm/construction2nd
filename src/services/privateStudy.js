@@ -1,11 +1,11 @@
 import { getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { firebaseConfig, firebaseEnabled } from './firebaseConfig';
-import { getPrivateExam, privateGeneration, publishPrivateExam, isPaidExam, renewPrivateLease, clearPrivateStudy } from './privateStudyStore';
+import { getPrivateExam, privateGeneration, publishPrivateExam, isPaidExam, renewPrivateLease, clearPrivateStudy, getPrivateAsset, publishPrivateAsset } from './privateStudyStore';
 
 const accessError = (code, message) => Object.assign(new Error(message), { code });
 
-export async function loadPaidExam(examId, { report = () => {}, fetcher = fetch } = {}) {
+async function requestFor(examId, fetcher) {
   if (!isPaidExam(examId)) throw new Error('収録されていない年度です');
   if (!firebaseEnabled) throw new Error('アカウント接続を準備中です');
   const app = getApps()[0] || initializeApp(firebaseConfig);
@@ -16,7 +16,7 @@ export async function loadPaidExam(examId, { report = () => {}, fetcher = fetch 
   const ensureCurrent = () => {
     if (getAuth(app).currentUser?.uid !== user.uid || privateGeneration() !== generation) throw new Error('ログイン状態が変わりました。やり直してください');
   };
-  async function request(asset) {
+  return async function request(asset) {
     ensureCurrent();
     const query = new URLSearchParams({ exam: examId });
     if (asset) query.set('asset', asset);
@@ -30,32 +30,37 @@ export async function loadPaidExam(examId, { report = () => {}, fetcher = fetch 
     if (!renewPrivateLease(Number(response.headers.get('X-Access-Expires-At')), Number(response.headers.get('X-Server-Time')), startedAt)) throw new Error('利用期間を再確認してください');
     return response;
   }
-  // 再選択時もサーバーへ確認し、端末内の有無だけで利用を許可しない。
+}
+
+export async function loadPaidExam(examId, { fetcher = fetch } = {}) {
+  const request = await requestFor(examId, fetcher);
+  const generation = privateGeneration();
   const response = await request();
   const exam = await response.json();
   if (exam.examId !== examId || exam.questions?.length !== 50 || !Array.isArray(exam.assets)) throw new Error('教材データを確認できませんでした');
   if (getPrivateExam(examId)) return;
-  const urls = new Map();
-  let cursor = 0, completed = 0;
-  try {
-    // 画像の取得に失敗した年度は中途半端に公開しない。並行数を4に抑える。
-    const results = await Promise.allSettled(Array.from({ length: 4 }, async () => {
-      while (cursor < exam.assets.length) {
-        const path = exam.assets[cursor++];
-        if (!/^(pages|crops|choices)\/[a-z0-9_]+\/[a-zA-Z0-9_-]+\.(png|webp)$/.test(path) || path.split('/')[1] !== examId) throw new Error('画像の指定が不正です');
-        const image = await request(path);
-        const blob = await image.blob(); ensureCurrent();
-        urls.set(path, URL.createObjectURL(blob));
-        report(++completed, exam.assets.length);
-      }
-    }));
-    const failed = results.find(result => result.status === 'rejected');
-    if (failed) throw failed.reason;
-    ensureCurrent();
-    if (!publishPrivateExam(exam, urls, generation)) throw new Error('ログイン状態が変わりました');
-  } catch (error) {
-    // 並行取得がすべて終了してからBlob URLを破棄する。
-    urls.forEach(url => URL.revokeObjectURL(url));
-    throw error;
-  }
+  if (!publishPrivateExam(exam, new Map(), generation)) throw new Error('ログイン状態が変わりました');
+}
+
+const pendingAssets = new Map();
+export async function loadPrivateAsset(path, { fetcher = fetch } = {}) {
+  const clean = path.replace(/^\//, '');
+  const examId = clean.split('/')[1];
+  const exam = getPrivateExam(examId);
+  if (!exam || !exam.assets.includes(clean)) throw new Error('この画像は利用できません');
+  const cached = getPrivateAsset(clean);
+  if (cached) return cached;
+  const generation = privateGeneration();
+  const key = generation + ':' + clean;
+  if (pendingAssets.has(key)) return pendingAssets.get(key);
+  const promise = (async () => {
+    const request = await requestFor(examId, fetcher);
+    const response = await request(clean);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    if (!publishPrivateAsset(clean, url, generation)) throw new Error('利用状態が変わりました');
+    return url;
+  })();
+  pendingAssets.set(key, promise);
+  try { return await promise; } finally { pendingAssets.delete(key); }
 }

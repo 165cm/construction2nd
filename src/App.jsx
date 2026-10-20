@@ -1,5 +1,6 @@
+import { resolveAssetUrl } from './utils/asset';
 import PaidAccessDialog from './components/PaidAccessDialog';
-import { privateContentMode, isPaidExam, paidExamIds, getPrivateExam, subscribePrivateStudy, getPrivateVersion, privateGeneration } from './services/privateStudyStore';
+import { privateContentMode, isPaidExam, paidExamIds, getPrivateExam, subscribePrivateStudy, getPrivateVersion, privateGeneration, isPrivateStudySuspended } from './services/privateStudyStore';
 import React, { useState, useEffect, useMemo, useRef, useSyncExternalStore, lazy, Suspense } from 'react';
 import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
 import { EXAM_LIST } from './data/examList';
@@ -256,11 +257,10 @@ export default function App() {
     setContentMessage('');
     if (privateContentMode && isPaidExam(examId)) {
       setContentBusy(true);
+      setContentMessage('教材を確認中…');
       try {
         const { loadPaidExam } = await import('./services/privateStudy');
-        await loadPaidExam(examId, { report: (done, total) => {
-          if (requestId === selectionRequest.current) setContentMessage(`教材画像を準備中… ${done}/${total}`);
-        } });
+        await loadPaidExam(examId);
       } catch (error) { if (requestId === selectionRequest.current) showAccessPrompt(error, examId); return; }
       finally { if (requestId === selectionRequest.current) setContentBusy(false); }
     } else setContentBusy(false);
@@ -302,6 +302,7 @@ export default function App() {
       const pageDir = currentExamMeta?.pageDir || '/pages';
       if (currentQuestion.id >= 25) prefetchHdPage(pageDir, currentExamMeta?.floorPlanPage || 15);
       const next = questionsData[(quizStep.index ?? 0) + 1];
+      if (next?.visualChoices) resolveAssetUrl('/choices/' + currentExamId + '/' + next.id + '.webp').catch(() => {});
       if (next?.diagram) {
         const coords = getActiveCropCoords(cropKeyForDiagram(next.id, next.diagram, currentExamId));
         if (coords) prefetchHdPage(coords.pageDir || pageDir, coords.page);
@@ -331,6 +332,8 @@ export default function App() {
     );
   }
 
+  if (isPrivateStudySuspended()) return <div role="status" className="p-4 text-slate-200">利用状態を再確認中…</div>;
+
   if (accessLost) return <div role="status" className="p-4 text-slate-200">利用状態を確認中…</div>;
 
   return (
@@ -352,7 +355,7 @@ export default function App() {
         {contentMessage && <p role="status" className="p-3 rounded-xl bg-slate-800 text-amber-200">{contentMessage}</p>}
         <button className="min-h-[44px] text-sky-300 underline" onClick={() => setIsStatsOpen(true)}>ログイン・料金・利用期限を確認</button>
         {currentMode === 'review' && paidExamIds.some(id => !getPrivateExam(id)) && <div>
-          <p className="text-slate-400">全年度の復習には、有料教材の読み込みが必要です。画像のため通信量が多くなります。</p>
+          <p className="text-slate-400">全年度の復習には、有料教材の読み込みが必要です。必要な画像は学習中に読み込みます。</p>
           <button disabled={contentBusy} className="min-h-[44px] text-sky-300 underline disabled:opacity-50" onClick={loadAllPaidExams}>全年度の教材を読み込む</button>
         </div>}
       </div>}

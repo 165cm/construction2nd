@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ZoomIn, ZoomOut, RotateCcw, Move } from 'lucide-react';
-import { getAssetUrl } from '../utils/asset';
+import AssetImage from './AssetImage';
 
 export default function WiringDiagramModal({ isOpen, onClose, highlightMarker, currentExamMeta }) {
   const [scale, setScale] = useState(1);
@@ -222,16 +222,10 @@ export default function WiringDiagramModal({ isOpen, onClose, highlightMarker, c
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`
           }}
         >
-          <img
+          <AssetImage
             key={activeTab + examPageDir}
-            src={getAssetUrl(getTabSrc())}
-            onError={(e) => {
-              // 高画質の WebP が読めない時は、PNG に1回だけ切り替える
-              const el = e.currentTarget;
-              if (el.dataset.fallback) return;
-              el.dataset.fallback = '1';
-              el.src = el.src.replace(/\.webp(\?.*)?$/, '.png$1');
-            }}
+            path={getTabSrc()}
+            fallbackPath={getTabSrc().replace(/\.webp$/, '.png')}
             alt="第二種電気工事士 配線図"
             className="max-h-[80vh] max-w-[95vw] object-contain rounded shadow-2xl bg-white select-none pointer-events-none"
             draggable="false"

@@ -160,3 +160,21 @@ node scripts/verify-checkout-sandbox.mjs --run-sandbox-check
 ```
 
 中断時の現仕様：同じプランは元のopen Checkoutを再利用できるが、別プランへは元の手続きが失効するまで進めない（予約は1時間）。中断後すぐに別プランへ変更できる導線は、今後の使い勝手の改善候補。
+
+## 月額通知の再送・返金先着・部分返金（2026-10-20）
+
+`scripts/verify-billing-notifications.mjs` を明示実行し、デプロイ済みstripeWebhookと実StripeテストAPI・Firestoreに接続して5項目、計10回の正規署名付き再送を確認した。実行ID `20261020133629613`。再送するJSONはStripeから取得した実イベントで、署名時刻は再送時に更新する。Stripe配信基盤の自動再送スケジュール自体の試験ではない。
+
+- 既存の専用架空UID `billing-failure-test-20261020-renewal` の2請求それぞれを2回並行再送。利用権2件と開始/終了を含む全項目が不変。
+- 新規の個人情報なし専用顧客で480円の月額テスト支払い。実通知で有効な利用権1件の登録を確認後、1円だけ部分返金し、実charge.refunded通知によるrevoked=true・アクセス不可を確認。開始/終了等は変わらず、invoice.paid再送2回でも復活しない。請求書 `in_1USdDcEVrGT4ZD0c9EyfIrwS`、返金 `re_3USdDcEVrGT4ZD0c0yZ7u7oO`。
+- もう1件の新規専用顧客ではUIDを紐づけずに480円をテスト支払い→全額返金。実返金通知による失効マーカーが利用権作成前に保存されることを確認。その後UIDを紐づけ、返金通知→支払い完了通知の順で再送しても利用権はrevoked=true。さらに両イベントを並行再送しても1件のまま・全項目不変。請求書 `in_1USdDjEVrGT4ZD0caFLcEUT2`、返金 `re_3USdDkEVrGT4ZD0c0TawNCxF`。
+- 無署名通知と、正規署名付きでもlivemodeがサンドボックス設定と異なる通知は、ともにHTTP400。
+- 本人の購入許可UIDの利用権を検証前後で全項目照合し、不変を確認。
+
+今回作成した専用月額2件は終了時にキャンセルし、停止処理のエラーなし。専用顧客・返金・利用権は証跡として保持。本人の契約・学習記録・利用権・購入許可UID設定は変更しない。1円返金でも対象請求の利用権を全て失効させる既存方針を検証しており、日割り・利用期間の短縮計算は追加していない。パックの部分返金は別途未検証。
+
+再実行にはFirebase CLI認証、サンドボックス設定、先の支払い失敗検証で作成した `/tmp/construction-payment-failure-state.json` が必要。明示フラグなしでは接続せず、秘密値はメモリ内のみ。結果は権限600の `/tmp/construction-notifications-<実行ID>.json` に保存する。
+
+```sh
+node scripts/verify-billing-notifications.mjs --run-sandbox-check
+```

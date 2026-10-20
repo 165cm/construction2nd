@@ -178,3 +178,17 @@ node scripts/verify-checkout-sandbox.mjs --run-sandbox-check
 ```sh
 node scripts/verify-billing-notifications.mjs --run-sandbox-check
 ```
+
+## 既存月額契約がある場合の追加購入拒否（2026-10-21）
+
+全体点検後の次項目として、`scripts/verify-existing-subscriptions.mjs` を追加。明示した `--run-read-only-check` がある場合だけ、既存の専用テスト契約2件へ接続する。前回の `/tmp/construction-payment-failure-state.json` が必要。`createCheckout.run` の実ハンドラーをローカルで呼び、Firestore/Stripeの読み取りは実サービスへ接続する。呼出元の認証とUID許可リストだけをプロセス内で専用架空UIDへ置き換え、デプロイ設定は変更しない。
+
+今回の実行 `20261020172057199` は4項目すべて成功：
+- 初回支払い未完了（Stripe `incomplete`）で月額を再購入：既存契約の案内とともに拒否。
+- 同じ未完了契約で3か月パックを購入：拒否。
+- 更新後の有効契約（Stripe `active`）で月額を再購入：拒否。
+- 同じ有効契約で3か月パックを購入：拒否。
+
+前後の専用顧客文書（購入予約含む）・利用権・契約全項目・Checkout一覧は不変。StripeのHTTPクライアントはGET以外を送る前に拒否し、購入ハンドラーに渡すFirestoreも読取操作だけを許可して、予約transactionに進んだ場合は作成前に停止する。今回はStripe書込試行0件、Firestore予約transaction試行0件。個人アカウントの契約・記録には接続せず、テスト契約の取消・返金・時計操作・新規支払いも行っていない。
+
+証跡はローカルの `/tmp/construction-existing-subscriptions-20261020172057199.json`（所有者のみ読取可）。サーバーハンドラーはローカル実行のため、デプロイ済みCallableの実認証・複数タブ操作とは区別する。将来専用契約が終了状態に変わった場合、読み取り専用の予約境界まで到達したことを別の結果として記録し、既存契約拒否の成功に数えない。

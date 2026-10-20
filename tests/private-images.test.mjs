@@ -6,7 +6,7 @@ const server = await createServer({
   plugins: [{ name: 'private-request-fixture', enforce: 'pre',
     resolveId(id) { if (id === 'firebase/auth') return '/test-auth.js'; if (id === 'firebase/app') return '/test-app.js'; },
     load(id) {
-      if (id === '/test-auth.js') return "export const auth={currentUser:{uid:'test-owner',getIdToken:async()=>'test-token'}};export const getAuth=()=>auth;";
+      if (id === '/test-auth.js') return "export const auth={ready:Promise.resolve(),authStateReady(){return this.ready},currentUser:{uid:'test-owner',getIdToken:async()=>'test-token'}};export const getAuth=()=>auth;";
       if (id === '/test-app.js') return 'export const getApps=()=>[{}];export const initializeApp=()=>({});';
       if (id.endsWith('/src/services/firebaseConfig.js')) return 'export const firebaseEnabled=true;export const firebaseConfig={};';
       if (id.endsWith('/src/services/cloudBackup.js')) return "export const observeAccount=fn=>{fn({uid:'test-owner'});return()=>{}};";
@@ -18,12 +18,30 @@ try {
   const store = await server.ssrLoadModule('/src/services/privateStudyStore.js');
   const { loadPaidExam, loadPrivateAsset } = await server.ssrLoadModule('/src/services/privateStudy.js');
   const { watchPrivateStudy } = await server.ssrLoadModule('/src/services/privateStudyLifecycle.js');
+  const { auth } = await server.ssrLoadModule('/test-auth.js');
   const billing = await server.ssrLoadModule('/src/services/billing.js');
   const path = 'choices/r7_2/1.webp';
   const exam = { examId:'r7_2', questions:Array.from({length:50},(_,i)=>({id:i+1})), assets:[path,'pages/r7_2/page_15.webp'], crops:{} };
   const response = body => new Response(body,{headers:{'X-Access-Expires-At':String(Date.now()+60000),'X-Server-Time':String(Date.now())}});
   let calls = [];
   const fetcher = async url => { calls.push(url); return response(url.includes('asset=') ? 'image' : JSON.stringify(exam)); };
+  const originalUser = auth.currentUser;
+  auth.currentUser = null;
+  let settleAuth;
+  auth.ready = new Promise(resolve => { settleAuth = resolve; });
+  const startup = loadPaidExam('r7_2', { fetcher });
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(calls.length,0,'初期認証の復元中は未ログイン扱いや教材通信をしない');
+  auth.currentUser = originalUser;
+  settleAuth();
+  await startup;
+  assert.ok(store.getPrivateExam('r7_2'),'初期認証の復元後に前回の有料教材を取得できる');
+  store.clearPrivateStudy();
+  calls = [];
+  auth.currentUser = null;
+  await assert.rejects(loadPaidExam('r7_2',{fetcher}),error => error.code==='login-required');
+  assert.equal(calls.length,0,'確定した未ログイン状態では教材を取得しない');
+  auth.currentUser = originalUser;
   store.setPrivateOwner('test-owner');
   await loadPaidExam('r7_2',{fetcher});
   assert.equal(calls.length,1,'年度選択はJSONだけを取得');

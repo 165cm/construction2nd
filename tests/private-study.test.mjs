@@ -6,7 +6,7 @@ const server = await createServer({ define: { 'import.meta.env.VITE_PRIVATE_CONT
 globalThis.localStorage = { getItem:()=>null };
 try {
   const store = await server.ssrLoadModule('/src/services/privateStudyStore.js');
-  const { getExamQuestions, loadCurrentExamId } = await server.ssrLoadModule('/src/data/examLoader.js');
+  const { getExamQuestions, loadCurrentExamId, loadSavedExamId } = await server.ssrLoadModule('/src/data/examLoader.js');
   const { getAssetUrl } = await server.ssrLoadModule('/src/utils/asset.js');
   assert.equal(getExamQuestions('r8_1').length, 50);
   assert.equal(getExamQuestions('r7_2').length, 0);
@@ -20,8 +20,15 @@ try {
   assert.equal(getAssetUrl('/pages/r7_2/page_15.webp'),url);
   globalThis.localStorage = { getItem:key => key === 'denkou2_current_exam_id' ? 'r7_2' : null };
   assert.equal(loadCurrentExamId(),'r8_1');
+  assert.equal(loadSavedExamId(),'r7_2','有料教材を表示できない起動時も復元先を記憶する');
   store.clearPrivateStudy();
+  assert.equal(loadSavedExamId(),'r7_2','教材の破棄は最後の年度を消さない');
   assert.equal(getExamQuestions('r7_2').length,0);
+  globalThis.localStorage = { getItem:()=> 'unknown-exam' };
+  assert.equal(loadSavedExamId(),'r8_1','収録外の年度は最新へ戻る');
+  globalThis.localStorage = { getItem:()=> { throw new Error('storage blocked'); } };
+  assert.equal(loadSavedExamId(),'r8_1','保存先を使えない場合も起動できる');
+  globalThis.localStorage = { getItem:()=>null };
   assert.equal(getAssetUrl('/pages/r7_2/page_15.webp'),'');
   assert.equal(store.publishPrivateExam({examId:'r7_2',questions},new Map(),generation),false);
   store.renewPrivateLease(200,100);

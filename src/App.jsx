@@ -2,7 +2,7 @@ import { resolveAssetUrl } from './utils/asset';
 import PaidAccessDialog from './components/PaidAccessDialog';
 import { privateContentMode, isPaidExam, paidExamIds, getPrivateExam, subscribePrivateStudy, getPrivateVersion, privateGeneration, isPrivateStudySuspended } from './services/privateStudyStore';
 import React, { useState, useEffect, useMemo, useRef, useSyncExternalStore, lazy, Suspense } from 'react';
-import { getExamQuestions, getExamMeta, loadCurrentExamId, saveCurrentExamId } from './data/examLoader';
+import { getExamQuestions, getExamMeta, loadCurrentExamId, loadSavedExamId, saveCurrentExamId } from './data/examLoader';
 import { EXAM_LIST } from './data/examList';
 import { loadState, saveState, recordAnswer, toggleBookmark, getInitialState, saveCurrentQuizPosition, getExamView, recordKey, getTodayCount } from './utils/storage';
 import { getInitialResumeQuestion, determineNextQuizQuestion } from './utils/spacedRepetition';
@@ -42,6 +42,10 @@ export default function App() {
     return () => { disposed = true; stop?.(); };
   }, []);
   const [currentExamId, setCurrentExamId] = useState(() => loadCurrentExamId());
+  const [restoringExamId, setRestoringExamId] = useState(() => {
+    const saved = loadSavedExamId();
+    return privateContentMode && isPaidExam(saved) ? saved : null;
+  });
   const currentExamMeta = useMemo(() => getExamMeta(currentExamId), [currentExamId]);
   // 管理画面で問題文を修正したら、再読み込みなしで反映する
   const [overridesVersion, setOverridesVersion] = useState(0);
@@ -228,8 +232,8 @@ export default function App() {
   };
 
   // Exam Selection Handler
-  const selectLoadedExam = (examId) => {
-    saveCurrentExamId(examId);
+  const selectLoadedExam = (examId, { remember = true } = {}) => {
+    if (remember) saveCurrentExamId(examId);
     setCurrentExamId(examId);
     const newQuestions = getExamQuestions(examId);
     // 選んだ年度の続きから再開する
@@ -279,6 +283,26 @@ export default function App() {
     finally { setContentBusy(false); }
   };
 
+  useEffect(() => {
+    if (!restoringExamId) return;
+    const requestId = ++selectionRequest.current;
+    let disposed = false;
+    const isCurrent = () => !disposed && requestId === selectionRequest.current;
+    (async () => {
+      try {
+        const { loadPaidExam } = await import('./services/privateStudy');
+        if (!isCurrent()) return;
+        await loadPaidExam(restoringExamId);
+        if (isCurrent()) selectLoadedExam(restoringExamId);
+      } catch (error) {
+        if (isCurrent()) showAccessPrompt(error, restoringExamId);
+      } finally {
+        if (isCurrent()) setRestoringExamId(null);
+      }
+    })();
+    return () => { disposed = true; };
+  }, [restoringExamId]);
+
   const accessLost = privateContentMode && isPaidExam(currentExamId) && !getPrivateExam(currentExamId);
   useEffect(() => {
     if (!accessLost) return;
@@ -288,7 +312,7 @@ export default function App() {
     setContentBusy(false);
     setContentMessage('利用状態が変わりました。無料問題に戻りました。有料年度は再度選んで確認してください。');
     setCurrentMode('quiz');
-    selectLoadedExam('r8_1');
+    selectLoadedExam('r8_1', { remember: false });
   }, [accessLost, privateVersion]);
 
   // 管理画面で問題を修正した時も、表示中の問題に最新の内容を使う
@@ -332,6 +356,14 @@ export default function App() {
     );
   }
 
+  if (restoringExamId) return <div className="p-4 text-slate-200 space-y-3">
+    <p role="status">前回の年度を開いています…</p>
+    <button className="min-h-[44px] rounded-lg bg-slate-700 px-4" onClick={() => {
+      selectionRequest.current++;
+      setRestoringExamId(null);
+      selectLoadedExam('r8_1');
+    }}>無料の最新問題を開く</button>
+  </div>;
   if (isPrivateStudySuspended()) return <div role="status" className="p-4 text-slate-200">利用状態を再確認中…</div>;
 
   if (accessLost) return <div role="status" className="p-4 text-slate-200">利用状態を確認中…</div>;

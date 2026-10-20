@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>お問い合わせ | 電工2種サクサク道場</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #020617; color: #f1f5f9; font-family: system-ui, sans-serif; line-height: 1.8; }
+    main { max-width: 680px; margin: 0 auto; padding: 28px 20px max(32px, env(safe-area-inset-bottom)); }
+    h1 { margin: 20px 0 8px; font-size: 1.7rem; }
+    h2 { font-size: 1.05rem; margin: 0 0 12px; }
+    p { margin: 10px 0; }
+    .brand, .note { color: #94a3b8; font-size: .9rem; }
+    section { margin-top: 24px; padding: 20px; border: 1px solid #334155; border-radius: 18px; background: #0f172a; }
+    a { color: #7dd3fc; text-underline-offset: 4px; }
+    a:focus-visible { outline: 3px solid #38bdf8; outline-offset: 4px; }
+    .email { overflow-wrap: anywhere; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 18px; margin-top: 12px; border-radius: 10px; background: #0369a1; color: white; text-decoration: none; font-weight: 700; }
+    .back { display: inline-flex; align-items: center; min-height: 44px; margin-top: 20px; }
+    ul { padding-left: 1.4rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand">電工2種サクサク道場</p>
+    <h1>お問い合わせ</h1>
+    <p>操作やお支払いについて、お困りのことがありましたらメールでご連絡ください。ログインは不要です。</p>
+    <section aria-labelledby="contact-title">
+      <h2 id="contact-title">メールで問い合わせる</h2>
+      <p>運営：電工2種サクサク道場 運営</p>
+      <p class="email"><a href="mailto:construction2nd-support@googlegroups.com">construction2nd-support@googlegroups.com</a></p>
+      <a class="button" href="mailto:construction2nd-support@googlegroups.com">メールアプリを開く</a>
+      <p class="note">開かない場合は、メールアドレスをコピーしてお使いのメールサービスから送信してください。</p>
+    </section>
+    <section aria-labelledby="details-title">
+      <h2 id="details-title">お知らせいただきたいこと</h2>
+      <ul>
+        <li>起きたことと、その直前の操作</li>
+        <li>問題についての場合は、年度と問題番号</li>
+        <li>お使いの端末とブラウザ</li>
+      </ul>
+      <p class="note">カード番号・セキュリティコード・パスワードは送らないでください。画像を添える場合は、関係のない個人情報を隠してください。</p>
+      <p>お支払いが完了しているのに利用できない場合は、追加購入せず、アプリの「支払い・利用期限を再確認」をお試しください。</p>
+    </section>
+    <a class="back" href="./">学習画面へ戻る</a>
+  </main>
+</body>
+</html>

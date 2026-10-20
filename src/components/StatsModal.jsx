@@ -239,6 +239,7 @@ export default function StatsModal({
 
               <ExamHistorySummary histories={state.examResults} />
               {firebaseEnabled && <Suspense fallback={<p className="text-xs">アカウント設定を読み込み中…</p>}><AccountPanel /></Suspense>}
+              <a className="inline-flex min-h-[44px] items-center text-xs text-sky-300 underline" href={`${import.meta.env.BASE_URL}contact.html`} target="_blank" rel="noopener noreferrer">お問い合わせ（別タブ）</a>
               {/* Learning Settings & Options */}
               <div className="pt-3 border-t border-slate-700/60 flex flex-col gap-2">
                 <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80 flex items-center justify-between">

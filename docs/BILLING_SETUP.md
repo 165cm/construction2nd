@@ -111,3 +111,13 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 専用顧客をアプリUIDへ紐づけていないため、これはStripe側の更新/終了と実請求書の判定の確認。更新通知からFirestoreへの利用権追加・画面の利用期限延長までの結合テストは別途必要。時間操作はStripeの時計だけで、アプリのサーバー時計は進めていない。検証オブジェクトは追跡用に保持、実際の請求はなし。
 
 公式手順：https://docs.stripe.com/billing/testing/test-clocks/simulate-subscriptions
+
+### 初回・更新の支払い失敗と復旧（2026-10-20）
+専用架空UID（Authenticationの利用者は作成せず、購入許可リストにも追加しない）とsandboxBillingCustomersを使用し、実Stripe通知→Firestoreまで確認。本人の契約・利用権は変更していない。
+
+- 初回失敗：`sub_1USYTHEVrGT4ZD0cNCvOE4nM` / `in_1USYTHEVrGT4ZD0c8QNYdngn`。公式のtok_chargeCustomerFailで請求を試みcard_declined。契約incomplete、請求書open、amount_paid=0、PaymentIntent requires_payment_method。monthlyGrant拒否、Firestore利用権0件。
+- 更新失敗：clock `clock_1USYTGEVrGT4ZD0c7h6zmdie` / 契約 `sub_1USYTJEVrGT4ZD0clOa2e28v`。初回請求 `in_1USYTJEVrGT4ZD0cqJfbYD9H` は480円paid、通知経由の利用権1件を確認。その後拒否カードへ切替、時計を期間末+2時間に進めreadyを確認。更新請求 `in_1USYU2EVrGT4ZD0ch82xLR7G` はopen、amount_paid=0、契約past_due、利用権は初回の1件のみで延長なし。シミュレーション時刻をaccessSummaryへ渡してhasAccess=false。
+- 復旧：正常カードへ戻し同じ未払い請求書を支払うと480円paid・契約active。実通知を経由して次期利用権がFirestoreへ追加され2件。初回終了と次期開始が一致し、シミュレーション時刻でhasAccess=true。
+- ブラウザのエラー表示、Checkoutでのカード拒否操作、3Dセキュアはこの検証に含めない。時間操作はStripeのみで、実サーバー時計は進めていない。本人画面での延長も未検証。専用契約は検証後に期間末解約へ設定済み。
+
+公式テストカード：https://docs.stripe.com/testing

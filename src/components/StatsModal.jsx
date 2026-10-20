@@ -1,6 +1,6 @@
 import HelpTip from './HelpTip';
 import ExamHistorySummary from './ExamHistorySummary';
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { X, Trophy, Clock, Zap, Flame, Award, BarChart3, RotateCcw, CheckCircle2, Brain, BookOpen, Table } from 'lucide-react';
 import { getTodayCount, getStudyStreakDays } from '../utils/storage';
 import { downloadLearningBackup, inspectLearningBackup, restoreLearningBackup } from '../utils/backup';
@@ -24,6 +24,31 @@ export default function StatsModal({
   const [activeTab, setActiveTab] = useState('stats'); // 'stats' | 'cheatsheets'
   const [isShuffle, setIsShuffle] = useState(getShuffleChoicesSetting);
   const [autoAdvance, setAutoAdvance] = useState(getAutoAdvanceMode);
+  const viewportRef = useRef(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const viewport = window.visualViewport;
+    const fitViewport = () => {
+      const overlay = viewportRef.current;
+      if (!overlay) return;
+      overlay.style.top = `${viewport?.offsetTop ?? 0}px`;
+      overlay.style.left = `${viewport?.offsetLeft ?? 0}px`;
+      overlay.style.width = `${viewport?.width ?? window.innerWidth}px`;
+      overlay.style.height = `${viewport?.height ?? window.innerHeight}px`;
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    fitViewport();
+    viewport?.addEventListener('resize', fitViewport);
+    viewport?.addEventListener('scroll', fitViewport);
+    window.addEventListener('resize', fitViewport);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      viewport?.removeEventListener('resize', fitViewport);
+      viewport?.removeEventListener('scroll', fitViewport);
+      window.removeEventListener('resize', fitViewport);
+    };
+  }, [isOpen]);
   // 解答後ポップアップなど、ほかの場所で変えた自動送り設定にも表示を合わせる
   useEffect(() => {
     const sync = () => setAutoAdvance(getAutoAdvanceMode());
@@ -75,13 +100,13 @@ export default function StatsModal({
   const allCheatsheetsList = Object.values(CHEATSHEETS);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/85 backdrop-blur-md animate-pop">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div ref={viewportRef} className="settings-viewport z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md">
+      <div role="dialog" aria-modal="true" aria-labelledby="settings-title" className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-md min-h-0 max-h-full flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800 bg-slate-800/50 shrink-0">
           <div className="flex items-center space-x-2">
             <Trophy className="text-amber-400" size={20} />
-            <h3 className="font-black text-sm text-white">学習記録・設定</h3>
+            <h3 id="settings-title" className="font-black text-sm text-white">学習記録・設定</h3>
           </div>
           <button
             onClick={() => { playClick(); onClose(); }}
@@ -121,7 +146,7 @@ export default function StatsModal({
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4">
           {activeTab === 'cheatsheets' ? (
             /* Cheatsheets Tab */
             <div className="space-y-3">

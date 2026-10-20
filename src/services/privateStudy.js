@@ -21,13 +21,14 @@ async function requestFor(examId, fetcher) {
     const query = new URLSearchParams({ exam: examId });
     if (asset) query.set('asset', asset);
     const startedAt = performance.now();
+    const startedWallAt = Date.now();
     const response = await fetcher(`/api/content?${query}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
     ensureCurrent();
     if (response.status === 401 || response.status === 403) clearPrivateStudy();
     if (response.status === 401) throw accessError('login-required', 'ログインし直してください');
     if (response.status === 403) throw accessError('plan-required', 'この年度は有料プランで学習できます');
     if (!response.ok) throw new Error('教材を取得できませんでした。通信を確認して再試行してください');
-    if (!renewPrivateLease(Number(response.headers.get('X-Access-Expires-At')), Number(response.headers.get('X-Server-Time')), startedAt)) throw new Error('利用期間を再確認してください');
+    if (!renewPrivateLease(Number(response.headers.get('X-Access-Expires-At')), Number(response.headers.get('X-Server-Time')), startedAt, startedWallAt)) throw new Error('利用期間を再確認してください');
     return response;
   }
 }

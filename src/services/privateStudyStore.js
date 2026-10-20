@@ -7,6 +7,7 @@ const listeners = new Set();
 let version = 0;
 let generation = 0;
 let leaseUntil = 0;
+let leaseWallUntil = 0;
 let owner = null;
 let suspended = false;
 export const isPrivateStudySuspended = () => suspended;
@@ -17,13 +18,16 @@ export function resumePrivateStudy() { if (suspended) { suspended = false; notif
 export function setPrivateOwner(uid) {
   if (uid !== owner) { clearPrivateStudy(); owner = uid; }
 }
-export function renewPrivateLease(expiresAt, serverNow, startedAt = performance.now()) {
+export function renewPrivateLease(expiresAt, serverNow, startedAt = performance.now(), startedWallAt = Date.now()) {
   const duration = Math.min(60000, expiresAt - serverNow);
   if (!Number.isFinite(duration) || duration <= 0) { clearPrivateStudy(); return false; }
   leaseUntil = startedAt + duration;
-  return performance.now() < leaseUntil;
+  leaseWallUntil = startedWallAt + duration;
+  return hasPrivateLease();
 }
-export const hasPrivateLease = () => performance.now() < leaseUntil;
+// 単調時計が休止中に進まない環境でも、実経過時間で保持期限を超えない。
+// 端末時計を戻しても単調時計側の期限は延びない。
+export const hasPrivateLease = () => performance.now() < leaseUntil && Date.now() < leaseWallUntil;
 export function expirePrivateStudy() {
   if (exams.size && !hasPrivateLease()) clearPrivateStudy();
 }
@@ -57,7 +61,7 @@ export function publishPrivateAsset(path, url, expectedGeneration) {
 }
 export function clearPrivateStudy() {
   suspended = false;
-  generation++; leaseUntil = 0;
+  generation++; leaseUntil = 0; leaseWallUntil = 0;
   assets.forEach(url => URL.revokeObjectURL(url));
   assets.clear(); exams.clear(); notify();
 }

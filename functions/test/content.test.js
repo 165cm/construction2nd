@@ -22,3 +22,23 @@ test('認証・期限を検証してから読む。エラー時もキャッシ�
     assert.match(result.headers['Cache-Control'], /no-store/);
   }
 });
+
+test('指定されたUIDではなく検証済みトークンの本人の利用権だけを確認する', async () => {
+  const granted = { startsAt:100, expiresAt:200, revoked:false };
+  for (const uid of ['paid-user','other-user']) {
+    let reads=0;
+    const checked=[];
+    const handler=contentHandler({enabled:()=>true,now:()=>150,
+      verifyToken:async token=>{assert.equal(token,'fixture-verified-token');return {uid}},
+      getGrants:async requested=>{checked.push(requested);return requested==='paid-user'?[granted]:[]},
+      readContent:async()=>{reads++;return Buffer.from('fixture-private-data')},
+    });
+    const result={headers:{},set(k,v){this.headers[k]=v;return this},status(n){this.code=n;return this},send(body){this.body=body;return this}};
+    await handler({method:'GET',query:{exam:'r7_2',uid:'paid-user'},headers:{authorization:'Bearer fixture-verified-token','x-user-id':'paid-user'}},result);
+    assert.deepEqual(checked,[uid]);
+    assert.equal(result.code,uid==='paid-user'?200:403);
+    assert.equal(reads,uid==='paid-user'?1:0);
+    assert.match(result.headers['Cache-Control'],/private, no-store/);
+    assert.equal(result.headers.Vary,'Authorization');
+  }
+});

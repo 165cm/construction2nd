@@ -56,6 +56,25 @@ try {
   await assert.rejects(loadPrivateAsset('pages/r7_2/page_15.webp',{fetcher:async()=>new Response('',{status:503})}));
   assert.ok(await loadPrivateAsset('pages/r7_2/page_15.webp',{fetcher}),'失敗画像を再試行できる');
 
+  assert.equal((await fetch(a)).ok,true,'保持期間内は実際のBlob URLを読める');
+  store.setPrivateOwner('another-owner');
+  assert.equal(store.getPrivateExam('r7_2'),undefined,'アカウント変更で本文を破棄');
+  assert.equal(store.getPrivateAsset(path),'');
+  await assert.rejects(fetch(a),'アカウント変更で以前のBlob URL自体も失効');
+  await loadPaidExam('r7_2',{fetcher});
+  const beforeExpiry = await loadPrivateAsset(path,{fetcher});
+  store.renewPrivateLease(200,100,performance.now()-1000);
+  store.expirePrivateStudy();
+  assert.equal(store.getPrivateExam('r7_2'),undefined,'期限切れで本文を破棄');
+  await assert.rejects(fetch(beforeExpiry),'期限切れでBlob URL自体も失効');
+  await loadPaidExam('r7_2',{fetcher});
+  const beforeDenied = await loadPrivateAsset(path,{fetcher});
+  await assert.rejects(loadPrivateAsset('pages/r7_2/page_15.webp',{
+    fetcher:async()=>new Response('',{status:403}),
+  }),error=>error.code==='plan-required');
+  assert.equal(store.getPrivateExam('r7_2'),undefined,'画像の権限拒否でも本文を破棄');
+  await assert.rejects(fetch(beforeDenied),'権限拒否で他の取得済み画像も失効');
+
   store.clearPrivateStudy();
   await loadPaidExam('r7_2',{fetcher});
   let finish, started;

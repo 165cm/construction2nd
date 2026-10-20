@@ -132,3 +132,31 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 Stripe APIで上記専用sessionのcomplete/paid、980 JPY、livemode=false、PaymentIntent succeeded、3DS authenticatedを確認。charge `ch_3USaFVEVrGT4ZD0c1W5wbgwP`。専用架空UIDのpack利用権とcharge一致をFirestoreで確認（開始1792492188000、終了1800440988000、revoked=false）。本人の既存月額権利には付与していない。
 
 続いて実イベント `evt_1USaIjEVrGT4ZD0cpc7Nh4vb` のJSONをAPIで取得し、既存Webhook署名秘密値で新しい署名を付け、既存受信先へ計4回POST。すべてHTTP200。Firestoreの項目順序を除外して前後比較し利用権1件、開始/終了時刻を含む全項目不変を確認。これは受信処理の再送・重複検証で、Stripe配信基盤の再送スケジュール自体の試験ではない。
+
+## 購入予約・同時実行の実接続確認（2026-10-20）
+
+`scripts/verify-checkout-sandbox.mjs` により、既存 `createCheckout.run` をローカルから呼び、実際のFirestoreトランザクションとStripeテストAPIを接続して以下の9項目を確認した。実行IDは `20261020132625633`。架空UIDは `billing-checkout-guard-` で始まる専用5件、Stripe顧客5件、未払いCheckout合計4件。個人情報・支払い方法は登録していない。
+
+1. 認証コンテキストなし・許可対象外UIDを拒否。
+2. 同一プラン8件同時実行は全件成功・同じURLで、Checkoutは1件。再試行も同じ1件。
+3. その手続きが開いている間の別プラン購入を拒否。
+4. pack/monthlyの4件同時実行は1プランだけが成功し、Checkoutは1件。
+5. 専用の予約期限だけを過去にしても、Stripeがopenの間は再作成を拒否。
+6. Stripe側でも失効させた後の4件同時再試行は、expired1件と新しいopen1件だけ。
+7. 専用UIDに有効な利用権を設定すると追加購入を拒否し、Checkoutは0件。
+8. セッション未作成のまま2時間経過した予約を模擬し、24時間内の再作成を拒否。
+9. セッション未作成のまま25時間経過した予約を模擬し、新しいCheckoutを1件作成。
+
+終了時に、この実行で作った未払いCheckoutのopen分だけを失効させ、cleanupエラーなしで終了した。予約・架空利用権・テスト顧客は証跡として残す。本人の月額契約・利用権・学習記録、サーバーの許可UID設定は変更していない。
+
+制約：HTTP経由の認証検証はこのスクリプトでは行わず、認証コンテキストを直接渡して既存ハンドラーを呼ぶ。既存のFunctions通知受信・購入APIをデプロイしての試験ではない。期限/24時間条件は専用の予約時刻を変更して確認しており、実際に1日待ってはいない。支払完了後の通知遅延と購入予約の競合、月額契約中の分岐は追加確認が残る。
+
+画面側もローカル模擬応答で、購入確定ボタンのダブルクリック→呼び出し1回、処理中は購入/別プラン/戻るが無効、完了後にボタンが復帰し呼び出しは1回のまま、を確認。
+
+再実行はNode.js 24のローカル環境で、Firebase CLIの認証とサンドボックス設定が必要。明示的なフラグなしでは何も接続しない。秘密値・短期アクセストークンはメモリ内でのみ使用し、実行記録は権限600の `/tmp/construction-checkout-guard-<実行ID>.json` に保存する。
+
+```sh
+node scripts/verify-checkout-sandbox.mjs --run-sandbox-check
+```
+
+中断時の現仕様：同じプランは元のopen Checkoutを再利用できるが、別プランへは元の手続きが失効するまで進めない（予約は1時間）。中断後すぐに別プランへ変更できる導線は、今後の使い勝手の改善候補。

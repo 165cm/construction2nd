@@ -121,3 +121,8 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 - ブラウザのエラー表示、Checkoutでのカード拒否操作、3Dセキュアはこの検証に含めない。時間操作はStripeのみで、実サーバー時計は進めていない。本人画面での延長も未検証。専用契約は検証後に期間末解約へ設定済み。
 
 公式テストカード：https://docs.stripe.com/testing
+
+### Checkout画面の失敗・追加認証の準備（2026-10-20）
+専用架空UIDと個人情報なしの専用顧客で、980円パックのサンドボックスCheckoutを作成（cs_test_a1z5MqwDG0LWBi2UbkFGFT5nvXP8wOx3oFJYL9BWS1c76wYIQEhKBQP3Gx）。本人の月額権利は変更していない。Checkout URLはGitに保存せず、ローカル専用 /tmp/construction-checkout-ui-state.json に保存。初回URLの期限は2026-10-20 20:19:29（日本時間）。
+
+料金・戻り先・metadataは本アプリのcheckoutParamsを使用。createCheckoutの購入予約・認証ガードを経由しないため、これはStripe Checkoutの表示と通知連携の検証用であり、アプリの重複購入防止や入口認証の検証には含めない。まず公式の拒否カードで画面を確認し、その後追加認証を検証予定。画面操作は本人確認待ち。

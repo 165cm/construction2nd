@@ -1,7 +1,7 @@
 import { getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { firebaseConfig, firebaseEnabled } from './firebaseConfig';
-import { getPrivateExam, privateGeneration, publishPrivateExam, isPaidExam, renewPrivateLease, clearPrivateStudy, getPrivateAsset, publishPrivateAsset } from './privateStudyStore';
+import { getPrivateExam, privateGeneration, publishPrivateExam, isPaidExam, renewPrivateLease, clearPrivateStudy, getPrivateAsset, publishPrivateAsset, setPrivateOwner } from './privateStudyStore';
 
 const accessError = (code, message) => Object.assign(new Error(message), { code });
 
@@ -9,8 +9,11 @@ async function requestFor(examId, fetcher) {
   if (!isPaidExam(examId)) throw new Error('収録されていない年度です');
   if (!firebaseEnabled) throw new Error('アカウント接続を準備中です');
   const app = getApps()[0] || initializeApp(firebaseConfig);
-  const user = getAuth(app).currentUser;
+  const auth = getAuth(app);
+  await auth.authStateReady();
+  const user = auth.currentUser;
   if (!user) throw accessError('login-required', '購入済みの方はログインして利用状態を確認してください');
+  setPrivateOwner(user.uid);
   const generation = privateGeneration();
   const token = await user.getIdToken();
   const ensureCurrent = () => {

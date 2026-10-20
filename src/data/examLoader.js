@@ -139,16 +139,22 @@ export function getExamQuestions(examId) {
 
 const STORAGE_EXAM_KEY = 'denkou2_current_exam_id';
 
-export function loadCurrentExamId() {
+export function loadSavedExamId() {
   try {
     const saved = localStorage.getItem(STORAGE_EXAM_KEY);
-    if (saved && EXAM_DATA_MAP[saved] && !(privateContentMode && isPaidExam(saved))) {
+    if (EXAM_LIST.some(exam => exam.id === saved)) {
       return saved;
     }
   } catch (e) {
     // ignore
   }
   return DEFAULT_EXAM_ID;
+}
+
+export function loadCurrentExamId() {
+  const saved = loadSavedExamId();
+  // 有料教材は再認証・取得が終わるまで表示しない。復元先の記憶とは分ける。
+  return privateContentMode && isPaidExam(saved) ? DEFAULT_EXAM_ID : saved;
 }
 
 export function saveCurrentExamId(examId) {

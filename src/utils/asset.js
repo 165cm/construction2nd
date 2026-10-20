@@ -8,3 +8,13 @@ export const getAssetUrl = (path) => {
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   return `${base}${cleanPath}`;
 };
+
+// 有料画像だけを認証付きで必要時に取得する。公開画像は従来のURLを使う。
+export async function resolveAssetUrl(path) {
+  if (!path) return '';
+  if (privateContentMode && privateAssetPath(path)) {
+    const { loadPrivateAsset } = await import('../services/privateStudy');
+    return loadPrivateAsset(path);
+  }
+  return getAssetUrl(path);
+}

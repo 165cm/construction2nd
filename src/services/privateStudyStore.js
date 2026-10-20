@@ -8,6 +8,12 @@ let version = 0;
 let generation = 0;
 let leaseUntil = 0;
 let owner = null;
+let suspended = false;
+export const isPrivateStudySuspended = () => suspended;
+export const hasStoredPrivateStudy = () => exams.size > 0;
+export function suspendPrivateStudy() { if (exams.size && !suspended) { suspended = true; notify(); } }
+export function resumePrivateStudy() { if (suspended) { suspended = false; notify(); } }
+
 export function setPrivateOwner(uid) {
   if (uid !== owner) { clearPrivateStudy(); owner = uid; }
 }
@@ -36,7 +42,21 @@ export function publishPrivateExam(exam, urls, expectedGeneration) {
   notify();
   return true;
 }
+export function discardPrivateAsset(path) {
+  const key = path?.replace(/^\//, '');
+  const url = assets.get(key);
+  if (url) URL.revokeObjectURL(url);
+  assets.delete(key);
+}
+export function publishPrivateAsset(path, url, expectedGeneration) {
+  if (generation !== expectedGeneration || !hasPrivateLease()) { URL.revokeObjectURL(url); return false; }
+  const old = assets.get(path);
+  if (old) URL.revokeObjectURL(old);
+  assets.set(path, url);
+  return true;
+}
 export function clearPrivateStudy() {
+  suspended = false;
   generation++; leaseUntil = 0;
   assets.forEach(url => URL.revokeObjectURL(url));
   assets.clear(); exams.clear(); notify();

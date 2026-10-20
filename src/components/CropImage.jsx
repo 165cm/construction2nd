@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAssetUrl } from '../utils/asset';
+import AssetImage from './AssetImage';
 import {
   getActiveCropCoords,
   getCachedCropUrl,
@@ -47,7 +47,7 @@ export default function CropImage({ cropKey, defaultPath, alt = '', className = 
   if (activeCoords && failedSig !== sig) {
     src = rendered?.sig === sig ? rendered.url : getCachedCropUrl(activeCoords);
   } else {
-    src = defaultPath ? getAssetUrl(defaultPath) : '';
+    return <AssetImage path={defaultPath} alt={alt} className={className} draggable={draggable} />;
   }
 
   if (!src) {

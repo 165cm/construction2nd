@@ -25,6 +25,14 @@ try {
   assert.match(active, /利用期間中の追加購入は不要/);
   assert.doesNotMatch(active, /パックの内容を確認|月額プランの内容を確認/);
   assert.match(active, /2027\/1\/16/);
+  for (const hasAccess of [true, false]) {
+    const paused = renderToStaticMarkup(React.createElement(PricingPlans, {
+      enabled: false, hasAccess, expiresAt: Date.parse('2027-01-16T00:00:00+09:00'), onManage: () => {},
+    }));
+    assert.match(paused, /<button(?![^>]*disabled)[^>]*>契約管理・月額の解約<\/button>/,
+      '購入受付を停止しても、有効/期限切れ契約の解約入口は維持する');
+    if (!hasAccess) assert.equal((paused.match(/disabled=""/g) || []).length, 2, '購入ボタンだけを停止');
+  }
   const panel = renderToStaticMarkup(React.createElement(BillingPanel, { uid: 'test' }));
   assert.doesNotMatch(panel, /Stripeで支払いに進む/);
   let navigated;

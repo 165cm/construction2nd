@@ -1,4 +1,8 @@
-# 有料版Hostingの接続準備
+# 有料版Hostingの接続と運用
+
+**現在（2026-10-21）**：Blaze・Stripeテスト価格・Portal・Functions・Firebase Hostingは準備/接続済み。検証サイトはPR #76相当、以降#77〜#81は検証と記録の追加のみ。一般販売・本番Stripe切替・main統合は未実施。以下は初期準備の経緯であり、現在の未設定事項は [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) と [並列運用監査](audits/2026-10-21-release-operations.md) を参照。
+
+## 初期準備時の記録（2026-10-17）
 
 2026-10-17。設定のみ。公開・課金開始は未実施。
 

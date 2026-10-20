@@ -10,7 +10,7 @@ const server = await createServer({
       if (id === '/test-app.js') return 'export const getApps=()=>[{}];export const initializeApp=()=>({});';
       if (id.endsWith('/src/services/firebaseConfig.js')) return 'export const firebaseEnabled=true;export const firebaseConfig={};';
       if (id.endsWith('/src/services/cloudBackup.js')) return "export const observeAccount=fn=>{fn({uid:'test-owner'});return()=>{}};";
-      if (id.endsWith('/src/services/billing.js')) return 'export let access;export const setAccess=value=>{access=value};export const billingCall=async()=>await access;';
+      if (id.endsWith('/src/services/billing.js')) return 'export let access;export let calls=0;export const setAccess=value=>{access=value};export const billingCall=async()=>{calls++;return await access};';
     }
   }]
 });
@@ -51,7 +51,13 @@ try {
 
   globalThis.document = new EventTarget(); document.hidden=false;
   globalThis.window = new EventTarget();
-  const stop = watchPrivateStudy();
+  const intervals=[];
+  const originalSetInterval=globalThis.setInterval;
+  let stop;
+  try {
+    globalThis.setInterval=fn=>{intervals.push(fn);return undefined};
+    stop=watchPrivateStudy();
+  } finally { globalThis.setInterval=originalSetInterval; }
   try {
     await loadPaidExam('r7_2',{fetcher});
     const cached = await loadPrivateAsset(path,{fetcher});
@@ -78,6 +84,33 @@ try {
     document.hidden=false; document.dispatchEvent(new Event('visibilitychange'));
     assert.equal(store.getPrivateExam('r7_2'),undefined,'長い非表示で保持期限が過ぎた教材は破棄');
     assert.equal(store.getPrivateAsset(path),'');
+    for (const eventName of ['focus', 'pageshow']) {
+      await loadPaidExam('r7_2',{fetcher});
+      const retained = await loadPrivateAsset(path,{fetcher});
+      let ready;
+      billing.setAccess(new Promise(r=>{ready=r}));
+      window.dispatchEvent(new Event('blur'));
+      assert.equal(store.isPrivateStudySuspended(),true,'visibilitychangeなしでもblurで停止');
+      const checksBefore = billing.calls;
+      await intervals[0]();
+      assert.equal(billing.calls,checksBefore,'blur中はvisibilityがvisibleでも定期確認で期限を延ばさない');
+      window.dispatchEvent(new Event(eventName));
+      assert.equal(store.isPrivateStudySuspended(),true,eventName+'だけでも再認証まで表示を止める');
+      ready({hasAccess:true,expiresAt:Date.now()+60000,serverNow:Date.now()});
+      await new Promise(r=>setTimeout(r,0));
+      assert.equal(store.isPrivateStudySuspended(),false);
+      assert.equal(store.getPrivateAsset(path),retained);
+      const originalNow = Date.now;
+      const wallNow = Date.now();
+      try {
+        Date.now = () => wallNow + 120000;
+        window.dispatchEvent(new Event(eventName));
+        assert.equal(store.getPrivateExam('r7_2'),undefined,'単調時計が進まなくても'+eventName+'で2分経過を検知');
+        assert.equal(store.getPrivateAsset(path),'');
+      } finally { Date.now = originalNow; }
+    }
+    store.renewPrivateLease(200,100,performance.now()-1000,Date.now()+120000);
+    assert.equal(store.hasPrivateLease(),false,'時計を戻す方向の補正でも単調時計の期限を延ばさない');
   } finally { stop(); delete globalThis.document; delete globalThis.window; }
   console.log('PASS: JSON-only selection, lazy assets, dedup/cache/retry, stale result rejection, tab resume authorization');
 } finally { await server.close(); }

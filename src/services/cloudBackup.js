@@ -42,5 +42,13 @@ export async function writeCloudBackup(uid, backup, expectedRevision) {
     const revision = currentRevision + 1;
     tx.set(ref, { payload, revision, updatedAt: serverTimestamp() });
     return revision;
+  }).catch(async error => {
+    // 競合時にルールのrevision判定が先に失敗するとSDKは再試行せず権限エラーを返す。
+    // 本人の最新データで競合を確認できた場合だけ、通常の競合案内へ置き換える。
+    if (error.code === 'permission-denied') {
+      const current = await readCloudBackup(uid);
+      assertCloudWrite(payload, expectedRevision, current?.revision ?? 0);
+    }
+    throw error;
   });
 }

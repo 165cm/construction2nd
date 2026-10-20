@@ -99,3 +99,15 @@ Firebaseプロジェクト `construction2nd`・Googleログイン・Firestoreル
 
 ### アプリ側の期限切れ検証（2026-10-20）
 指定テスターの月額利用期限を約5分後へ一時変更。本人が開いたままの有料問題の表示終了、有料年度再取得時の拒否案内、無料問題利用、学習記録維持を確認。控えた元の期限2026-11-20 10:59:09（日本時間）へ復元しFirestore読取照合成功。Stripe側の時刻・契約は変更していないため、これはStripeの期間末終了・更新請求の実接続検証には含めない。復元後の教材再取得は本人確認待ち。
+
+### Stripeの更新・期間末終了（2026-10-20）
+専用サンドボックス顧客（個人情報なし）を新規作成し、test clock `clock_1USYMFEVrGT4ZD0cKo5alHZ8`、契約 `sub_1USYMIEVrGT4ZD0cHGvIi5BM` で検証。本人の既存契約・利用権は変更していない。
+
+- 初回 `in_1USYMIEVrGT4ZD0cqXlsmxhn`：paid、480円、subscription_create。
+- 時計を初回の期間末+2時間へ進め、ready後に `in_1USYMYEVrGT4ZD0cULZ49FAe`：paid、480円、subscription_cycle を確認。
+- 実際の2請求書（chargeを展開）を本アプリのmonthlyGrantへ渡し、両方で利用権の生成を確認。初回の終了時刻と更新分の開始時刻が一致。
+- 期間末解約を設定後、次の期間末+2時間まで進めてreadyを確認。契約はcanceled。請求書は2件で、3回目の請求は発生していない。
+
+専用顧客をアプリUIDへ紐づけていないため、これはStripe側の更新/終了と実請求書の判定の確認。更新通知からFirestoreへの利用権追加・画面の利用期限延長までの結合テストは別途必要。時間操作はStripeの時計だけで、アプリのサーバー時計は進めていない。検証オブジェクトは追跡用に保持、実際の請求はなし。
+
+公式手順：https://docs.stripe.com/billing/testing/test-clocks/simulate-subscriptions

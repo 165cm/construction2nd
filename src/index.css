@@ -5,6 +5,19 @@
   --safe-right: env(safe-area-inset-right, 0px);
 }
 
+/* Keep the settings header inside the visible area, including mobile browser bars. */
+.settings-viewport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  box-sizing: border-box;
+  padding: max(12px, var(--safe-top)) max(12px, var(--safe-right))
+    max(12px, var(--safe-bottom)) max(12px, var(--safe-left));
+}
+
 /* Fast tap response on mobile */
 * {
   -webkit-tap-highlight-color: transparent;

@@ -50,7 +50,13 @@ AND (textPayload:"billing-webhook-retry" OR jsonPayload.message:"billing-webhook
 
 ## 費用
 
-ユーザーの月額目安は1,000円、Google Cloudで予算通知は設定済みのはずとの申告。予算APIはSERVICE_DISABLEDのため実設定は未確認。APIの有効化・予算の新規作成・既存予算の変更は行っていない。管理画面でも確認を試み、プロジェクトに請求先が紐付くことは表示で確認したが、請求先ページの読み込みエラーで予算一覧には到達できなかった（再試行後も未確認）。月額金額・対象範囲・通知条件/宛先を一括確認する作業が残る。予算通知は支出の自動停止ではない。
+2026-10-22、本人提供の一覧/編集画面から既存予算「Monthly ¥1000 Alert」を確認。月別・目標額1,000円、実費50%/90%/100%（500/900/1,000円）、アラートのみ、課金管理者とユーザーへのメール通知が有効。Monitoringメールチャネル連携・Pub/Subは未選択で、予算通知の個別宛先指定は行っていない。
+
+`construction2nd`からリンクされる請求先が、この予算を表示した請求先であることは本人確認済み。編集画面のプロジェクト/サービス絞り込み詳細は画像に写っていないため、この予算をプロジェクト単独専用とまでは断定しない。
+
+親がCloud BillingのIAMをGETで読み取り、承認済みメール通知先と同じ受信先に、当該請求先の`roles/billing.admin`が直接・条件なしで付与されていることを確認。実アドレス/請求先ID/ポリシー全体は文書へ保存しない。金額・期間・しきい値・ロール通知の受信対象を照合できたが、メール実到達は未確認。
+
+Budget APIはDISABLEDのままで、APIからの予算内容取得はしていない。API有効化・新規予算作成・設定変更は行わず、本人の画面証跡を確認根拠とする。以前の請求先画面読み込みエラーによる確認待ちは、この画面提供で解消。今回の予算はアラートのみで、自動停止は選択されていない。
 
 今回の外形監視は30日換算で2対象×3地域×288回/日×30日＝51,840地域実行/月。2026-10-21確認の公式料金では外形監視は各プロジェクト月100万地域実行まで無料枠がある。Functions呼出し/計算・ログ等は別であり、総額1,000円以下を保証しない。設定を増やす時や料金改定時は再確認する。
 
@@ -60,3 +66,5 @@ AND (textPayload:"billing-webhook-retry" OR jsonPayload.message:"billing-webhook
 - [外形監視設定API](https://docs.cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.uptimeCheckConfigs)
 - [ログに一致した時の通知](https://docs.cloud.google.com/logging/docs/alerting/log-based-alerts)
 - [Observability料金](https://cloud.google.com/products/observability/pricing)
+
+- [Google Cloud：予算と通知先の設定](https://docs.cloud.google.com/billing/docs/how-to/budgets?hl=ja)（ロール宛て通知と、アラートのみの予算は自動停止しないことを確認）

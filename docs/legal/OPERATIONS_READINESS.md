@@ -132,3 +132,5 @@
 - [個人情報保護委員会：ガイドラインQ&A](https://www.ppc.go.jp/personalinfo/faq/APPI_QA/)
 
 コード読取、既存試験証跡、公式要件の読取を2026-10-22に分担確認。保存地域等の未確認事項や運用未実施を、確認完了へ変更しない。
+
+2026-10-22の実設定追加確認：Cloud Loggingはglobalの通常30日/必須監査400日、転送は当該プロジェクト2バケットのみ。Firestore東京、東京の5関数ACTIVE・サンドボックス稼働。一般仕様と実設定の違い、追加の公式資料は [DATA_SETTINGS_AUDIT.md](DATA_SETTINGS_AUDIT.md)。国外取扱い/全保持期間・本番決済はなお要確認。

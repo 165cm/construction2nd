@@ -1,0 +1,83 @@
+# 外部取扱い・保存期間・決済設定の読取確認
+
+確認日：2026-10-22（日本時間）。公式資料の一般仕様、稼働プロジェクトの実設定、未確認の本番設定を分けて記録する。設定変更・契約操作・個人の学習記録取得は行っていない。
+
+## 1. 実APIで確認できた設定
+
+Google Cloudの既存認証をメモリ内で使用し、FirestoreのDB情報、Functionsの状態/限定した環境フラグ、Loggingのバケットと転送先をGETで取得。秘密値・UID・メール・ログ本文・顧客情報は出力/保存しない。API一覧の次ページなしも確認した。
+
+| 対象 | 実確認結果 | 解釈の限界 |
+|---|---|---|
+| Firestore | Native、`asia-northeast1`（東京） | 認証/Hosting/ログ等も東京という意味ではない |
+| Functions | 東京の5関数すべてACTIVE | 決済のモードは下記。稼働中というだけで本番設定の適正を保証しない |
+| 決済モード | 5関数で `BILLING_SANDBOX=true`。購入/教材配信の有効フラグはtrue。パック/月額のPrice参照設定あり | サンドボックスの購入受付。一般販売や本番Stripeの確認済みとはしない。許可UIDの値は出力/保存しない |
+| 通常ログのバケット | `_Default`、`global`、保持30日、ACTIVE | このバケット内の保持設定。他社ログや手元に保存した調査用の写しを含まない |
+| 必須監査ログのバケット | `_Required`、`global`、保持400日、locked、ACTIVE | 一部監査ログの保持設定。すべての利用者情報/全Functionsログを400日保存する意味ではない |
+| ログの転送先 | プロジェクトのsinkは上記2バケット宛ての2件。有効。追加のプロジェクトsinkなし | 上位組織/フォルダの設定、手動エクスポート、外部サービス側の保持は今回未照会 |
+| Firestoreの復元機能 | PITRは無効、DB削除保護も無効 | 別のバックアップが一切ないことの証明ではない。今回は設定変更しない |
+
+ログの `global` を日本国内限定と記載しない。公式のglobal仕様と契約を照合する。30日/400日の設定確認だけで、ログ内の取得項目・個別削除・全外部コピーの消去を保証しない。
+
+## 2. Google/Firebaseの公式仕様と文案への反映
+
+| 対象 | 公式資料にある一般仕様 | 文案への使い方 |
+|---|---|---|
+| Firebase Authentication | サービスは米国のデータセンターで稼働し、データを米国で処理 | Googleログインの利用に伴う米国処理を説明。Firestoreの東京設定で打ち消さない |
+| 認証情報の保持 | 関連ユーザーの削除を顧客が開始するまで認証情報を保持し、削除後はlive/backupから180日以内に削除。認証IPログは数週間 | サービス提供者の一般仕様。クラウド学習記録削除の30日目標とは別。Googleアカウント自体の削除も別 |
+| Hosting | IPを不正利用対策や利用状況分析に使い、数か月保持するとの説明 | アプリのCloud Loggingの30日をHosting全体の保持期間へ広げない |
+| 地域選択 | 個別の選択を提供するサービス以外は、Google/代理人の施設で処理・保存され得る | すべて国内保存/国外提供なしとの表現は使わない |
+
+上記は公式仕様の要約で、Firebase/Googleの契約全体や全サービスの保持期限を確定したものではない。利用中サービスに適用される契約・DPA、再委託先、国外取扱いの法的整理は別途確認する。GDPR上のprocessor等の説明を日本法上の評価へそのまま置き換えない。
+
+公開文案の追加候補：
+
+> GoogleログインにはFirebase Authenticationを利用し、認証に関するデータは同サービスの仕様により米国で処理されます。学習記録のFirestoreとFunctionsは東京の設定を使用していますが、認証、サイト配信、ログなどを含むすべての情報が日本国内だけで処理・保存されるものではありません。
+
+この候補文だけで国外取扱いに必要な説明/同意が完成したとはしない。
+
+## 3. 決済のコード照合
+
+| 項目 | 実装 | 残る本番確認 |
+|---|---|---|
+| 価格 | active/JPY/480円・980円、`tax_behavior=inclusive`を購入前に照合 | 本番Price・商品説明・税設定・確定画面の総額 |
+| 周期・数量 | 月額は1か月周期、パックは非定期。数量1 | 本番の更新説明・請求日時 |
+| 支払方法 | Checkoutは`payment_method_types=['card']` | 本番で実表示されるブランド/ウォレット等。カード指定だけで個別の対応を断定しない |
+| 自動税 | Checkout作成パラメータに`automatic_tax`の指定なし | inclusiveの設定確認だけで自動税計算が有効とは書かない。実Session/請求書・総額と照合 |
+| Portal | 有効、解約可、期間末解約、プラン更新不可を起動時照合 | 本番Portalの更新日時・締切・日本語表示・戻り先 |
+| 利用権 | 支払後も480/980円等を照合し、不一致なら付与しない | 誤った金額で請求されない保証ではない。総額相違で支払済み利用不可にならないよう本番の事前照合が必要 |
+
+現在稼働する設定はサンドボックス。本番の鍵・Price・Portal・Webhook・署名/API版・戻り先・データ保存先は本番切替の準備時に購入停止のまま照合する。テスト環境の成功を本番の確認済みへ振り替えない。本番切替や実請求を今回の調査では行わない。
+
+根拠：`functions/billingPolicy.js` の `checkoutParams` / `assertConfiguredPrice` / `packGrant` / `monthlyGrant`、`functions/index.js` の `createCheckout` / `createBillingPortal`、`functions/billingEnvironment.js`。
+
+## 4. 確認が残る保存・契約情報
+
+公式資料の追加調査では、次を確認した。いずれも、このアプリの適用契約・実保存国・全情報の保持期間を確定するものではない。
+
+| サービス | 一般的な取扱いと根拠 | このアプリで残る確認 |
+|---|---|---|
+| Stripe | 活動により管理者/処理者の役割が異なり、国外処理や法令/不正対策等の保持がある。Privacy Policy/DPAに説明 | 実際の契約主体と適用版、情報別の保持と運営側の保存義務。単一の年数を全データに当てはめない |
+| Cloudflare Turnstile | IP・User-Agent・TLS等を処理し、サービス提供と検出改善で取扱いの役割が異なると補遺で説明 | 当アプリでの適用条件と必要な説明。Workersのログ保持をTurnstileの全情報の期間としない |
+| GitHub | 国外移転・保存、目的/契約/法令等に応じた保持を説明 | リポジトリ設定・適用契約。Issue削除で第三者の写しも回収できるとはしない |
+| Google Groups | 会話履歴とメンバーへのメール配信は別機能 | グループ履歴を消しても各受信箱の写しが消えたとは扱わない。削除対象一覧と担当が必要 |
+
+- **運営側の決済記録**：税務・請求・不正対策・紛争対応で必要な情報と期限を区別。Stripe自身の保持期間と運営者の税務保存期間は同じとは限らない。推測の年数を採用しない。
+- **Google Groups**：グループ履歴、各メンバーの受信メール、添付・転送・バックアップの写しを区別。通常問い合わせの完了後最長1年の方針を満たす削除対象・手順は未整備。
+- **Cloudflare/GitHub**：サービスごとの役割、契約、国/国外アクセスと実際のログ保持・公開範囲を確認する。投稿本文へ利用者が入力した個人情報は混入し得る。
+- **認証・学習記録**：Firestore文書の削除と認証ユーザー削除、端末データ、外部バックアップは別。アカウント削除手順と本人確認方法を整備する。
+- **解析・追加収集**：対象ソースと公開ファイルの検索ではAnalytics/gtag等の追加実装は見つからない。ただし外部管理画面の連携設定や事業者自身の処理まで「収集なし」と断定しない。
+
+## 一次資料
+
+- [Firebase Privacy and Security](https://firebase.google.com/support/privacy/)（認証/Hostingの保持・処理地域）
+- [Firebase Data Processing and Security Terms](https://firebase.google.com/terms/data-processing-terms/)（対象契約の適用は要確認）
+- [Cloud Loggingの転送と保存](https://docs.cloud.google.com/logging/docs/routing/overview)
+- [Cloud Loggingの保存場所](https://docs.cloud.google.com/logging/docs/region-support)
+- [Cloud Loggingの保持期間](https://docs.cloud.google.com/logging/quotas)
+- [Stripe Priceのtax_behavior](https://docs.stripe.com/api/prices/object)
+- [Stripe Privacy Policy](https://stripe.com/privacy) / [Stripe DPA](https://stripe.com/jp/legal/dpa)
+- [Cloudflare Turnstile Privacy Addendum](https://www.cloudflare.com/turnstile-privacy-policy/)
+- [GitHub General Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
+- [Google Groupsのメール配信](https://support.google.com/groups/answer/9792489?hl=ja) / [投稿・削除](https://support.google.com/groups/answer/1046523?hl=ja)
+
+実設定のAPI読取、決済コード読取、サービス公式資料調査を分担実施。文書の追記は運営方針の勝手な追加や設定変更を意味しない。

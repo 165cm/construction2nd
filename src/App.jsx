@@ -457,6 +457,9 @@ export default function App() {
             onOpenExamSelect={() => { playClick(); setIsExamSelectOpen(true); }}
           />
         )}
+        <footer className="mt-6 border-t border-slate-800 pt-2 text-xs">
+          <a className="inline-flex min-h-[44px] items-center text-sky-300 underline" href={`${import.meta.env.BASE_URL}contact.html`} target="_blank" rel="noopener noreferrer">お問い合わせ（別タブ）</a>
+        </footer>
       </main>
 
       {/* Bottom Thumb Navigation */}

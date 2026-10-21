@@ -1,0 +1,11 @@
+{
+  "scope": "local real app; fixture auth/grants; real content handler and generated material",
+  "authorized": 13,
+  "denied": 0,
+  "imageAttempts": 7,
+  "imageFailures": 4,
+  "imageSuccesses": 3,
+  "expired": false,
+  "imageMode": "healthy",
+  "targetAsset": "choices/r7_2/48.webp"
+}

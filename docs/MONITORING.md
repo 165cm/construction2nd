@@ -34,6 +34,13 @@ AND (textPayload:"billing-webhook-retry" OR jsonPayload.message:"billing-webhook
 - サイト監視はHTTP200の監視で、JavaScriptの起動・画面操作の成功は保証しない。教材API監視は認証なしの拒否応答を確認する。有効な購入者の教材取得、全画像、全API、Stripe基盤の通知未着まで網羅するものではない。`billing-webhook-retry` を出す前のプロセス停止や、処理例外を出さずHTTP200で終了する対応不明イベントも検知対象外。
 - 意図的停止でAPIが503になると外形監視も通知する。計画停止時はMonitoringで対象通知ルールの一時停止（Snooze）を検討し、終了後に復帰を確認。無承認で本サービスを停止して発報テストしない。
 
+## 2026-10-22の読取再確認
+
+- 承認済みメール通知先はenabled=true、3通知ルールすべてenabled=trueで同じ通知先へ接続。APIのverificationStatusは未指定のままで、到着確認済みとはしない。ルール一覧の次ページなしも確認。
+- Cloud Billingはプロジェクトへの紐付けが有効。Budget APIのサービス状態はDISABLEDであり、予算一覧は取得できていない。これは予算未設定の証明ではない。API有効化/重複予算作成/既存設定変更は行わない。
+- 本人に管理画面の既存「予算とアラート」で、月単位/1,000円/対象にconstruction2ndを含むこと/通知しきい値と受信先をまとめて確認してもらう。存在しない場合もこの段階では新規作成せず結果を共有する。
+- メール受信の実試験と費用通知の設定確認は別。今回のGET照合でメール送信・意図的障害・契約変更は行っていない。
+
 ## 通知を受けた時
 
 1. [アラート一覧](https://console.cloud.google.com/monitoring/alerting?project=construction2nd)と[稼働監視](https://console.cloud.google.com/monitoring/uptime?project=construction2nd)で対象・発生時刻・地域を確認し、意図的な停止試験かを確認する。

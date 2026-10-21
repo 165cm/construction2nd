@@ -41,6 +41,10 @@ AND (textPayload:"billing-webhook-retry" OR jsonPayload.message:"billing-webhook
 - 本人に管理画面の既存「予算とアラート」で、月単位/1,000円/対象にconstruction2ndを含むこと/通知しきい値と受信先をまとめて確認してもらう。存在しない場合もこの段階では新規作成せず結果を共有する。
 - メール受信の実試験と費用通知の設定確認は別。今回のGET照合でメール送信・意図的障害・契約変更は行っていない。
 
+## サービスを停止しない実到達試験の準備
+
+2026-10-22に公式手順を調査。メール通知チャネル単体のテスト機能はなく、別の専用ログ一致ルールと試験ログ1件を使う案を準備した。既存の通知先を再利用し、本人の到着確認後に一時ルールだけ無効化/削除する。既存3ルール/アプリの停止・変更はしない。要求データはローカル準備のみ、実行承認待ちで外部作成/送信/削除は未実施。詳細 [通知試験計画](audits/2026-10-22-notification-test-plan.md)。費用予算通知の経路はこの試験の対象外。
+
 ## 通知を受けた時
 
 1. [アラート一覧](https://console.cloud.google.com/monitoring/alerting?project=construction2nd)と[稼働監視](https://console.cloud.google.com/monitoring/uptime?project=construction2nd)で対象・発生時刻・地域を確認し、意図的な停止試験かを確認する。

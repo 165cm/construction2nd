@@ -81,3 +81,23 @@ Google Cloudの既存認証をメモリ内で使用し、FirestoreのDB情報、
 - [Google Groupsのメール配信](https://support.google.com/groups/answer/9792489?hl=ja) / [投稿・削除](https://support.google.com/groups/answer/1046523?hl=ja)
 
 実設定のAPI読取、決済コード読取、サービス公式資料調査を分担実施。文書の追記は運営方針の勝手な追加や設定変更を意味しない。
+
+## 2026-10-22の追加本人確認と公表方法
+
+- Google/GitHub/Stripeはすべて2段階認証またはパスキーを設定済みと本人回答。Googleグループの問い合わせ閲覧メンバーも本人アカウントだけと回答。これは管理画面の独立取得でなく本人確認に基づく。
+- 個人情報取扱事業者の正式氏名/住所は同じサポート窓口への求めに遅滞なく回答する方式を本人採用。特商法の購入前開示とは別の目的・手続として本文へ反映。根拠：[PPC通則編3-8-1](https://www.ppc.go.jp/personalinfo/legal/guidelines_tsusoku/)。実情報をGitやチャットへ収集しない。
+- サービス別の適用契約/国外取扱いの確認は、MFA設定や本人回答だけで完了扱いしない。現在、一次資料と実データフローを照合中。
+
+## 契約・国外取扱いの追加照合（2026-10-22）
+
+公開前の残りを、実契約とデータの流れの確認へ絞る。法律上の根拠を初心者向け選択肢だけで決めず、まず適用される事実を確認する。
+
+| サービス | 一次資料で分かった点 | 残る具体確認 |
+|---|---|---|
+| Firebase/GCP | Firebase DPAは対象契約が参照する場合に適用。サービスによってCloud DPAとの区別があり、Customer DataとGoogle管理のService Dataを混同しない。国外処理を認める一般条項がある | 使用サービスごとの適用契約/主体/再委託等と実データフロー。東京設定だけで全情報国内としない |
+| Google Groups | 個人向け無料版と組織向け版がある。無料版にWorkspace CDPAが適用されるとは確認できない | アカウント種別を本人へ選択式で質問中。閲覧メンバーは本人のみと回答済み |
+| Stripe | DPAは用途で処理者/独立管理者の役割を区別し、米国等への移転を説明。DPAがあるだけで日本法の全要件完了とはしない | 実際の契約主体/適用契約・送信フィールド。本番の決済表示照合とは別 |
+
+必要な説明/同意や相当措置の判断は、確定した契約とフローから検討し、不確かな場合はその具体情報を添えて専門家確認する。現時点で追加同意画面の方式や全サービスの国外移転根拠を採用済みとはしない。
+
+一次資料：[Firebase DPA](https://firebase.google.com/terms/data-processing-terms/)、[Firebase privacy](https://firebase.google.com/support/privacy/)、[Google Cloud Service Dataの説明](https://cloud.google.com/terms/cloud-privacy-notice?hl=ja)、[Groupsの版](https://support.google.com/groups/answer/46601)、[Workspace/Cloud Identityのデータ保護](https://knowledge.workspace.google.com/admin/compliance/privacy-compliance-and-records-for-google-workspace-and-cloud-identity)、[Stripe DPA](https://stripe.com/jp/legal/dpa)、[Stripe DTA](https://stripe.com/jp/legal/dta)、[PPC国外取扱い指針](https://www.ppc.go.jp/personalinfo/legal/guidelines_offshore/)。別担当の読取調査を統合、実アカウントの契約受諾/設定変更なし。

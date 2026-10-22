@@ -6,6 +6,7 @@ const server = await createServer({ server: { middlewareMode: true, hmr: false, 
 try {
   const { default: PricingPlans } = await server.ssrLoadModule('/src/components/PricingPlans.jsx');
   const { default: BillingPanel } = await server.ssrLoadModule('/src/components/BillingPanel.jsx');
+  const { default: PurchaseConfirmation } = await server.ssrLoadModule('/src/components/PurchaseConfirmation.jsx');
   const { default: PaidAccessDialog } = await server.ssrLoadModule('/src/components/PaidAccessDialog.jsx');
   const gate = kind => renderToStaticMarkup(React.createElement(PaidAccessDialog, { kind, title: '令和7年度 下期' }));
   assert.match(gate('login-required'), /購入に使ったアカウントでログイン/);
@@ -35,6 +36,23 @@ try {
   }
   const panel = renderToStaticMarkup(React.createElement(BillingPanel, { uid: 'test' }));
   assert.doesNotMatch(panel, /Stripeで支払いに進む/);
+  const confirmation = props => renderToStaticMarkup(React.createElement(PurchaseConfirmation, props));
+  const legalLinks = { terms: '/terms.html', privacy: '/privacy.html', trade: '/trade.html' };
+  for (const planId of ['pack', 'monthly']) {
+    const blocked = confirmation({ planId, legalLinks });
+    assert.match(blocked, /必要な文書を準備中/);
+    assert.doesNotMatch(blocked, /<a[^>]+href="\/terms.html"/);
+    const ready = confirmation({ planId, legalLinks, documentsReady: true });
+    assert.match(ready, /type="submit" disabled=""/u, '文書があっても確認欄の初期状態では決済へ進めない');
+    assert.match(ready, /法定代理人の同意/);
+    assert.match(ready, /法令に基づく権利を制限しません/);
+    assert.match(ready, /target="_blank" rel="noopener noreferrer"/);
+  }
+  assert.match(confirmation({ planId: 'pack' }), /980円[\s\S]*暦で3か月/);
+  assert.match(confirmation({ planId: 'monthly' }), /初回480円、以後毎月480円/);
+  assert.match(confirmation({ planId: 'monthly' }), /次回更新日時より前/);
+  assert.equal(confirmation({ planId: 'unknown' }), '');
+  assert.match(confirmation({ planId: 'pack', documentsReady: true, legalLinks: { ...legalLinks, terms: '//outside.example' } }), /必要な文書を準備中/);
   let navigated;
   globalThis.window = { location: { assign: url => { navigated = url; } } };
   for (const url of ['http://checkout.stripe.com/a', 'https://checkout.stripe.com.attacker.example/a', 'javascript:alert(1)', 'https://example.com']) assert.throws(() => openStripeUrl(url));

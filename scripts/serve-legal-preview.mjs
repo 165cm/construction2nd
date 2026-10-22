@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 // docs内の掲載案だけを表示するローカル確認用。公開用HTMLは生成しない。
 const pages = {
@@ -18,7 +19,7 @@ function inline(text) {
   }).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 }
 // 掲載案で使う見出し・段落・表だけを扱う。元文書のHTMLは実行しない。
-function render(source) {
+export function render(source) {
   const lines = source.trim().split(/\r?\n/);
   let html = '';
   for (let i = 0; i < lines.length; i++) {
@@ -50,7 +51,7 @@ function render(source) {
   }
   return html;
 }
-function layout(title, body, active = '') {
+export function layout(title, body, active = '') {
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>${escape(title)}・確認版 | 電工2種サクサク道場</title>
@@ -72,7 +73,9 @@ footer{color:#94a3b8;margin-top:24px;font-size:.9rem}@media(max-width:480px){mai
 <article>${body}</article><footer>電工2種サクサク道場 運営<br>この確認画面から購入・ログイン・メール送信は行いません。</footer></main></body></html>`;
 }
 
-if (!process.argv.includes('--serve-local-preview')) {
+if (process.argv[1] !== fileURLToPath(import.meta.url)) {
+  // 他のローカル確認サーバーから表示関数だけを再利用する。
+} else if (!process.argv.includes('--serve-local-preview')) {
   console.log('No server started. Use --serve-local-preview to view the drafts at http://127.0.0.1:5210/ .');
 } else {
   http.createServer(async (request, response) => {

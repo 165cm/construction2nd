@@ -38,3 +38,10 @@ export function calendarPeriod(joinedAt, planId, periodIndex = 0) {
   if (expiresAt <= startsAt) throw new Error('invalid-period');
   return { startsAt, expiresAt };
 }
+
+// StripeのUTC指定へ変換する候補。支払成功日をサーバーで確定してから使う。
+// 1日加入はUTC月末15時。その他は前日15時。実請求への接続は未検証。
+export function calendarAnchorConfig(joinedAt) {
+  const day = joinedDate(joinedAt).getUTCDate();
+  return { day_of_month: day === 1 ? 31 : day - 1, hour: 15, minute: 0, second: 0 };
+}

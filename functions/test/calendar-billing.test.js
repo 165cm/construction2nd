@@ -68,3 +68,22 @@ test('旧480円の月額通知と旧980円パックの期限計算は維持', ()
     lines: { data: [{ price: { id: 'price_legacy_monthly' }, quantity: 1, period: { start: 100, end: 200 } }] } };
   assert.equal(monthlyGrant(invoice, 'price_legacy_monthly').expiresAt, 200000);
 });
+
+test('JSTの基準日をUTC指定へ変換し、月末補正後も元の日に戻る', async () => {
+  const { calendarAnchorConfig } = await import('../calendarBillingPolicy.js');
+  for (let day = 1; day <= 31; day += 1) {
+    const joined = Date.parse(`2027-01-${String(day).padStart(2, '0')}T12:00:00+09:00`);
+    const config = calendarAnchorConfig(joined);
+    assert.deepEqual(config, { day_of_month: day === 1 ? 31 : day - 1, hour: 15, minute: 0, second: 0 });
+    // UTCの月末丸めを模擬し、各回のJST暦計算と照合（Stripe実動作の証明とは区別）。
+    const first = new Date(calendarBoundary(joined, 1));
+    for (let offset = 0; offset < 24; offset += 1) {
+      const year = first.getUTCFullYear();
+      const month = first.getUTCMonth() + offset;
+      const last = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+      const actual = Date.UTC(year, month, Math.min(config.day_of_month, last), config.hour);
+      assert.equal(actual, calendarBoundary(joined, offset + 1));
+    }
+  }
+  assert.throws(() => calendarAnchorConfig(NaN), /invalid-join-date/);
+});

@@ -51,6 +51,12 @@ AND (textPayload:"billing-webhook-retry" OR jsonPayload.message:"billing-webhook
 
 試験アラート生成後、一時ルールalertPolicies/12666514241642722335だけを無効化・削除しGET404で不在を確認。既存3ルールと共有メール通知チャネルの全比較ハッシュ不変。後片付け完了。新規ログやアプリ停止はなし。
 
+## 稼働指標試験の未着調査（2026-10-22）
+
+本人は未着と回答。上記の「回答待ち」を更新し、メール実到達は未達とする。追加通知を送らず読取確認した結果、既存メールチャネルはenabled=true/type=email、宛先は承認済み受信先と完全一致し余分な空白なし。verificationStatus未指定を原因とは断定しない。試験開始以降のnotification_channel_eventsは0件・次ページなし、一時停止設定一覧も0件。試験アラート履歴は05:30:49 UTCにOPEN、05:33:24 UTCにCLOSED。送信成功や受信拒否の証拠は得られず、原因は未特定。Gmailで送信元alerting-noreply@google.comを迷惑メール/ごみ箱込みで検索する切り分けを本人へ案内。Gmail内容・フィルタ設定へのアクセスや既存設定変更はなし。
+
+公式根拠：[未着の調査](https://docs.cloud.google.com/monitoring/alerts/troubleshoot-missing-notifications)、[メール通知先](https://docs.cloud.google.com/monitoring/support/notification-options#email)。
+
 ## 通知を受けた時
 
 1. [アラート一覧](https://console.cloud.google.com/monitoring/alerting?project=construction2nd)と[稼働監視](https://console.cloud.google.com/monitoring/uptime?project=construction2nd)で対象・発生時刻・地域を確認し、意図的な停止試験かを確認する。

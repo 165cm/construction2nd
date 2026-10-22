@@ -7,8 +7,10 @@
 
 | 担当 | ブランチ | 内容 | 触るファイル |
 |---|---|---|---|
+| Codex | codex/legal-policy-drafts | 通知試験ログ1件保存済み。本人到着回答待ち・一時ルール後片付けが残る | docs/MONITORING.md、docs/audits/2026-10-22-notification-test-plan.md、docs/CURRENT_TASK.md |
 
 ## 次のタスク（上から優先）
+- 進行中：通知到着試験。一時ルール alertPolicies/14548373563564621193 は作成/専用ログ1件保存済み、本人受信回答待ち。試験終了時に今回のIDだけ無効化/削除し不在/既存3ルール・通知先不変を確認する。アラート一覧は200/0件で生成も未確認、追加送信しない。手元状態 /tmp/construction-notification-test-state.json。
 0. 有料版検証・公開前の必須対応
    - 本人のGoogleログイン・クラウド保存・保存済み記録の復元を実機で確認済み。
    - 保存UI・設定の補足表示はPR #65で改善し、承認済みのFirebase検証サイトへ反映済み。mainへのマージは未実施。

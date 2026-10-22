@@ -152,7 +152,7 @@
 |---|---|
 | Google/Firebase/Google Cloud | 認証、ホスティング、学習記録/利用権の保存、教材配信、障害ログ/監視 |
 | Stripe | 支払情報の入力、決済、契約管理、支払い/返金の通知 |
-| Google Groups | サポート窓口でのメール受信・対応履歴管理 |
+| Google Groups（個人向け無料版）・Gmail | サポート窓口でのメール受信・対応履歴管理 |
 | Cloudflare/Turnstile | 教材報告と問題情報の受付、ロボット対策。IPをTurnstile検証APIへ送信 |
 | GitHub | 報告コメント、年度/番号/分類、問題文・選択肢・正解をIssueへ登録・管理 |
 

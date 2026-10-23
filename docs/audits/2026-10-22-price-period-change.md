@@ -211,3 +211,20 @@ Checkout完了、PI成功、Invoice支払済み通知を新版の保存/契約�
 本人が専用データでの一括試験/今回分cleanupを承認。Cloud Functions APIとGCSの配備済みソースを読取し、stripeWebhookのindex.js/billingPolicy.js/billingEnvironment.jsがfc9d9d9と一致することを確認。index.jsのSHA256は6211a8a7e39d19f1e0820d305e4d45a4597182354192d0efac08f768796b8035。旧通知はpackGrant/monthlyGrantの正確な旧Price IDで判定し、今回新規作成の別Priceを付与しない。外部endpoint/環境設定は変更していない。
 
 実行UUID f93b9e01-0c6e-4908-b3b5-76a3e2c16512。専用商品1件・Price3件・顧客2件・Checkout2件の成功応答を保存、未確定作成0件、manifest権限0600を確認。ローカル実createCheckoutから実Stripe/実Firestore予約を通して作成成功し、127.0.0.1:5213に確認画面を表示。本人にテストカードで2件の購入を依頼中。まだ支払成功/利用権/再送/cleanupの実成立は確認していない。プロセスとmanifestを保持し、本人購入後に結果照合と今回分の片付けを続ける。
+
+
+### 購入リンク期限切れ後の再起動（2026-10-23）
+
+本人のサーバー再起動依頼を受け調査。旧サーバーは稼働していたが、両Checkoutがexpired/unpaid。停止後、新しい認証で限定cleanupを実行し、顧客2削除/Price3・商品1inactive/文書4削除、エラー0と読取確認。契約・支払いは0件。旧manifest f93b9e01-0c6e-4908-b3b5-76a3e2c16512へ結果保存。
+
+同じ承認済みの試験をUUID 6d212b81-3ff9-48e8-bd52-d04cefa7c423で作り直し、商品1/Price3/顧客・Checkout各2を用意。サーバーsession 86411、127.0.0.1:5213を再読込し、新しいリンク2件と準備完了を確認。購入待ち。既存利用者・配備設定は変更していない。
+
+
+### 実購入・実保存・再送・片付け成功（2026-10-23）
+
+本人が再起動後のCheckout2件を完了し結果確認を実行。実行UUID 6d212b81-3ff9-48e8-bd52-d04cefa7c423の2プランともverified=true、resultsエラーなし。追加の読取で実Firestoreの購入status=completeと利用権各1件/revoked=falseを確認し、秘密を含まない証跡を/tmp/calendar-integration-completion-evidence.json（0600）へ保存。
+
+- 月額600円：成功正本2026-10-23T14:40:42Z、日本時間10月23日23:40:42。排他的期限2026-11-22T15:00:00Z（11月23日0:00）、11月22日いっぱい利用。月額契約1件。実月次契約のPrice/期間末が初回権利と一致。
+- パック980円：成功正本2026-10-23T14:41:17Z、日本時間10月23日23:41:17。排他的期限2027-01-22T15:00:00Z（1月23日0:00）、1月22日いっぱい利用。自動更新契約0件。
+- ローカル確認処理で成功Eventを再送して、利用権内容・期限不変、月額契約1/パック0、利用権各1を確認。これは実Stripe Eventのローカル再署名による実ハンドラー/実Firestoreの初回結合成功。実Stripe外部HTTP配送・Callable認証・新更新通知/3DS日跨ぎ・実利用者のアプリ権利反映は今回範囲外。
+- 承認済みの今回分cleanupを実行し、エラー0。月額契約1件を追加請求/按分なしで取消、顧客2件削除、Price3件/商品1件inactive、予約/購入/権利の計6文書削除を再読取確認。両Checkoutはcompleteのため未払い画面失効は0件。テスト決済履歴は残る。既存契約・学習記録・配備設定・公開は変更なし。

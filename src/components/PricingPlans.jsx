@@ -5,7 +5,7 @@ export default function PricingPlans({ enabled = false, busy = false, hasAccess 
   return <section className="space-y-3" aria-labelledby="pricing-title">
     <h4 id="pricing-title" className="font-bold text-sm">試験までの学習プラン</h4>
     <p className="text-xs text-slate-300">最新1回50問は無料。有料プランでは過去分を含む全250問の解説・復習・模試を利用できます。</p>
-    {!enabled && <p role="status" className="text-xs text-amber-200">有料プランは準備中です。現在は購入できません。</p>}
+    {!enabled && !hasAccess && <p role="status" className="text-xs text-amber-200">有料プランは準備中です。現在は購入できません。</p>}
     {hasAccess ? <div className="rounded-xl border border-emerald-500 p-3 space-y-2">
       <p className="text-sm font-bold">全年度を利用できます</p>
       <p className="text-xs">利用期限：{new Date(expiresAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}（日本時間）</p>

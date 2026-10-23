@@ -6,7 +6,8 @@ import { defineSecret, defineString, defineBoolean } from 'firebase-functions/pa
 import Stripe from 'stripe';
 import { assertStripeEnvironment } from './billingEnvironment.js';
 import { billingSandbox, allowedBillingUser, currentBillingPaths } from './billingEnvironmentConfig.js';
-import { requirePlan, checkoutParams, assertConfiguredPrice, packGrant, monthlyGrant, mergeGrant, accessSummary } from './billingPolicy.js';
+import { requirePlan, checkoutParams, assertConfiguredPrice, packGrant, monthlyGrant, accessSummary } from './billingPolicy.js';
+import { preserveGrantOnReplay } from './billingPriceRegistry.js';
 
 initializeApp();
 const db = getFirestore();
@@ -44,6 +45,11 @@ export const createCheckout = onCall(options, async request => {
   const uid = uidOf(request);
   if (!billingEnabled.value()) throw new HttpsError('failed-precondition', '購入の受付はまだ開始していません');
   if (!allowedBillingUser(uid)) throw new HttpsError('permission-denied', '現在は指定アカウントでのみテストできます');
+  // 新確認画面の600円購入を、旧480円の経路へ誤って流さない。
+  // 新通知・永続予約・契約作成を接続するまでは明示的に停止する。
+  if (request.data?.consentVersion !== undefined || request.data?.recurringConsent !== undefined) {
+    throw new HttpsError('failed-precondition', '新料金の購入手続きを準備中です。購入受付の開始までお待ちください。');
+  }
   const planId = request.data?.planId;
   try { requirePlan(planId); } catch { throw new HttpsError('invalid-argument', 'プランを選んでください'); }
   const stripe = stripeClient();
@@ -139,7 +145,8 @@ async function saveGrant(uid, grant) {
   const ref = grantsRef(uid).doc(grant.id);
   await db.runTransaction(async tx => {
     const [old, revoked] = await Promise.all([tx.get(ref), tx.get(db.doc(`${currentBillingPaths().revocations}/${grant.chargeId}`))]);
-    tx.set(ref, mergeGrant(old.data(), grant, revoked.exists));
+    // 旧Priceの再送も、保存済み期限・版を保持して失効だけを単調に反映する。
+    tx.set(ref, preserveGrantOnReplay(old.data(), grant, revoked.exists));
     // checkout予約と同じ文書を更新し、並行する購入判定と競合させる。
     tx.set(customerRef(uid), { updatedAt: Date.now() }, { merge: true });
   });

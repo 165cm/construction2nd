@@ -3,6 +3,7 @@ import './PurchaseConfirmation.css';
 import BillingPeriodIllustration from './BillingPeriodIllustration';
 
 const names = { terms: '利用規約', privacy: 'プライバシーポリシー', trade: '特定商取引法に基づく表記' };
+export const PURCHASE_CONSENT_VERSION = 'calendar-jst-v1';
 
 function ConfirmationBody({ planId, busy = false, onBack, onContinue, legalLinks, documentsReady = false, sandbox = false }) {
   const [accepted, setAccepted] = useState(false);
@@ -31,9 +32,9 @@ function ConfirmationBody({ planId, busy = false, onBack, onContinue, legalLinks
       {Object.entries(names).map(([key, name]) => ready ? <a key={key} href={legalLinks[key]} target="_blank" rel="noopener noreferrer">{name}（別タブ）</a> : <span key={key}>{name}（準備中）</span>)}
     </nav>
     {!ready && <p role="status" className="purchase-note">必要な文書を準備中のため、購入手続きには進めません。</p>}
-    <form onSubmit={event => { event.preventDefault(); if (accepted && ready && !busy) onContinue?.(); }}>
+    <form onSubmit={event => { event.preventDefault(); if (accepted && ready && !busy) onContinue?.({ planId, consentVersion: PURCHASE_CONSENT_VERSION, recurringConsent: !pack }); }}>
       <label className="purchase-consent"><input type="checkbox" checked={accepted} disabled={busy || !ready} onChange={event => setAccepted(event.target.checked)} />
-        <span>購入内容と利用規約を確認しました。18歳未満の場合は、保護者など法定代理人の同意を得ています。</span>
+        <span>購入内容と利用規約を確認しました。{!pack && '今後の請求のためのカード保存と、以後毎月600円の継続請求に同意します。'}18歳未満の場合は、保護者など法定代理人の同意を得ています。</span>
       </label>
       <div className="purchase-actions">
         <button type="button" disabled={busy} onClick={onBack}>プラン選択へ戻る</button>

@@ -6,6 +6,7 @@ const ROLES = Object.freeze({
   legacyMonthly: { planId: 'monthly', amount: 480, recurring: true, policyVersion: LEGACY_POLICY_VERSION },
   legacyPack: { planId: 'pack', amount: 980, recurring: false, policyVersion: LEGACY_POLICY_VERSION },
   calendarMonthly: { planId: 'monthly', amount: 600, recurring: true, policyVersion: CALENDAR_POLICY_VERSION },
+  calendarInitial: { planId: 'monthly', amount: 600, recurring: false, policyVersion: CALENDAR_POLICY_VERSION },
   calendarPack: { planId: 'pack', amount: 980, recurring: false, policyVersion: CALENDAR_POLICY_VERSION },
 });
 

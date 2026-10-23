@@ -25,3 +25,11 @@ test('新確認画面の要求でも認証と指定アカウントの確認を�
   await assert.rejects(createCheckout.run({ data }), error => error.code === 'unauthenticated');
   await assert.rejects(createCheckout.run({ auth: { uid: 'other-user' }, data }), error => error.code === 'permission-denied');
 });
+
+test('本番で新方式が停止中なら、同意情報を省いた旧形式の購入も外部接続前に拒否', async () => {
+  process.env.BILLING_SANDBOX = 'false';
+  try {
+    await assert.rejects(createCheckout.run({ auth: { uid: 'fake-calendar-user' }, data: { planId: 'monthly' } }),
+      error => error.code === 'failed-precondition' && error.message.includes('新料金'));
+  } finally { process.env.BILLING_SANDBOX = 'true'; }
+});

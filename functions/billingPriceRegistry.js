@@ -1,4 +1,4 @@
-// 改定準備用。実Checkout/通知経路には、Sandbox検証が済むまで接続しない。
+// 新方式の正確なPrice照合。新経路の実接続試験と配備前は受付を再開しない。
 import { CALENDAR_POLICY_VERSION } from './calendarBillingPolicy.js';
 
 export const LEGACY_POLICY_VERSION = 'legacy-time-v1';

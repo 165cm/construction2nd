@@ -234,3 +234,12 @@ Java 21以降で次を実行する：
 Functions13テスト、スクリプトの構文、フラグなし未接続、差分チェックも成功。アプリ・Functions本体の変更やデプロイは不要。
 
 範囲：これは実ハンドラー＋実Firestore transactionと制御可能なStripe模擬応答の結合確認。実Stripe側の冪等性そのもの、配信基盤の長時間遅延/自動再送、デプロイ済みCallableの認証と実複数タブ、実サービスで同じタイミングを作った競合は未確認。既存の実Stripe/Firestoreの購入予約9項目およびデプロイ済み通知先への再送検証と分けて記録する。
+
+
+## 新料金/日付単位の接続コード（2026-10-23、未配備）
+
+月額600円と新980円パックは新しいPriceを使う。新規購入用CALENDAR_BILLING_ENABLEDは既定false、実環境へ未設定。STRIPE_CALENDAR_INITIAL_PRICE_ID（単発600円）、STRIPE_CALENDAR_MONTHLY_PRICE_ID（継続600円）、STRIPE_CALENDAR_PACK_PRICE_ID（単発980円）も未設定。旧STRIPE_MONTHLY_PRICE_ID/STRIPE_PACK_PRICE_IDは既存通知用に置き換えない。
+
+新方式の購入予約/初回支払/成功日/作成作業権/契約IDはusers/{uid}/sandboxBillingPurchasesまたはbillingPurchasesにサーバーだけが保存する。購入停止時もPrice設定と通知処理を保持し、paid済みの更新利用権を止めない。PI成功通知の購読は未変更。新フラグやPriceを設定/配備する前に、対象と影響を示して承認を得る。66件のローカルテスト成功は実Checkout/署名通知/実DBの成立確認ではない。
+
+詳細：[価格・期間改定の実装と試験](audits/2026-10-22-price-period-change.md)。

@@ -16,5 +16,6 @@ export function billingPaths(sandbox, uid) {
     customers: sandbox ? 'sandboxBillingCustomers' : 'billingCustomers',
     revocations: sandbox ? 'sandboxBillingRevocations' : 'billingRevocations',
     grants: `users/${uid}/${sandbox ? 'sandboxEntitlements' : 'entitlements'}`,
+    purchases: `users/${uid}/${sandbox ? 'sandboxBillingPurchases' : 'billingPurchases'}`,
   };
 }

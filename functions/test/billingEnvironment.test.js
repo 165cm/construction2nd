@@ -21,7 +21,7 @@ test('サンドボックスと本番の秘密鍵を取り違えたら停止す�
 test('テスト購入と本番購入は顧客・予約・利用権・返金の保存先を共有しない', () => {
   const sandbox = billingPaths(true, 'user');
   const live = billingPaths(false, 'user');
-  for (const key of ['customers', 'revocations', 'grants']) {
+  for (const key of ['customers', 'revocations', 'grants', 'purchases']) {
     assert.notEqual(sandbox[key], live[key]);
   }
   assert.equal(live.grants, 'users/user/entitlements');

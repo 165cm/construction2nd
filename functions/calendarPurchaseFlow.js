@@ -1,4 +1,4 @@
-// 新方式の接続準備。現在の公開購入/通知ハンドラーからは呼び出さない。
+// 新方式用。実ハンドラーへ接続済みだが、新受付は既定停止・未配備。
 import { CALENDAR_POLICY_VERSION, calendarAnchorConfig, calendarPeriod } from './calendarBillingPolicy.js';
 
 const requireId = (value, prefix) => {

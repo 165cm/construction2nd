@@ -243,3 +243,10 @@ Functions13テスト、スクリプトの構文、フラグなし未接続、差
 新方式の購入予約/初回支払/成功日/作成作業権/契約IDはusers/{uid}/sandboxBillingPurchasesまたはbillingPurchasesにサーバーだけが保存する。購入停止時もPrice設定と通知処理を保持し、paid済みの更新利用権を止めない。PI成功通知の購読は未変更。新フラグやPriceを設定/配備する前に、対象と影響を示して承認を得る。66件のローカルテスト成功は実Checkout/署名通知/実DBの成立確認ではない。
 
 詳細：[価格・期間改定の実装と試験](audits/2026-10-22-price-period-change.md)。
+
+
+## 新料金の実Checkout結合試験（未実行）
+
+実行準備は `scripts/verify-calendar-checkout-integration.mjs`。無引数では外部接続せず、専用商品1/Price3/顧客・Checkout各2とSandboxの専用文書を作る明示実行方式。今回の作成/削除範囲への本人承認を得てから実行する。専用の月額/パック購入を各1回、実Stripe成功Event→ローカル試験署名→ローカル実通知処理→実Firestoreで確認し、今回分だけを片付ける。
+
+配備済みWebhookの外部配送や実Callable認証はこの方式では検証しない。既存通知先には通常のStripe通知が届くため、実行前に旧Price判定との分離を読取照合する。具体的な対象・保護・回復方法は[監査記録](audits/2026-10-22-price-period-change.md#実checkout結合試験の実行準備2026-10-23未実行)を参照。

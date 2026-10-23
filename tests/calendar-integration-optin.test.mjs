@@ -11,11 +11,14 @@ if(specifier==='node:http')return {url:'data:text/javascript,export const create
 if(/stripe|firebase-tools|google-cloud/.test(specifier))throw Error('external-sdk-prohibited');
 return next(specifier,context);
 }});`;
-const script = fileURLToPath(new URL('../scripts/verify-calendar-checkout-integration.mjs', import.meta.url));
+for (const name of ['verify-calendar-checkout-integration.mjs', 'prepare-calendar-webhook-probe.mjs', 'calendar-webhook-probe-fixture.mjs']) {
+const script = fileURLToPath(new URL('../scripts/' + name, import.meta.url));
 for (const [label, args, status] of [['no arguments', [], 0], ['unknown argument', ['--run'], 1], ['mixed flags', ['--run-calendar-integration', '--state', '/tmp/no.json'], 1]]) {
-  test(`calendar integration explicit opt-in: ${label}`, () => {
+  test(`${name} explicit opt-in: ${label}`, () => {
     const result = spawnSync(process.execPath, ['--import', 'data:text/javascript,' + encodeURIComponent(guard), script, ...args], { encoding: 'utf8' });
     assert.equal(result.status, status, result.stderr);
     assert.match(result.stdout, /未実行/); assert.doesNotMatch(result.stderr, /prohibited/);
   });
+}
+
 }

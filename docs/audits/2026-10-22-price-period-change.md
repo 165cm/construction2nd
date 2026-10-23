@@ -228,3 +228,31 @@ Checkout完了、PI成功、Invoice支払済み通知を新版の保存/契約�
 - パック980円：成功正本2026-10-23T14:41:17Z、日本時間10月23日23:41:17。排他的期限2027-01-22T15:00:00Z（1月23日0:00）、1月22日いっぱい利用。自動更新契約0件。
 - ローカル確認処理で成功Eventを再送して、利用権内容・期限不変、月額契約1/パック0、利用権各1を確認。これは実Stripe Eventのローカル再署名による実ハンドラー/実Firestoreの初回結合成功。実Stripe外部HTTP配送・Callable認証・新更新通知/3DS日跨ぎ・実利用者のアプリ権利反映は今回範囲外。
 - 承認済みの今回分cleanupを実行し、エラー0。月額契約1件を追加請求/按分なしで取消、顧客2件削除、Price3件/商品1件inactive、予約/購入/権利の計6文書削除を再読取確認。両Checkoutはcompleteのため未払い画面失効は0件。テスト決済履歴は残る。既存契約・学習記録・配備設定・公開は変更なし。
+
+
+## 外部署名配送・完了済み通知の再送試験の準備（2026-10-23、未配備）
+
+追加購入を避けるため、先ほどの実PI成功Event2件を再利用する。Stripe正本/保存済み証跡から専用UIDの完了済み購入fixtureを一時保存し、Stripe自身から新しい隔離HTTPS受信先へ再送する。過去の全DB文書を忠実復元するものではない。新初回契約作成/更新通知/実Callable認証の成立とは区別する。
+
+### 準備したコードとローカル確認
+
+- billingWebhookHandlerへHTTP境界を抽出し、既存stripeWebhookと一時受信先で同じ署名/環境/エラー処理を使う。実業務処理はindexのprocessStripeBillingEventへ移し、本体/試験で共有。処理内容を複製しない。
+- calendarWebhookProbeGuardは既知Event ID2件だけを許可し、type/PI/顧客/UID/予約/プラン/正本時刻/test環境、唯一のsandbox顧客対応、保存済みcompleteを確認。未知Eventは無処理200、既知の不整合は500で保留。
+- prepare-calendar-webhook-probeはローカルだけで専用codebase/calendarBillingWebhookProbeの配備用資料を生成する。秘密値・.env原本・node_modules・教材はコピーしない。出力先は/tmp/calendar-webhook-probe-6d212b81-3ff9-48e8-bd52-d04cefa7c423。確認のため一時的にnode_modulesの参照を付けてimport後、その参照は除去済み。
+- 生成入口のexportがcalendarBillingWebhookProbeの1件だけ、秘密値の紐付けがSTRIPE_SECRET_KEYと**別名CALENDAR_PROBE_WEBHOOK_SECRET**だけ、maxInstances=1であることをローカルSDKメタデータで確認。既存STRIPE_WEBHOOK_SECRETを更新しない。購入受付はfalse、minInstances=0。probeのStripe clientではsubscriptions.create/cancelを禁止し、fixture漏れでも契約を再作成/取消ししない。
+- calendar-webhook-probe-fixtureは承認後のみ、実Stripe session/PI/charge/Eventとgrant完全一致、月額契約が取消済みで本人/PIが一致することを読取確認。6文書すべて不在/同顧客の別所有者なし/取消マーカーなしをtransactionで確認して保存する。Stripeへの変更APIはない。事前checkpointを残し、削除は同checkpointの6パスと内容照合をしてtransaction削除→不在確認する。
+- Functions92テスト（実SDKの署名7、専用対象ガード6を追加）と無引数/不明引数などのガード9件成功。生成入口の構文も成功。別担当レビューで追加必須問題なし。
+
+### 実行時にまとめて承認する範囲
+
+1. construction2ndへ東京の一時HTTPS関数1件（専用calendar-probe codebase、最小0/最大1、timeout120秒）を配備。既存の5関数/Hosting/一般購入受付は変更しない。
+2. Stripe Sandboxにpayment_intent.succeededだけを購読する一時endpoint1件を作成し、API2024-06-20を指定。専用署名Secret1件をSecret Managerへ保存して一時関数だけに紐付ける。既存endpoint/既存署名値は変更しない。
+3. 専用fixture6文書を一時保存し、既知成功Event2件をStripe公式CLI等から新endpointへ再送。CLIが未導入なら公式配布を作業用フォルダへ置き、キーはプロセス環境だけで渡す。秘密値をコマンド引数/ログ/チャットへ出さない。追加購入・新Stripe顧客/契約作成は不要。
+4. 正しい外部署名のHTTP200、署名なし400、GET405、専用購入complete・正本時刻/期限・利用権各1と非増殖を確認し証跡を残す。知らない通知の無処理は、業務処理成功と取り違えない。
+5. 一時endpointを無効化→一時関数を削除/停止して読取確認→最後のリクエスト終了から最大120秒を複数の短い待機で待つ→6文書削除/不在確認→今回endpoint/専用Secretを削除/読取確認。既存秘密値・契約・学習記録は対象外。--receiver-stoppedは自動検知ではなく、この手順で保証する。
+
+初回配備前はendpointの署名値がまだないため、endpoint作成→専用Secret登録→一時関数配備→fixture保存→再送の順を予定する。予定URLでのendpoint登録可否と実際の関数URLを照合し、違う場合は今回endpointだけ修正する。実行前には現在のendpoint数/関数名衝突/専用Secret名の既存有無も読取確認し、既存物があれば上書きせず保留する。
+
+費用は関数配備ビルド/実行等の少額利用が発生し得るため、無料とは断言しない。既存1000円アラートの設定は変更しない。本番マージ・一般販売とは別の一時試験で、まだ配備/endpoint作成/秘密値登録/fixture保存/再送は行っていない。
+
+参考：Stripe公式[再送と配送動作](https://docs.stripe.com/webhooks#manual-retries)はDashboardで15日、公式CLIで30日までの再送を案内。現時点のEventは当日のもの。再送しても自動再試行の打切りにはならないため、cleanupはendpoint無効化/削除を先行する。

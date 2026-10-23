@@ -12,6 +12,7 @@ import { CALENDAR_POLICY_VERSION } from './calendarBillingPolicy.js';
 import { initialMonthlyCheckout } from './calendarPurchaseFlow.js';
 import { createCalendarPurchaseStore } from './calendarPurchaseStore.js';
 import { createCalendarBillingProcessor } from './calendarBillingProcessor.js';
+import { createBillingWebhookHandler } from './billingWebhookHandler.js';
 
 initializeApp();
 const db = getFirestore();
@@ -215,56 +216,51 @@ async function revokeCharge(chargeId, customerId) {
   matches.docs.forEach(doc => batch.update(doc.ref, { revoked: true }));
   await batch.commit();
 }
-export const stripeWebhook = onRequest({ ...options, secrets: [stripeKey, webhookSecret] }, async (req, res) => {
-  res.set('Cache-Control', 'no-store');
-  if (req.method !== 'POST') return res.sendStatus(405);
-  const stripe = stripeClient();
-  let event;
-  try { event = stripe.webhooks.constructEvent(req.rawBody, req.headers['stripe-signature'], webhookSecret.value()); }
-  catch { return res.status(400).send('Invalid signature'); }
-  if (event.livemode !== !billingSandbox.value()) return res.status(400).send('Environment mismatch');
-  try {
-    if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
-      const session = await stripe.checkout.sessions.retrieve(event.data.object.id, { expand: ['line_items', 'payment_intent.latest_charge'] });
-      const uid = await ownerFor(session.customer);
-      if (session.metadata?.policyVersion === CALENDAR_POLICY_VERSION) {
-        if (uid && session.client_reference_id === uid) {
-          requireCalendarResult(await calendarProcessor(stripe).initial({ uid, attemptId: session.metadata.attemptId, session }));
-        }
-      } else {
-        const grant = packGrant(session, packPrice.value());
-        if (uid && grant && session.client_reference_id === uid) await saveGrant(uid, grant);
+// 本番入口と隔離試験入口で、同じ保存・復旧処理を共有する。
+// この関数単体はHTTP公開されず、署名/環境/試験対象の確認後にだけ呼び出す。
+export async function processStripeBillingEvent(event, stripe) {
+  if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
+    const session = await stripe.checkout.sessions.retrieve(event.data.object.id, { expand: ['line_items', 'payment_intent.latest_charge'] });
+    const uid = await ownerFor(session.customer);
+    if (session.metadata?.policyVersion === CALENDAR_POLICY_VERSION) {
+      if (uid && session.client_reference_id === uid) {
+        requireCalendarResult(await calendarProcessor(stripe).initial({ uid, attemptId: session.metadata.attemptId, session }));
       }
-    } else if (event.type === 'payment_intent.succeeded') {
-      const payment = await stripe.paymentIntents.retrieve(event.data.object.id);
-      const uid = await ownerFor(payment.customer);
-      if (uid && payment.metadata?.policyVersion === CALENDAR_POLICY_VERSION && payment.metadata.uid === uid) {
-        requireCalendarResult(await calendarProcessor(stripe).initial({ uid, attemptId: payment.metadata.attemptId, successEvent: event }));
-      }
-    } else if (event.type === 'invoice.paid') {
-      const invoice = await stripe.invoices.retrieve(event.data.object.id, { expand: ['charge'] });
-      const uid = await ownerFor(invoice.customer);
-      const subscription = uid && invoice.subscription ? await stripe.subscriptions.retrieve(typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription.id) : null;
-      if (subscription?.metadata?.policyVersion === CALENDAR_POLICY_VERSION) {
-        if (subscription.metadata.uid !== uid) throw new Error('calendar-owner-mismatch');
-        requireCalendarResult(await calendarProcessor(stripe).renewal({ uid, attemptId: subscription.metadata.attemptId, invoice }));
-      } else {
-        const grant = monthlyGrant(invoice, monthlyPrice.value());
-        if (uid && grant) await saveGrant(uid, grant);
-      }
-    } else if (event.type === 'charge.refunded') {
-      const charge = await stripe.charges.retrieve(event.data.object.id);
-      if (charge.amount_refunded > 0) await revokeCharge(charge.id, charge.customer);
-    } else if (event.type === 'charge.dispute.created') {
-      const charge = await stripe.charges.retrieve(event.data.object.charge);
-      await revokeCharge(charge.id, charge.customer);
+    } else {
+      const grant = packGrant(session, packPrice.value());
+      if (uid && grant && session.client_reference_id === uid) await saveGrant(uid, grant);
     }
-    return res.status(200).send('ok');
-  } catch {
-    console.error('billing-webhook-retry', { eventId: event.id, type: event.type });
-    // Stripeの再送で回復させる。秘密値や支払い情報を応答に含めない。
-    return res.status(500).send('Retry later');
+  } else if (event.type === 'payment_intent.succeeded') {
+    const payment = await stripe.paymentIntents.retrieve(event.data.object.id);
+    const uid = await ownerFor(payment.customer);
+    if (uid && payment.metadata?.policyVersion === CALENDAR_POLICY_VERSION && payment.metadata.uid === uid) {
+      requireCalendarResult(await calendarProcessor(stripe).initial({ uid, attemptId: payment.metadata.attemptId, successEvent: event }));
+    }
+  } else if (event.type === 'invoice.paid') {
+    const invoice = await stripe.invoices.retrieve(event.data.object.id, { expand: ['charge'] });
+    const uid = await ownerFor(invoice.customer);
+    const subscription = uid && invoice.subscription ? await stripe.subscriptions.retrieve(typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription.id) : null;
+    if (subscription?.metadata?.policyVersion === CALENDAR_POLICY_VERSION) {
+      if (subscription.metadata.uid !== uid) throw new Error('calendar-owner-mismatch');
+      requireCalendarResult(await calendarProcessor(stripe).renewal({ uid, attemptId: subscription.metadata.attemptId, invoice }));
+    } else {
+      const grant = monthlyGrant(invoice, monthlyPrice.value());
+      if (uid && grant) await saveGrant(uid, grant);
+    }
+  } else if (event.type === 'charge.refunded') {
+    const charge = await stripe.charges.retrieve(event.data.object.id);
+    if (charge.amount_refunded > 0) await revokeCharge(charge.id, charge.customer);
+  } else if (event.type === 'charge.dispute.created') {
+    const charge = await stripe.charges.retrieve(event.data.object.charge);
+    await revokeCharge(charge.id, charge.customer);
   }
-});
+}
+
+export const stripeWebhook = onRequest({ ...options, secrets: [stripeKey, webhookSecret] }, createBillingWebhookHandler({
+  stripeClient,
+  webhookSecret: () => webhookSecret.value(),
+  sandbox: () => billingSandbox.value(),
+  processEvent: processStripeBillingEvent,
+}));
 
 export { privateContent } from './privateContent.js';

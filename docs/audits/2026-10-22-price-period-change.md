@@ -204,3 +204,10 @@ Checkout完了、PI成功、Invoice支払済み通知を新版の保存/契約�
 準備段階のFunctions79テスト（cleanup10件・作成前journal3件を含む）、明示実行ガード3件、構文検証が成功。実サービス上の新しい作成・購入・削除・配備はまだ行っていない。
 
 作成前journalに商品/価格/顧客/Session/契約の未確定を先行保存し、成功IDと親manifestを同じ保存で確定する。応答喪失などで未確定の作成があればcleanupを成功扱いせず、個別照合まで保留。準備完了前のPOSTも拒否。別担当レビューの2指摘を修正し、再レビューで追加の実行前必須指摘なし。
+
+
+### 承認済み実行の開始（2026-10-23、本人購入待ち）
+
+本人が専用データでの一括試験/今回分cleanupを承認。Cloud Functions APIとGCSの配備済みソースを読取し、stripeWebhookのindex.js/billingPolicy.js/billingEnvironment.jsがfc9d9d9と一致することを確認。index.jsのSHA256は6211a8a7e39d19f1e0820d305e4d45a4597182354192d0efac08f768796b8035。旧通知はpackGrant/monthlyGrantの正確な旧Price IDで判定し、今回新規作成の別Priceを付与しない。外部endpoint/環境設定は変更していない。
+
+実行UUID f93b9e01-0c6e-4908-b3b5-76a3e2c16512。専用商品1件・Price3件・顧客2件・Checkout2件の成功応答を保存、未確定作成0件、manifest権限0600を確認。ローカル実createCheckoutから実Stripe/実Firestore予約を通して作成成功し、127.0.0.1:5213に確認画面を表示。本人にテストカードで2件の購入を依頼中。まだ支払成功/利用権/再送/cleanupの実成立は確認していない。プロセスとmanifestを保持し、本人購入後に結果照合と今回分の片付けを続ける。

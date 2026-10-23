@@ -53,7 +53,11 @@ save('fixture.json', { runId: state.runId, priceIds: state.priceIds, fixtures })
 save('firebase.json', { functions: [{ source: 'functions', codebase: 'calendar-probe', runtime: 'nodejs22' }] });
 save('functions/.env.construction2nd', ['BILLING_SANDBOX=true', 'BILLING_ENABLED=false', 'CALENDAR_BILLING_ENABLED=false',
   `STRIPE_CALENDAR_INITIAL_PRICE_ID=${state.priceIds.initial}`, `STRIPE_CALENDAR_MONTHLY_PRICE_ID=${state.priceIds.monthly}`,
-  `STRIPE_CALENDAR_PACK_PRICE_ID=${state.priceIds.pack}`, `CALENDAR_PROBE_TARGETS=${JSON.stringify(targets)}`, ''].join('\n'));
+  `STRIPE_CALENDAR_PACK_PRICE_ID=${state.priceIds.pack}`, `CALENDAR_PROBE_TARGETS=${JSON.stringify(targets)}`,
+  // importする本体の未使用パラメータにも無効値を明記し、非対話配備で質問させない。
+  'BILLING_TESTER_UIDS=' + targets.map(t => t.uid).join(','), 'PRIVATE_CONTENT_ENABLED=false', 'SITE_URL=https://example.invalid',
+  'STRIPE_MONTHLY_PRICE_ID=price_probe_unused_legacy_monthly', 'STRIPE_PACK_PRICE_ID=price_probe_unused_legacy_pack',
+  'STRIPE_PORTAL_CONFIGURATION_ID=bpc_probe_unused', ''].join('\n'));
 save('functions/probeEntry.js', `import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret, defineString } from 'firebase-functions/params';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -75,7 +79,7 @@ export const calendarBillingWebhookProbe = onRequest({region:'asia-northeast1',m
   },
   webhookSecret:()=>secret.value(),sandbox:()=>true,
   acceptsEvent:event=>createCalendarWebhookProbeGuard({targets:JSON.parse(targets.value()),db:getFirestore()})(event),
-  processEvent:processStripeBillingEvent,
+  processEvent:async(event,stripe)=>{await processStripeBillingEvent(event,stripe);console.info('calendar-probe-processed',{eventId:event.id,type:event.type});},
 }));
 `);
 save('README.txt', `未配備の隔離通知試験。外部操作は本人承認後のみ。

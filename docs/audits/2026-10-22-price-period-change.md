@@ -256,3 +256,28 @@ Checkout完了、PI成功、Invoice支払済み通知を新版の保存/契約�
 費用は関数配備ビルド/実行等の少額利用が発生し得るため、無料とは断言しない。既存1000円アラートの設定は変更しない。本番マージ・一般販売とは別の一時試験で、まだ配備/endpoint作成/秘密値登録/fixture保存/再送は行っていない。
 
 参考：Stripe公式[再送と配送動作](https://docs.stripe.com/webhooks#manual-retries)はDashboardで15日、公式CLIで30日までの再送を案内。現時点のEventは当日のもの。再送しても自動再試行の打切りにはならないため、cleanupはendpoint無効化/削除を先行する。
+
+
+## 実Stripe外部署名配送・完了済み通知再送の成功（2026-10-24）
+
+本人が一時受信先/別Secret/Stripe endpoint/専用fixture6文書と既知Event2件再送・今回分cleanupを承認。既存5関数とendpoint1件の名前/更新日時/URL/有効状態/購読/API版を事前保存し、一時関数名/Secret名の未使用と実Event2件の残存を読取確認。公式CLI1.55.1を/tmpの作業用フォルダへ導入した（グローバル設定変更/CLIログインなし、キーは子プロセス環境だけ）。
+
+### 実行・証拠
+
+- Stripe Sandboxへpayment_intent.succeededだけの一時endpointを作成し、配備完了までdisabled。専用CALENDAR_PROBE_WEBHOOK_SECRETを新規作成。既存STRIPE_WEBHOOK_SECRETの値は更新していない。
+- calendar-probe codebaseのcalendarBillingWebhookProbeだけを東京へ配備。最小0/最大1、timeout120秒、署名Secretの紐付けがSTRIPE_SECRET_KEYと専用署名だけであることを実メタデータで確認。通常の本体5関数/Hosting/一般受付は配備対象外。
+- 初回の非対話配備は、importした本体の未使用パラメータが未指定で配備前に停止。専用UID/配信false/例示用無効URL/無効な旧Price・Portal値を試験用envだけへ補い、次の配備で成功した。元環境ファイルは変更していない。成功処理ログもEvent ID/typeだけを記録するよう生成器へ追加。
+- 実Stripe session/PI/charge/Eventと初回grantが一致し、月額契約が取消済みであることを確認後、専用完了fixture6文書をtransactionで保存。新規支払い/顧客/契約は作成しない。
+- 実関数URLを取得し今回endpointだけへ設定。GET405、署名なしPOST400を確認し、endpointを有効化して先ほどの実成功Event2件を公式CLIから再送。
+- Cloud Loggingのcalendar-probe-processedで既知Event2件が共通の実業務処理を完了したことを確認。同期間のリクエストログでHTTP200が2件。unknown通知のignoredとは区別した。
+- 実Firestoreを読取し月額/パックともcomplete、初回grantの全項目/正本時刻/期限がfixtureと一致、利用権各1件。customer.updatedAtがfixture保存後へ更新されたことも確認。Stripe契約は月額の取消済み1件/パック0件で、稼働契約は両方0のまま。
+
+### 後片付け・範囲
+
+今回endpointをdisabledにして読取確認→一時関数削除/GET404→削除確認後120秒待機→checkpointで指定した6文書を内容照合/transaction削除/不在確認→今回endpoint削除/resource_missing→専用Secretのrun_id/purpose照合後削除/GET404。すべて成功。最後に既存5関数の名前/更新日時、既存endpoint1のURL/有効状態/購読/API版が事前値と同じことを確認。完了は2026-10-24 00:37ごろ（日本時間）。
+
+秘密を含まない実行manifestは/tmp/calendar-external-probe-state.json（0600）に結果/停止時刻/削除確認を保存。Secret/キー/Event本文/client_secretは記録しない。Cloudの試験ログ・ビルド記録やStripeの過去履歴は残る。コンテナ保管は既設の1日保持方針に従い、既存artifact全体の削除はしていない。
+
+配備資料に未使用設定が揃い、公開export1/別署名Secret/最大1instanceになることをローカルSDKで自動検証するテストを追加。Functions93件と実行ガード9件が成功。実行後のコード差分は生成器の未使用設定/安全な成功ログとこの回帰テストだけで、本体の追加配備はしていない。
+
+成立したのは **Stripe自身の外部署名配送＋完了済み成功通知の実再送と実DB非増殖**。新初回契約作成の外部自動通知、更新invoiceの実付与、実Callable認証、3DS日跨ぎ、配信基盤の長時間自動再送は今回の成立範囲外。一般販売/本体PRマージを許可されたとは扱わない。

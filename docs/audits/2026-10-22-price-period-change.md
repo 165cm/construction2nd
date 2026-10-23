@@ -281,3 +281,19 @@ Checkout完了、PI成功、Invoice支払済み通知を新版の保存/契約�
 配備資料に未使用設定が揃い、公開export1/別署名Secret/最大1instanceになることをローカルSDKで自動検証するテストを追加。Functions93件と実行ガード9件が成功。実行後のコード差分は生成器の未使用設定/安全な成功ログとこの回帰テストだけで、本体の追加配備はしていない。
 
 成立したのは **Stripe自身の外部署名配送＋完了済み成功通知の実再送と実DB非増殖**。新初回契約作成の外部自動通知、更新invoiceの実付与、実Callable認証、3DS日跨ぎ、配信基盤の長時間自動再送は今回の成立範囲外。一般販売/本体PRマージを許可されたとは扱わない。
+
+
+## 更新invoice専用の実外部試験準備（2026-10-24、実行承認待ち）
+
+隔離時計4ケース（通常日/月末/閏年/1日）で既に生じた更新請求書8件とinvoice.paid8件が残存。全8件を固定APIのinvoice/charge/取消済みsubscriptionと現在のcalendarRenewalGrantへ読取照合し、一致を確認した。追加の購入/顧客/契約/時計は不要。過去の時計時刻から作る完了fixtureであり、実初回PI成功Event時刻の復元とはしない。
+
+- prepare-calendar-renewal-probe.mjsがローカル資料だけを生成。calendar-renewal-probe codebaseのcalendarRenewalWebhookProbeのみ、東京・最小0/最大1・timeout120秒。署名Secretは別名CALENDAR_RENEWAL_PROBE_WEBHOOK_SECRETで既存値に触れない。すべての未使用パラメータも無効値を明示する。
+- calendarRenewalProbeGuardは同じ隔離runの4UID/4顧客/4契約/8Event/8Invoiceと正確な時刻・600円・Price・元加入日基準期間・唯一所有者・complete購入に限定。未知通知はignored、既知不一致は保留する。Stripe clientのsubscriptions.create/cancel/updateは禁止。
+- 実保存EventはAPI2026-09-30.endiveで生成され、固定API2024-06-20で取得するinvoiceとsubscription/price等の項目構造が異なった。通知では不変のID/種別/環境/作成時刻/顧客/支払状態/金額を照合した後、正本invoiceを固定APIで再取得して契約/価格/期間を厳密照合する。形式差を課金成功と取り違えず、移行や既存本体API版の変更はしない。未使用Priceの無効値もレジストリの書式に適合する専用値へ訂正し、生成前にレジストリ検証する。
+- calendar-renewal-probe-fixture.mjsは顧客対応4/完了購入4だけをseed。8対象grantを含む最大16パスすべて不在・別所有者なし・返金マーカーなしをtransaction確認し、commit前checkpointを残す。seed前に実Stripeの8件を再照合する。--verify-renewal-fixtureは同じ照合だけで外部書込0を確認済み。
+- cleanupは受信先停止/待機を前提に、checkpointの最大16パスだけを内容一致確認してtransaction削除・不在再取得する。--receiver-stopped自体が停止を検知するわけではない。初回grantをseedしないためその保持は試験範囲外。全期間が過去なので現時点の有料画面/実認証試験でもない。
+- Functions99件（新ガード/保存非増殖/形式差/配備資料6件を追加）、実行ガード15件、既存全npm test成功。配備資料のexport1/別Secret2紐付け/最大1instanceをSDKで確認。外部配備/DB書込/再送は未実施。
+
+### 次の一括承認範囲
+
+一時HTTPS関数1件・専用署名Secret1件・Stripe Sandbox endpoint1件（invoice.paidのみ、固定API）を作り、seed8文書へ既知8通知をStripe自身から再送。再送の非増殖を確かめるため同8件をもう1回（合計16配送）送り、各期間/利用権8件・購入不変・契約数不変・HTTP200/処理ログを確認する。実行後endpoint無効化→関数削除/停止の確認→最大処理時間120秒待機→今回最大16文書削除/不在確認→endpoint/専用Secret削除/不在確認。既存5関数/endpoint1件の前後照合も行う。クラウド配備/実行費用が少額発生し得る。一般販売/本体配備/既存記録の変更とは別の承認範囲。

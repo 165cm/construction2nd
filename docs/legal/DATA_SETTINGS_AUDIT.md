@@ -1,6 +1,6 @@
 # 外部取扱い・保存期間・決済設定の読取確認
 
-確認日：2026-10-22（日本時間）。公式資料の一般仕様、稼働プロジェクトの実設定、未確認の本番設定を分けて記録する。設定変更・契約操作・個人の学習記録取得は行っていない。
+初回確認日：2026-10-22、補足更新：2026-10-24（日本時間）。公式資料の一般仕様、稼働プロジェクトの実設定、未確認の本番設定を分けて記録する。2026-10-22の読取調査自体では設定変更・契約操作・個人の学習記録取得は行っていない。その後の承認済み隔離決済試験は、末尾の最新補足と別の試験証跡を参照。
 
 ## 1. 実APIで確認できた設定
 
@@ -36,6 +36,8 @@ Google Cloudの既存認証をメモリ内で使用し、FirestoreのDB情報、
 この候補文だけで国外取扱いに必要な説明/同意が完成したとはしない。
 
 ## 3. 決済のコード照合
+
+以下は2026-10-22に読取した旧480円の稼働経路。未配備の新600円経路とは分けて扱う。新コードと隔離試験の結果は末尾の補足を優先し、旧稼働値を現行の販売予定価格として転用しない。
 
 | 項目 | 実装 | 残る本番確認 |
 |---|---|---|
@@ -101,3 +103,11 @@ Google Cloudの既存認証をメモリ内で使用し、FirestoreのDB情報、
 必要な説明/同意や相当措置の判断は、確定した契約とフローから検討し、不確かな場合はその具体情報を添えて専門家確認する。現時点で追加同意画面の方式や全サービスの国外移転根拠を採用済みとはしない。
 
 一次資料：[Firebase DPA](https://firebase.google.com/terms/data-processing-terms/)、[Firebase privacy](https://firebase.google.com/support/privacy/)、[Google Cloud Service Dataの説明](https://cloud.google.com/terms/cloud-privacy-notice?hl=ja)、[Groupsの版](https://support.google.com/groups/answer/46601)、[Workspace/Cloud Identityのデータ保護](https://knowledge.workspace.google.com/admin/compliance/privacy-compliance-and-records-for-google-workspace-and-cloud-identity)、[Stripe DPA](https://stripe.com/jp/legal/dpa)、[Stripe DTA](https://stripe.com/jp/legal/dta)、[PPC国外取扱い指針](https://www.ppc.go.jp/personalinfo/legal/guidelines_offshore/)。別担当の読取調査を統合、実アカウントの契約受諾/設定変更なし。
+
+## 新料金・隔離試験の最新補足（2026-10-24）
+
+本体の新コードは、旧480円/旧980円と新600円/新980円を正確なPrice ID・環境・JPY金額・税込・定額月次周期で分離する。新方式は初回600円の単発支払後に月次契約を作る二段階方式で、成功Eventの日時を正本として保存し、日本時間の新期間を付与する。旧Price参照・既存契約・保存済み期限は置き換えない。本体の新受付フラグは既定停止で、通常の本体Functions/Hostingはまだ配備していない。
+
+本人承認の専用試験では、時計4ケースの初回/更新2回/解約、実Checkout初回2件、完了済み成功Event2件の実外部署名再送を確認。後者は実処理ログとHTTP200×2、署名なし400/GET405、両プランの完了・利用権各1・保存済み期限/契約数不変を確認した。一時関数・通知先・専用Secret・専用fixture6文書は停止/削除/読取確認済み。既存5関数と通知先1件が試験前と同じであることも照合済み。詳しい範囲と証跡は[価格期間改定の監査](../audits/2026-10-22-price-period-change.md)を参照する。
+
+これらは本番Stripeの契約主体・適用契約・税/総額・Portal・本番鍵や署名・外部サービスの国外取扱いの確認を完了した意味ではない。新更新通知の実付与・実Callable認証・3DS日跨ぎも別の残項目。初回の調査以降に承認された試験操作があるため、本書全体を「外部設定変更を一切していない」とは要約しない。

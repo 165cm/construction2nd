@@ -5,7 +5,7 @@ export default function PricingPlans({ enabled = false, busy = false, hasAccess 
   return <section className="space-y-3" aria-labelledby="pricing-title">
     <h4 id="pricing-title" className="font-bold text-sm">試験までの学習プラン</h4>
     <p className="text-xs text-slate-300">最新1回50問は無料。有料プランでは過去分を含む全250問の解説・復習・模試を利用できます。</p>
-    {!enabled && <p role="status" className="text-xs text-amber-200">有料プランは準備中です。現在は購入できません。</p>}
+    {!enabled && !hasAccess && <p role="status" className="text-xs text-amber-200">有料プランは準備中です。現在は購入できません。</p>}
     {hasAccess ? <div className="rounded-xl border border-emerald-500 p-3 space-y-2">
       <p className="text-sm font-bold">全年度を利用できます</p>
       <p className="text-xs">利用期限：{new Date(expiresAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}（日本時間）</p>
@@ -16,17 +16,17 @@ export default function PricingPlans({ enabled = false, busy = false, hasAccess 
         <h5 className="font-bold">3か月集中パック</h5>
         <p className="text-2xl font-bold">980円<span className="text-xs font-normal">（税込・一括）</span></p>
         <p className="text-sm font-bold">自動更新なし</p>
-        <p className="text-xs text-slate-300">支払日時から暦の3か月間。終了後の請求はありません。</p>
-        <p className="text-xs text-slate-300">月額を3回支払う場合より460円お得。</p>
+        <p className="text-xs text-slate-300">加入日の3か月後の同日の前日まで。自動更新・終了後の請求はありません。</p>
+        <p className="text-xs text-slate-300">月額を3回支払う場合より820円お得。</p>
         <button className={`${button} bg-emerald-600 text-white`} disabled={!enabled || busy} onClick={() => onChoose?.('pack')}>3か月パックの内容を確認</button>
       </div>
       <div className="rounded-xl border border-slate-600 p-3 space-y-2">
         <p className="text-xs text-slate-300">1か月から始める方に</p>
         <h5 className="font-bold">月額プラン</h5>
-        <p className="text-2xl font-bold">480円<span className="text-xs font-normal">（税込／月）</span></p>
+        <p className="text-2xl font-bold">600円<span className="text-xs font-normal">（税込／月）</span></p>
         <p className="text-sm font-bold">毎月自動更新</p>
         <p className="text-xs text-slate-300">契約管理から解約できます。解約後も支払済み期間の終了まで利用できます。</p>
-        <p className="text-xs text-slate-300">1〜2か月の利用なら月額の総額が低くなります。</p>
+        <p className="text-xs text-slate-300">1か月だけの利用なら月額の総額が低くなります。</p>
         <button className={`${button} bg-slate-700`} disabled={!enabled || busy} onClick={() => onChoose?.('monthly')}>月額プランの内容を確認</button>
       </div>
     </div>}

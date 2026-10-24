@@ -234,3 +234,39 @@ Java 21以降で次を実行する：
 Functions13テスト、スクリプトの構文、フラグなし未接続、差分チェックも成功。アプリ・Functions本体の変更やデプロイは不要。
 
 範囲：これは実ハンドラー＋実Firestore transactionと制御可能なStripe模擬応答の結合確認。実Stripe側の冪等性そのもの、配信基盤の長時間遅延/自動再送、デプロイ済みCallableの認証と実複数タブ、実サービスで同じタイミングを作った競合は未確認。既存の実Stripe/Firestoreの購入予約9項目およびデプロイ済み通知先への再送検証と分けて記録する。
+
+
+## 新料金/日付単位の接続コード（2026-10-23、未配備）
+
+月額600円と新980円パックは新しいPriceを使う。新規購入用CALENDAR_BILLING_ENABLEDは既定false、実環境へ未設定。STRIPE_CALENDAR_INITIAL_PRICE_ID（単発600円）、STRIPE_CALENDAR_MONTHLY_PRICE_ID（継続600円）、STRIPE_CALENDAR_PACK_PRICE_ID（単発980円）も未設定。旧STRIPE_MONTHLY_PRICE_ID/STRIPE_PACK_PRICE_IDは既存通知用に置き換えない。
+
+新方式の購入予約/初回支払/成功日/作成作業権/契約IDはusers/{uid}/sandboxBillingPurchasesまたはbillingPurchasesにサーバーだけが保存する。購入停止時もPrice設定と通知処理を保持し、paid済みの更新利用権を止めない。PI成功通知の購読は未変更。新フラグやPriceを設定/配備する前に、対象と影響を示して承認を得る。66件のローカルテスト成功は実Checkout/署名通知/実DBの成立確認ではない。
+
+詳細：[価格・期間改定の実装と試験](audits/2026-10-22-price-period-change.md)。
+
+
+## 新料金の実Checkout結合試験（未実行）
+
+実行準備は `scripts/verify-calendar-checkout-integration.mjs`。無引数では外部接続せず、専用商品1/Price3/顧客・Checkout各2とSandboxの専用文書を作る明示実行方式。今回の作成/削除範囲への本人承認を得てから実行する。専用の月額/パック購入を各1回、実Stripe成功Event→ローカル試験署名→ローカル実通知処理→実Firestoreで確認し、今回分だけを片付ける。
+
+配備済みWebhookの外部配送や実Callable認証はこの方式では検証しない。既存通知先には通常のStripe通知が届くため、実行前に旧Price判定との分離を読取照合する。具体的な対象・保護・回復方法は[監査記録](audits/2026-10-22-price-period-change.md#実checkout結合試験の実行準備2026-10-23未実行)を参照。
+
+
+### 新料金の初回結合試験の結果（2026-10-23）
+
+本人の実Checkout購入2件により、実Stripe成功Event→ローカル試験署名→実ローカル通知ハンドラー→実Firestoreの初回付与が成功。月額契約1件/パック0件、利用権各1件と新期限、成功Event再送後も非増殖を確認。今回分の限定cleanupはエラー0で読取確認済み。実外部HTTP署名配送・Callable認証・新更新通知の実付与/3DS日跨ぎは別の残項目。配備と一般受付は未変更。
+
+
+## 外部署名配送の次の試験（2026-10-23、準備のみ）
+
+HTTP境界をbillingWebhookHandlerへ共通化し、業務処理は本体と同じprocessStripeBillingEventを使う。ローカル専用生成器とfixture保存/削除手順を用意。既知の成功Event2件だけを許可する一時関数と別名署名Secretで、追加購入なしに外部署名配送/完了済み通知の再送を確認する計画。Functions92テスト、実行ガード9件成功。外部配備/設定変更は未実施。具体的な作成/片付け範囲をまとめて承認後に進める。更新通知/実Callable認証の検証とは別に記録する。詳細は価格期間の監査記録。
+
+
+### 外部署名再送の実施結果（2026-10-24）
+
+本人承認で隔離受信先を一時配備し、Stripe自身から既知成功Event2件を再送。実業務処理ログ2件/HTTP200×2、署名なし400/GET405、両プランの完了/利用権各1/正本日時と期限不変、契約の非増殖を確認。今回の関数/endpoint/専用Secret/fixture6文書は停止・削除・読取確認済み。既存5関数/既存通知先1不変。本体/Hostingの配備や一般受付再開は行っていない。新更新invoiceの実付与・実Callable認証/3DS日跨ぎは残る。生成器の未使用パラメータを補い、専用export/Secret紐付けの回帰テストを加えて93+9テスト成功。
+
+
+## 既存配備の実認証をまとめて読む確認（2026-10-24）
+
+購入やDB書込を行わないlocalhost確認画面を準備。起動・本人操作・安全の境界・成立範囲は[実ログインの読取確認](audits/2026-10-24-auth-readonly.md)。未ログイン/不正認証の実拒否は確認済み。購入済み/未購入のログイン後と、新600円createCheckoutの認証全経路は未確認として残す。トークンをチャットへ貼らせたり、サーバーへファイル保存する方法は使わない。

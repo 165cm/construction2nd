@@ -148,3 +148,13 @@
 ## 有料版の模試履歴（2026-10-17）
 
 `paidHistory.js` は有料年度の結果を問題番号と解答・正誤・点数等に限定して保存する。`ExamMode` は取得済みの現在の教材から振り返りを復元し、`ExamHistorySummary` は利用権に関係なく点数の履歴を表示する。移行は有料版のみ。詳細・現在の接続状況は `PRIVATE_CONTENT.md` を参照。
+
+
+## 新料金の決済処理（2026-10-23、未配備）
+
+新方式のcalendarPurchaseStoreは購入予約・成功日時・初回利用権・契約作成の作業権をFirestore transactionで保持する。calendarBillingProcessorは支払証拠と保存正本を使い、初回単発600円後の月次契約作成・既存契約照合・中断復旧・更新利用権を処理する。indexの新旧版分岐へ接続済みだが新規受付は既定停止。既存通知は停止フラグと独立に処理する。署名・環境・本人/予約・Price・期間を確認してから利用権を付与し、再送時は保存済み期限を維持する。設定と実検証の限界はBILLING_SETUPと価格改定の監査記録を参照。
+
+
+## 通知の共通HTTP境界と隔離試験（2026-10-23、未配備）
+
+billingWebhookHandlerは署名/環境/任意の対象制限を確認してからprocessStripeBillingEventへ渡す。既存stripeWebhookと生成用の専用受信先で業務処理を共有する。一時試験はcalendarWebhookProbeGuardの既知Event2件と専用complete fixtureだけを通し、別名Secret/別codebaseを使う。試験入口は通常の本体exportへ追加せず、明示実行のローカル生成器が作業用フォルダへ出力する。外部公開は別途承認後。新規月額契約の作成/取消しも試験clientで禁止する。

@@ -32,9 +32,9 @@ export default function PaidAccessDialog({ kind, title, onClose, onFree, onRetry
           <p className="text-sm text-slate-300">過去分の問題・解説・復習・模試は有料プランで利用できます。最新1回50問は無料です。</p>
           <div className="border border-emerald-500 rounded-xl p-3">
             <p className="font-bold">3か月集中パック 980円（税込・一括）</p>
-            <p className="text-sm text-emerald-200">自動更新なし・支払日時から暦の3か月間</p>
+            <p className="text-sm text-emerald-200">自動更新なし・加入日の3か月後の同日の前日まで</p>
           </div>
-          <p className="text-sm text-slate-300">月額480円（税込・毎月自動更新）も選べます。</p>
+          <p className="text-sm text-slate-300">月額600円（税込・毎月自動更新）も選べます。</p>
           {kind === 'login-required' && <p className="text-sm">購入済みの方は、購入に使ったアカウントでログインしてください。</p>}
         </>}
         {retry && <button className={button + ' w-full bg-sky-700'} onClick={onRetry}>再試行</button>}
